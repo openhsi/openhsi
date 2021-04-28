@@ -1,7 +1,6 @@
 {
   "openhsi": {
     "Overview": "/",
-    "module name here": "core.html",
     "Utils": "utils.html",
     "Calibrate": "calibrate.html",
     "Capture": "capture.html",

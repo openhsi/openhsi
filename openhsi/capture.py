@@ -63,11 +63,11 @@ class OpenHSI(object):
     """XIMEA camera class to change camera settings and take images"""
 
     def __init__(self, exposure_ms:int = 100, gain:int = 0,
-                 xbinwidth:int = 896, xbinoffset:int = 528, serialnumber:str = None):
+                 xbinwidth:int = 896, xbinoffset:int = 528, serial_number:str = None, serial_connected = False):
         """Init the camera"""
 
         self.xicam = xiapi.Camera()
-        self.xicam.open_device_by_SN(serialnumber) if serialnumber else self.xicam.open_device()
+        self.xicam.open_device_by_SN(serial_number) if serial_number else self.xicam.open_device()
 
         print(f'Connected to device {self.xicam.get_device_sn()}')
 
@@ -94,6 +94,9 @@ class OpenHSI(object):
         self.img = xiapi.Image()
 
         self.load_cam_settings()
+
+        if serial_connected:
+            self.sensor_stream = SensorStream(baudrate=921_600,port="/dev/ttyTHS0")
 
     def __str__(self):
         return f"Connected to device {self.xicam.get_device_sn()}"
@@ -165,10 +168,19 @@ def get_datacube(self:OpenHSI, n:int = 1, show:bool = True) -> np.ndarray:
 
     for i in tqdm(range(n)):
 
+        if serial_connected:
+            self.sensor_stream.request()
+
         self.xicam.get_image(self.img)
+
+        if serial_connected:
+            self.sensor_stream.record()
+
         self.dc.push(self.img.get_image_data_numpy())
 
+
     self.xicam.stop_acquisition()
+    _ = self.sensor_stream.to_df()
 
     if show and n > 1:
         plt.imshow(np.sum(self.dc.data,axis=2),cmap="gray")
