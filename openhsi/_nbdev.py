@@ -2,36 +2,23 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"settings_dump": "00_utils.ipynb",
-         "settings_load": "00_utils.ipynb",
-         "CircArrayBuffer": "00_utils.ipynb",
-         "CircArrayBuffer.update_axis": "00_utils.ipynb",
-         "CircArrayBuffer.push": "00_utils.ipynb",
-         "CircArrayBuffer.show": "00_utils.ipynb",
-         "CircArrayBuffer.dump": "00_utils.ipynb",
-         "CircArrayBuffer.load": "00_utils.ipynb",
-         "DataCube": "00_utils.ipynb",
-         "row_minmax": "01_calibrate.ipynb",
-         "find_smile_shifts": "01_calibrate.ipynb",
-         "sum_gaussians": "01_calibrate.ipynb",
-         "fit_spectral_lines": "01_calibrate.ipynb",
-         "HgAr_lines": "01_calibrate.ipynb",
-         "SimulatedBasicCamera": "02_capture.ipynb",
-         "HgAr_lines_approx_sorted": "02_capture.ipynb",
-         "OpenHSI": "02_capture.ipynb",
-         "OpenHSI.get_raw_img": "02_capture.ipynb",
-         "OpenHSI.load_cam_settings": "02_capture.ipynb",
-         "OpenHSI.get_datacube": "02_capture.ipynb",
-         "save": "03_data.ipynb",
-         "sensor_stream": "06_sensors.ipynb"}
+index = {"Array": "00_data.ipynb",
+         "Shape": "00_data.ipynb",
+         "CircArrayBuffer": "00_data.ipynb",
+         "CameraProperties": "00_data.ipynb",
+         "CameraProperties.tfm_setup": "00_data.ipynb",
+         "CameraProperties.crop": "00_data.ipynb",
+         "CameraProperties.fast_smile": "00_data.ipynb",
+         "CameraProperties.fast_bin": "00_data.ipynb",
+         "CameraProperties.pipeline": "00_data.ipynb",
+         "DataCube": "00_data.ipynb",
+         "Model6SV": "03_atmos.ipynb"}
 
-modules = ["utils.py",
+modules = ["data.py",
+           "camera.py",
            "calibrate.py",
-           "capture.py",
-           "data.py",
-           "visualise.py",
-           "sensors.py",
-           "atmosphere.py"]
+           "atmos.py",
+           "snr.py"]
 
 doc_url = "https://openhsi.github.io/openhsi/"
 

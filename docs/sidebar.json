@@ -8,6 +8,7 @@
     "Visualise": "visualise.html",
     "Geometry": "geometry.html",
     "Sensors": "sensors.html",
-    "Atmosphere": "atmosphere.html"
+    "Atmosphere": "atmosphere.html",
+    "Collect": "collect.html"
   }
 }

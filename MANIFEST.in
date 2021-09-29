@@ -2,5 +2,5 @@ include settings.ini
 include LICENSE
 include CONTRIBUTING.md
 include README.md
-include calibration_files/*
+include assets/*
 recursive-exclude * __pycache__
