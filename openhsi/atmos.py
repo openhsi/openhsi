@@ -98,3 +98,32 @@ class Model6SV():
         plt.ylabel("radiance (W/m$^2$/sr/$\mu$m)")
         plt.legend()
         plt.minorticks_on()
+
+
+# Cell
+
+
+@patch
+def _sixs_run_one_wavelength(self:Model6SV, wv:float) -> float:
+    """Runs one instance of 6SV for one wavelength wv"""
+    self.s.outputs = None
+    a = copy.deepcopy(self.s)
+    a.wavelength = Wavelength(wv)
+    a.run()
+    return SixSHelpers.Wavelengths.recursive_getattr(a.outputs, "pixel_radiance")
+
+@patch
+def run_wavelengths(self:Model6SV, wavelengths:np.array, n_threads:int = None) -> np.array:
+    """Modified version of SixSHelpers.Wavelengths.run_wavelengths that has a progress bar.
+    This implementation uses threading (through Python's multiprocessing API)."""
+    from multiprocessing.dummy import Pool
+
+    if n_threads is None: n_threads = num_cpus()
+    with Pool(n_threads) as p, tqdm(total=len(wavelengths)) as pbar:
+        res = [p.apply_async( self._sixs_run_one_wavelength, args=(wavelengths[i],),
+                callback=lambda _: pbar.update(1)) for i in range(len(wavelengths))]
+        results = [r.get() for r in res]
+
+    return np.array(results)
+
+

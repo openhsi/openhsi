@@ -53,6 +53,7 @@ fields_dict = {'rtc_now': 'datetime',
              'magAcc': 'float'}
 
 # Cell
+
 class SensorStream():
 
     def __init__(self, baudrate=921_600, port="/dev/ttyTHS0", start_pin=27, save_dir="/xavier_ssd/data/"):

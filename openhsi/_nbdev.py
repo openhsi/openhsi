@@ -24,6 +24,7 @@ index = {"Array": "00_data.ipynb",
          "SimulatedCamera": "01_capture.ipynb",
          "XimeaCamera": "01_capture.ipynb",
          "Model6SV": "03_atmos.ipynb",
+         "Model6SV.run_wavelengths": "03_atmos.ipynb",
          "fields_dict": "06_sensors.ipynb",
          "SensorStream": "06_sensors.ipynb"}
 
