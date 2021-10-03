@@ -17,6 +17,9 @@ jobs:
         cd package
         ./install -pcie
         cd ..
+        ls -lah
+        rm XIMEA_Linux_SP.tgz
+        rm -rf package
         pip install -e .
     - name: Read all notebooks
       run: |
