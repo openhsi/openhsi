@@ -376,6 +376,8 @@ def save(self:DataCube, save_dir:str):
 
     self.nc.to_netcdf(f"{self.directory}/{self.timestamps[0].time()}.nc")
 
+    hv.save(self.show("matplotlib",robust=True),f"{self.directory}/{self.timestamps[0].time()}.png")
+
 # Cell
 
 @patch

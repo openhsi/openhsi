@@ -112,17 +112,12 @@ class SimulatedCamera(OpenHSI):
         return self.rgb2xyz_matching_funcs(self.rgb_buff.get())
 
 
-with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing_lvl = 3) as cam:
-    cam.collect()
-    fig = cam.show(robust=True)
 
-fig
 
 
 # Cell
 
-
-@delegates
+@delegates()
 class XimeaCamera(OpenHSI):
     """Core functionality for Ximea cameras"""
     # https://www.ximea.com/support/wiki/apis/Python
