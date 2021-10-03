@@ -10,32 +10,23 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: Utils
-      url: utils.html
-    - output: web,pdf
-      title: Calibrate
-      url: calibrate.html
+      title: Data Transforms for Hyperspectral Datacubes
+      url: data.html
     - output: web,pdf
       title: Capture
       url: capture.html
     - output: web,pdf
-      title: Data
-      url: data.html
+      title: Calibration Procedure
+      url: calibrate.html
     - output: web,pdf
-      title: Visualise
-      url: visualise.html
+      title: Atmospheric Correction
+      url: atmos.html
     - output: web,pdf
-      title: Geometry
-      url: geometry.html
+      title: Signal To Noise Ratio for the OpenHSI Camera
+      url: snr.html
     - output: web,pdf
       title: Sensors
       url: sensors.html
-    - output: web,pdf
-      title: Atmosphere
-      url: atmosphere.html
-    - output: web,pdf
-      title: Collect
-      url: collect.html
     output: web
     title: openhsi
   output: web

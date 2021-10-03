@@ -10,15 +10,29 @@ index = {"Array": "00_data.ipynb",
          "CameraProperties.crop": "00_data.ipynb",
          "CameraProperties.fast_smile": "00_data.ipynb",
          "CameraProperties.fast_bin": "00_data.ipynb",
+         "CameraProperties.dn2rad": "00_data.ipynb",
+         "CameraProperties.rad2ref_6SV": "00_data.ipynb",
+         "CameraProperties.set_processing_lvl": "00_data.ipynb",
          "CameraProperties.pipeline": "00_data.ipynb",
+         "DateTimeBuffer": "00_data.ipynb",
          "DataCube": "00_data.ipynb",
-         "Model6SV": "03_atmos.ipynb"}
+         "DataCube.save": "00_data.ipynb",
+         "DataCube.load_nc": "00_data.ipynb",
+         "DataCube.show": "00_data.ipynb",
+         "OpenHSI": "01_capture.ipynb",
+         "cam": "01_capture.ipynb",
+         "SimulatedCamera": "01_capture.ipynb",
+         "XimeaCamera": "01_capture.ipynb",
+         "Model6SV": "03_atmos.ipynb",
+         "fields_dict": "06_sensors.ipynb",
+         "SensorStream": "06_sensors.ipynb"}
 
 modules = ["data.py",
-           "camera.py",
+           "capture.py",
            "calibrate.py",
            "atmos.py",
-           "snr.py"]
+           "snr.py",
+           "sensors.py"]
 
 doc_url = "https://openhsi.github.io/openhsi/"
 

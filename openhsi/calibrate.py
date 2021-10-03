@@ -22,4 +22,4 @@ import pickle
 # Cell
 
 from .data import *
-from .camera import *
+from .capture import *
