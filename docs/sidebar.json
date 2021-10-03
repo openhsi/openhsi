@@ -1,14 +1,11 @@
 {
   "openhsi": {
     "Overview": "/",
-    "Utils": "utils.html",
-    "Calibrate": "calibrate.html",
+    "Data Transforms for Hyperspectral Datacubes": "data.html",
     "Capture": "capture.html",
-    "Data": "data.html",
-    "Visualise": "visualise.html",
-    "Geometry": "geometry.html",
-    "Sensors": "sensors.html",
-    "Atmosphere": "atmosphere.html",
-    "Collect": "collect.html"
+    "Calibration Procedure": "calibrate.html",
+    "Atmospheric Correction": "atmos.html",
+    "Signal To Noise Ratio for the OpenHSI Camera": "snr.html",
+    "Sensors": "sensors.html"
   }
 }

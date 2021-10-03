@@ -6,22 +6,28 @@ __all__ = ['Model6SV']
 
 from fastcore.foundation import patch
 from fastcore.meta import delegates
-import xarray as xr
+from fastcore.basics import num_cpus
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from scipy.interpolate import interp1d
-from PIL import Image
-from scipy.signal import decimate
+from datetime import datetime as dt
+import os
+import copy
+from tqdm import tqdm
 
-from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Optional
-import datetime
-import json
-import pickle
+import param
+import panel as pn
+pn.extension()
+
+import holoviews as hv
+hv.extension('bokeh')
+
+from Py6S import *
+
 
 # Cell
 
-#from openhsi.data import *
+from .data import *
 
 
 # Cell
@@ -32,10 +38,10 @@ class Model6SV():
                  z_time:"zulu" = dt.strptime("2021-05-26 03:26","%Y-%m-%d %H:%M"),
                  station_num:int = 94299, region:str = "pac",
                  alt:"km" = 0.12, zen:"degrees" = 0., azi:"degrees" = 0.,
-                 tile_type:GroundReflectance = GroundReflectance.GreenVegetation,
+                 tile_type:GroundReflectance = 1.0,
                  aero_profile:AeroProfile = AeroProfile.Maritime,
                  λ_array:"array [μm]" = np.arange(0.4, .8, 0.004),
-                 sixs_path="assets/sixsV1.1"):
+                 sixs_path="assets/6SV1.1/sixsV1.1"):
 
         self.λ_array = λ_array
 
@@ -75,22 +81,20 @@ class Model6SV():
         self.__call__()
 
     def rad2photons(self):
-        self.photons = self.radiance/( 1.98644582e-25/(self.λ*1e-6) )
+        self.photons = self.radiance/( 1.98644582e-25/(self.λ_array*1e-6) )
 
     def __call__(self) -> None:
-        self.λ, self.radiance = SixSHelpers.Wavelengths.run_wavelengths(self.s,self.λ_array,output_name="pixel_radiance")
-        print("6SV computation done")
+        self.radiance = self.run_wavelengths(self.λ_array)
 
-        df = pd.DataFrame({"wavelength":self.λ,"radiance":self.radiance})
+        df = pd.DataFrame({"wavelength":self.λ_array,"radiance":self.radiance})
         df.set_index("wavelength",inplace=True)
         df.interpolate(method="cubicspline",axis="index",limit_direction="both",inplace=True)
         self.radiance = df["radiance"].to_numpy()
         self.rad2photons()
 
     def show(self):
-        plt.plot(self.λ*1000,self.radiance,label="computed radiance")
+        plt.plot(self.λ_array*1000,self.radiance,label="computed radiance")
         plt.xlabel("wavelength (nm)")
         plt.ylabel("radiance (W/m$^2$/sr/$\mu$m)")
         plt.legend()
         plt.minorticks_on()
-
