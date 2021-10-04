@@ -19,7 +19,7 @@ jobs:
         cd package
         ./install -pcie
         ls -lah
-        cd openhsi
+        cd /home/runner/work/openhsi/openhsi
         pip install -e .
     - name: Read all notebooks
       run: |
