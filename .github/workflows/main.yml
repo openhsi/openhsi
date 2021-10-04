@@ -19,8 +19,6 @@ jobs:
         cd package
         ./install -pcie
         ls -lah
-        rm XIMEA_Linux_SP.tgz
-        rm -rf package
         cd openhsi
         pip install -e .
     - name: Read all notebooks
