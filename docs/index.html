@@ -88,58 +88,11 @@ nb_path: "index.ipynb"
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.capture</span> <span class="kn">import</span> <span class="o">*</span>
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">take_show</span><span class="p">()</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No devices found. Camera not connected.&#39;</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>No devices found. Camera not connected.
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Changing-the-Exposure-and-Gain">Changing the Exposure and Gain<a class="anchor-link" href="#Changing-the-Exposure-and-Gain"> </a></h3>
-</div>
-</div>
-</div>
-    {% raw %}
+<span class="k">with</span> <span class="n">SimulatedCamera</span><span class="p">(</span><span class="n">img_path</span><span class="o">=</span><span class="s2">&quot;assets/rocky_beach.png&quot;</span><span class="p">,</span> <span class="n">n_lines</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">processing_lvl</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
+    <span class="n">cam</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">try</span><span class="p">:</span>
-    <span class="k">with</span> <span class="n">OpenHSI</span><span class="p">(</span><span class="n">xbinwidth</span><span class="o">=</span><span class="mi">896</span><span class="p">,</span><span class="n">xbinoffset</span><span class="o">=</span><span class="mi">528</span><span class="p">,</span><span class="n">exposure_ms</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span><span class="n">gain</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
-        <span class="n">cam</span><span class="o">.</span><span class="n">exposure</span>    <span class="o">=</span> <span class="mi">100</span>
-        <span class="n">cam</span><span class="o">.</span><span class="n">gain</span>        <span class="o">=</span> <span class="mi">5</span>
-
-        <span class="n">img</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">start</span><span class="p">()</span><span class="o">.</span><span class="n">get_img</span><span class="p">()</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Wavelength (nm)&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Line pixels&#39;</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No devices found. Camera not connected.&#39;</span><span class="p">)</span>
+<span class="n">fig</span>
 </pre></div>
 
     </div>
@@ -177,7 +130,7 @@ nb_path: "index.ipynb"
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.calibrate</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">fit_arc_lines2</span><span class="p">(</span><span class="n">arc_file</span> <span class="o">=</span> <span class="s2">&quot;cal_files/arc.hdf5&quot;</span><span class="p">,</span> <span class="n">wave_save_file</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skip</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">show</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="c1">#result = fit_arc_lines2(arc_file = &quot;cal_files/arc.hdf5&quot;, wave_save_file = None, skip = 1, show = True)</span>
 </pre></div>
 
     </div>

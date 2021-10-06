@@ -69,7 +69,7 @@ nb_path: "06_sensors.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="SensorStream" class="doc_header"><code>class</code> <code>SensorStream</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/sensors.py#L56" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SensorStream</code>(<strong><code>baudrate</code></strong>=<em><code>921600</code></em>, <strong><code>port</code></strong>=<em><code>'/dev/ttyTHS0'</code></em>, <strong><code>start_pin</code></strong>=<em><code>27</code></em>, <strong><code>save_dir</code></strong>=<em><code>'/xavier_ssd/data/'</code></em>)</p>
+<h2 id="SensorStream" class="doc_header"><code>class</code> <code>SensorStream</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/sensors.py#L57" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SensorStream</code>(<strong><code>baudrate</code></strong>=<em><code>921600</code></em>, <strong><code>port</code></strong>=<em><code>'/dev/ttyTHS0'</code></em>, <strong><code>start_pin</code></strong>=<em><code>27</code></em>, <strong><code>save_dir</code></strong>=<em><code>'/xavier_ssd/data/'</code></em>)</p>
 </blockquote>
 
 </div>
@@ -120,6 +120,115 @@ nb_path: "06_sensors.ipynb"
 </pre></div>
 
     </div>
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>test
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_text output_error">
+<pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">ValueError</span>                                Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-306-56153777548f&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg">#test</span>
+<span class="ansi-green-intense-fg ansi-bold">      2</span> print<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;test&#34;</span><span class="ansi-blue-fg">)</span>
+<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">raise</span> ValueError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">&#34;Test flag entered&#34;</span><span class="ansi-blue-fg">)</span>
+
+<span class="ansi-red-fg">ValueError</span>: Test flag entered</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;hardware&quot;</span><span class="p">)</span>
+<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Hardware flag entered&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>hardware
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;skip&quot;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>skip
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 

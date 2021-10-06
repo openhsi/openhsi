@@ -346,8 +346,8 @@ class DataCube(CameraProperties):
 def save(self:DataCube, save_dir:str):
     """Saves to a NetCDF file to directory dir_path in folder given by date with file name given by UTC time."""
 
-    self.directory = Path(f"{save_dir}/{self.timestamps[0].date()}/").mkdir(parents=False, exist_ok=True)
-    self.directory = f"{save_dir}/{self.timestamps[0].date()}"
+    self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
+    self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
     # time coordinates can only be saved in np.datetime64 format
     self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"],self.dc.data)),
@@ -374,9 +374,8 @@ def save(self:DataCube, save_dir:str):
     self.nc.datacube.attrs["units"]       = "uW/cm^2/sr/nm" if self.proc_lvl in (3,4,6) else "digital number"
     self.nc.datacube.attrs["description"] = "hyperspectral datacube"
 
-    self.nc.to_netcdf(f"{self.directory}/{self.timestamps[0].time()}.nc")
-
-    hv.save(self.show("matplotlib",robust=True),f"{self.directory}/{self.timestamps[0].time()}.png")
+    self.nc.to_netcdf(f"{self.directory}/{self.timestamps[0].strftime('%H_%M_%S')}.nc")
+    hv.save(self.show("matplotlib",robust=True),f"{self.directory}/{self.timestamps[0].strftime('%H_%M_%S')}.png")
 
 # Cell
 

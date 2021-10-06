@@ -13,7 +13,7 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from PIL import Image
 from tqdm import tqdm
-from ximea import xiapi
+import warnings
 
 from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Optional
 import json
@@ -119,15 +119,20 @@ class SimulatedCamera(OpenHSI):
 
 @delegates()
 class XimeaCamera(OpenHSI):
+    try:
+        from ximea import xiapi
+        xicam = xiapi.Camera()
+    except ModuleNotFoundError:
+        raise("ModuleNotFoundError: No module named ximea")
+
     """Core functionality for Ximea cameras"""
     # https://www.ximea.com/support/wiki/apis/Python
-    def __init__(self,**kwargs):
+    def __init__(self, xbinwidth:int = 896, xbinoffset:int = 528, exposure_ms:float = 10, serial_num:str = None, **kwargs):
         """Initialise Camera"""
 
         super().__init__(**kwargs)
 
-        self.xicam = xiapi.Camera()
-        self.xicam.open_device_by_SN(serial_number) if serial_number else self.xicam.open_device()
+        self.xicam.open_device_by_SN(serial_num) if serial_num else self.xicam.open_device()
 
         print(f'Connected to device {self.xicam.get_device_sn()}')
 
