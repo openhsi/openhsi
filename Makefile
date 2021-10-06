@@ -14,7 +14,7 @@ docs: $(SRC)
 	touch docs
 
 test:
-	nbdev_test_nbs
+	nbdev_test_nbs --verbose --flags test
 
 release: pypi
 	nbdev_bump_version
