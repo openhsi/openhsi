@@ -123,7 +123,7 @@ class XimeaCamera(OpenHSI):
         from ximea import xiapi
         xicam = xiapi.Camera()
     except ModuleNotFoundError:
-        raise("ModuleNotFoundError: No module named ximea")
+        warnings.warn("ModuleNotFoundError: No module named 'ximea'.",stacklevel=2)
 
     """Core functionality for Ximea cameras"""
     # https://www.ximea.com/support/wiki/apis/Python

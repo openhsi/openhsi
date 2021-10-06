@@ -10,7 +10,7 @@ from fastcore.basics import num_cpus
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime as dt
+from datetime import datetime
 import os
 import copy
 from tqdm import tqdm
@@ -35,7 +35,7 @@ from .data import *
 class Model6SV():
 
     def __init__(self, lat:"degrees" = -17.7, lon:"degrees" = 146.1, # Queensland
-                 z_time:"zulu" = dt.strptime("2021-05-26 03:26","%Y-%m-%d %H:%M"),
+                 z_time:"zulu" = datetime.strptime("2021-05-26 03:26","%Y-%m-%d %H:%M"),
                  station_num:int = 94299, region:str = "pac",
                  alt:"km" = 0.12, zen:"degrees" = 0., azi:"degrees" = 0.,
                  tile_type:GroundReflectance = 1.0,
@@ -68,7 +68,7 @@ class Model6SV():
         #s.geometry.solar_z = 0; s.geometry.solar_a = 0; s.geometry.view_z = 0; s.geometry.view_a = 0
         s.geometry.day = z_time.day
         s.geometry.month = z_time.month
-        s.geometry.from_time_and_location(lat, lon, f"{z_time.year}-{z_time.month:02d}-{z_time.day:02d} {z_time.hour}:{z_time.minute}:{z_time.second}", zen, azi)
+        s.geometry.from_time_and_location(lat, lon, f"{z_time.year}-{z_time.month:02d}-{z_time.day:02d} {z_time.hour:02d}:{z_time.minute:02d}:{z_time.second:02d}", zen, azi)
 
         #Altitude
         s.altitudes = Altitudes()
