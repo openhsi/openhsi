@@ -21,6 +21,9 @@ jobs:
         ls -lah
         cd /home/runner/work/openhsi/openhsi
         pip install -e .
+        cd assets/6SV1.1
+        make sixs
+        cd ../..
     - name: Read all notebooks
       run: |
         nbdev_read_nbs
