@@ -9,6 +9,16 @@ entries:
     - output: web,pdf
       title: Overview
       url: /
+      subfolders:
+      - output: web
+        subfolderitems:
+        - output: web,pdf
+          title: How to use the OpenHSI Camera
+          url: tutorial_camera.html
+        - output: web,pdf
+          title: How to calibrate the OpenHSI Camera
+          url: tutorial_calibrate.html
+        title: Tutorials
     - output: web,pdf
       title: Data Transforms for Hyperspectral Datacubes
       url: data.html
@@ -16,14 +26,14 @@ entries:
       title: Capture
       url: capture.html
     - output: web,pdf
-      title: Calibration Procedure
-      url: calibrate.html
-    - output: web,pdf
       title: Atmospheric Correction
       url: atmos.html
     - output: web,pdf
       title: Signal To Noise Ratio for the OpenHSI Camera
       url: snr.html
+    - output: web,pdf
+      title: Calibration Procedure
+      url: calibrate.html
     - output: web,pdf
       title: Sensors
       url: sensors.html

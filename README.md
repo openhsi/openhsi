@@ -25,7 +25,7 @@ This whole software library, testing suite, documentation website, and PyPi uplo
 
 ### Taking a single picture
 
-```python
+```
 from openhsi.capture import *
 
 with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing_lvl = 3) as cam:
@@ -40,7 +40,7 @@ fig
 
 ### Calibration
 
-```python
+```
 from openhsi.calibrate import *
 #result = fit_arc_lines2(arc_file = "cal_files/arc.hdf5", wave_save_file = None, skip = 1, show = True)
 ```
