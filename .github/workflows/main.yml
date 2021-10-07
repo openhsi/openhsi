@@ -12,14 +12,6 @@ jobs:
     - name: Install the library
       run: |
         pip install nbdev jupyter
-        pwd
-        cd ..
-        wget https://www.ximea.com/downloads/recent/XIMEA_Linux_SP.tgz
-        tar xzf XIMEA_Linux_SP.tgz
-        cd package
-        ./install -pcie
-        ls -lah
-        cd /home/runner/work/openhsi/openhsi
         pip install -e .
         cd assets/6SV1.1
         make clean

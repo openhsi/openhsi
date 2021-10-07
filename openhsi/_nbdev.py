@@ -22,20 +22,19 @@ index = {"Array": "00_data.ipynb",
          "OpenHSI": "01_capture.ipynb",
          "cam": "01_capture.ipynb",
          "SimulatedCamera": "01_capture.ipynb",
-         "XimeaCamera": "01_capture.ipynb",
-         "SettingsBuilderMixin": "02_calibrate.ipynb",
-         "SettingsBuilderMetaclass": "02_calibrate.ipynb",
-         "create_settings_builder": "02_calibrate.ipynb",
          "Model6SV": "03_atmos.ipynb",
          "Model6SV.run_wavelengths": "03_atmos.ipynb",
-         "fields_dict": "06_sensors.ipynb",
-         "SensorStream": "06_sensors.ipynb"}
+         "SettingsBuilderMixin": "05_calibrate.ipynb",
+         "SettingsBuilderMetaclass": "05_calibrate.ipynb",
+         "create_settings_builder": "05_calibrate.ipynb",
+         "fields_dict": "07_sensors.ipynb",
+         "SensorStream": "07_sensors.ipynb"}
 
 modules = ["data.py",
            "capture.py",
-           "calibrate.py",
            "atmos.py",
            "snr.py",
+           "calibrate.py",
            "sensors.py"]
 
 doc_url = "https://openhsi.github.io/openhsi/"
