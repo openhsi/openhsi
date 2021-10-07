@@ -2,6 +2,8 @@
 > Library to calibrate, trigger and capture data cubes for the open source DIY hyperspectral camera. 
 
 
+![example workflow](https://github.com/openhsi/openhsi/actions/workflows/main.yml/badge.svg)
+
 <a rel="license" href="http://creativecommons.org/licenses/by/3.0/au/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/3.0/au/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/au/">Creative Commons Attribution 3.0 Australia License</a>.
 
 Documentation can be found here: [https://openhsi.github.io/openhsi/](https://openhsi.github.io/openhsi/).
@@ -25,7 +27,7 @@ This whole software library, testing suite, documentation website, and PyPi uplo
 
 ### Taking a single picture
 
-```
+```python
 from openhsi.capture import *
 
 with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing_lvl = 3) as cam:
@@ -40,7 +42,7 @@ fig
 
 ### Calibration
 
-```
+```python
 from openhsi.calibrate import *
 #result = fit_arc_lines2(arc_file = "cal_files/arc.hdf5", wave_save_file = None, skip = 1, show = True)
 ```
@@ -70,5 +72,5 @@ from openhsi.calibrate import *
 
 
 
-![svg](docs/images/output_9_2.svg)
+![svg](docs/images/output_10_2.svg)
 
