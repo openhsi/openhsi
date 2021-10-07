@@ -23,8 +23,8 @@ jobs:
     - name: Check if all notebooks are cleaned
       run: |
         echo "Check we are starting with clean git checkout"
-        git status -uno -s | grep -v "assets" 
-        if [ -n "$( git status -uno -s | grep -v "assets" )" ]; then echo "git status is not clean"; false; fi
+        git status -uno -s
+        #if [ -n "$( git status -uno -s | grep -v "assets" )" ]; then echo "git status is not clean"; false; fi
         echo "Trying to strip out notebooks"
         nbdev_clean_nbs
         echo "Check that strip out was unnecessary"
