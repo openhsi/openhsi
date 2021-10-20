@@ -20,7 +20,7 @@ import panel as pn
 pn.extension()
 
 import holoviews as hv
-hv.extension('bokeh')
+hv.extension('bokeh',logo=False)
 
 from Py6S import *
 

@@ -7,7 +7,7 @@ __all__ = []
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime as dt
+from datetime import datetime
 import os
 
 import param
@@ -15,7 +15,7 @@ import panel as pn
 pn.extension()
 
 import holoviews as hv
-hv.extension('bokeh')
+hv.extension('bokeh',logo=False)
 
 from Py6S import *
 

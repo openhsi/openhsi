@@ -3,6 +3,7 @@
 __all__ = ['Array', 'Shape', 'CircArrayBuffer', 'CameraProperties', 'DateTimeBuffer', 'DataCube']
 
 # Cell
+#hide
 
 from fastcore.foundation import patch
 from fastcore.meta import delegates
@@ -16,7 +17,7 @@ from scipy.interpolate import interp1d
 from PIL import Image
 from scipy.signal import decimate
 import holoviews as hv
-hv.extension('bokeh')
+hv.extension('bokeh',logo=False)
 
 from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Optional
 import json
@@ -24,6 +25,10 @@ import pickle
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import warnings
+
+
+# Cell
+#hide
 
 # numpy.ndarray type hints
 Shape = TypeVar("Shape"); DType = TypeVar("DType")
@@ -395,7 +400,7 @@ def show(self:DataCube, plot_lib:str = "bokeh",
          robust:bool = False, hist_eq:bool = False) -> "bokeh or matplotlib plot":
     """Generate a histogram equalised RGB plot from chosen RGB wavelengths.
     The plotting backend can be specified by plot_lib and can be "bokeh" or "matplotlib". """
-    hv.extension(plot_lib)
+    hv.extension(plot_lib,logo=False)
 
     rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
     rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]

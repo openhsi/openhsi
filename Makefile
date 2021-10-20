@@ -12,6 +12,7 @@ docs_serve: docs
 docs: $(SRC)
 	nbdev_build_docs
 	touch docs
+	cp assets/combo_logos.png docs/_site/assets/images/company_logo.png 
 
 test:
 	nbdev_test_nbs --verbose --flags test
