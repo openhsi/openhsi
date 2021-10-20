@@ -23,6 +23,7 @@ import pickle
 
 from .data import *
 from .capture import *
+from .cameras import *
 
 # Cell
 
