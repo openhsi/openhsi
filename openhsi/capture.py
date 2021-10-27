@@ -111,5 +111,7 @@ class SimulatedCamera(OpenHSI):
             self.rgb_buff.slots_left = 0 # make buffer full again
         return self.rgb2xyz_matching_funcs(self.rgb_buff.get())
 
+    def exposure(self):
+        pass
 
 

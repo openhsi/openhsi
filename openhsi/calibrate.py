@@ -15,6 +15,7 @@ from PIL import Image
 from scipy.signal import decimate, medfilt
 import holoviews as hv
 hv.extension('bokeh',logo=False)
+from fastprogress.fastprogress import master_bar, progress_bar
 
 from scipy.signal import find_peaks, savgol_filter
 from scipy.optimize import curve_fit

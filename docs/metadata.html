@@ -43,10 +43,10 @@ nb_path: "06_metadata.ipynb"
 
 
 
-<div id="ccf7beec-5e3b-4d43-8ce4-8039e5075c54"></div>
+<div id="90ac301b-3a66-42b9-84ec-8e3910a5c370"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#ccf7beec-5e3b-4d43-8ce4-8039e5075c54');
+var element = $('#90ac301b-3a66-42b9-84ec-8e3910a5c370');
 
 (function(root) {
   function now() {
@@ -202,10 +202,10 @@ var element = $('#ccf7beec-5e3b-4d43-8ce4-8039e5075c54');
 
 
 
-<div id="f8a231ee-816d-4e10-ba6a-ee433f45fcd6"></div>
+<div id="63880662-2f78-4723-8fcf-cee23409d86a"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#f8a231ee-816d-4e10-ba6a-ee433f45fcd6');
+var element = $('#63880662-2f78-4723-8fcf-cee23409d86a');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -456,10 +456,10 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="ba0482f3-11c0-46a1-8288-f86c8f3d8916"></div>
+<div id="4a8f019c-99af-4d8d-8cfd-18fafb8e54fd"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#ba0482f3-11c0-46a1-8288-f86c8f3d8916');
+var element = $('#4a8f019c-99af-4d8d-8cfd-18fafb8e54fd');
 
 (function(root) {
   function now() {
@@ -615,436 +615,10 @@ var element = $('#ba0482f3-11c0-46a1-8288-f86c8f3d8916');
 
 
 
-<div id="a392418e-3ea1-4ee5-80f0-078096ec0b4b"></div>
+<div id="c84fde7a-75be-4a6d-8f82-ac561f007662"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#a392418e-3ea1-4ee5-80f0-078096ec0b4b');
-
-if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
-  window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
-}
-
-
-    function JupyterCommManager() {
-    }
-
-    JupyterCommManager.prototype.register_target = function(plot_id, comm_id, msg_handler) {
-      if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        comm_manager.register_target(comm_id, function(comm) {
-          comm.on_msg(msg_handler);
-        });
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        window.PyViz.kernels[plot_id].registerCommTarget(comm_id, function(comm) {
-          comm.onMsg = msg_handler;
-        });
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        google.colab.kernel.comms.registerTarget(comm_id, (comm) => {
-          var messages = comm.messages[Symbol.asyncIterator]();
-          function processIteratorResult(result) {
-            var message = result.value;
-            console.log(message)
-            var content = {data: message.data, comm_id};
-            var buffers = []
-            for (var buffer of message.buffers ?? []) {
-              buffers.push(new DataView(buffer))
-            }
-            var metadata = message.metadata ?? {};
-            var msg = {content, buffers, metadata}
-            msg_handler(msg);
-            return messages.next().then(processIteratorResult);
-          }
-          return messages.next().then(processIteratorResult);
-        })
-      }
-    }
-
-    JupyterCommManager.prototype.get_client_comm = function(plot_id, comm_id, msg_handler) {
-      if (comm_id in window.PyViz.comms) {
-        return window.PyViz.comms[comm_id];
-      } else if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        var comm = comm_manager.new_comm(comm_id, {}, {}, {}, comm_id);
-        if (msg_handler) {
-          comm.on_msg(msg_handler);
-        }
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        var comm = window.PyViz.kernels[plot_id].connectToComm(comm_id);
-        comm.open();
-        if (msg_handler) {
-          comm.onMsg = msg_handler;
-        }
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        var comm_promise = google.colab.kernel.comms.open(comm_id)
-        comm_promise.then((comm) => {
-          window.PyViz.comms[comm_id] = comm;
-          if (msg_handler) {
-            var messages = comm.messages[Symbol.asyncIterator]();
-            function processIteratorResult(result) {
-              var message = result.value;
-              var content = {data: message.data};
-              var metadata = message.metadata ?? {comm_id};
-              var msg = {content, metadata}
-              msg_handler(msg);
-              return messages.next().then(processIteratorResult);
-            }
-            return messages.next().then(processIteratorResult);
-          }
-        }) 
-        var sendClosure = (data, metadata, buffers, disposeOnDone) => {
-          return comm_promise.then((comm) => {
-            comm.send(data, metadata, buffers, disposeOnDone);
-          });
-        };
-        var comm = {
-          send: sendClosure
-        };
-      }
-      window.PyViz.comms[comm_id] = comm;
-      return comm;
-    }
-    window.PyViz.comm_manager = new JupyterCommManager();
-    
-
-
-var JS_MIME_TYPE = 'application/javascript';
-var HTML_MIME_TYPE = 'text/html';
-var EXEC_MIME_TYPE = 'application/vnd.holoviews_exec.v0+json';
-var CLASS_NAME = 'output';
-
-/**
- * Render data to the DOM node
- */
-function render(props, node) {
-  var div = document.createElement("div");
-  var script = document.createElement("script");
-  node.appendChild(div);
-  node.appendChild(script);
-}
-
-/**
- * Handle when a new output is added
- */
-function handle_add_output(event, handle) {
-  var output_area = handle.output_area;
-  var output = handle.output;
-  if ((output.data == undefined) || (!output.data.hasOwnProperty(EXEC_MIME_TYPE))) {
-    return
-  }
-  var id = output.metadata[EXEC_MIME_TYPE]["id"];
-  var toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
-  if (id !== undefined) {
-    var nchildren = toinsert.length;
-    var html_node = toinsert[nchildren-1].children[0];
-    html_node.innerHTML = output.data[HTML_MIME_TYPE];
-    var scripts = [];
-    var nodelist = html_node.querySelectorAll("script");
-    for (var i in nodelist) {
-      if (nodelist.hasOwnProperty(i)) {
-        scripts.push(nodelist[i])
-      }
-    }
-
-    scripts.forEach( function (oldScript) {
-      var newScript = document.createElement("script");
-      var attrs = [];
-      var nodemap = oldScript.attributes;
-      for (var j in nodemap) {
-        if (nodemap.hasOwnProperty(j)) {
-          attrs.push(nodemap[j])
-        }
-      }
-      attrs.forEach(function(attr) { newScript.setAttribute(attr.name, attr.value) });
-      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-    if (JS_MIME_TYPE in output.data) {
-      toinsert[nchildren-1].children[1].textContent = output.data[JS_MIME_TYPE];
-    }
-    output_area._hv_plot_id = id;
-    if ((window.Bokeh !== undefined) && (id in Bokeh.index)) {
-      window.PyViz.plot_index[id] = Bokeh.index[id];
-    } else {
-      window.PyViz.plot_index[id] = null;
-    }
-  } else if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
-    var bk_div = document.createElement("div");
-    bk_div.innerHTML = output.data[HTML_MIME_TYPE];
-    var script_attrs = bk_div.children[0].attributes;
-    for (var i = 0; i < script_attrs.length; i++) {
-      toinsert[toinsert.length - 1].childNodes[1].setAttribute(script_attrs[i].name, script_attrs[i].value);
-    }
-    // store reference to server id on output_area
-    output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
-  }
-}
-
-/**
- * Handle when an output is cleared or removed
- */
-function handle_clear_output(event, handle) {
-  var id = handle.cell.output_area._hv_plot_id;
-  var server_id = handle.cell.output_area._bokeh_server_id;
-  if (((id === undefined) || !(id in PyViz.plot_index)) && (server_id !== undefined)) { return; }
-  var comm = window.PyViz.comm_manager.get_client_comm("hv-extension-comm", "hv-extension-comm", function () {});
-  if (server_id !== null) {
-    comm.send({event_type: 'server_delete', 'id': server_id});
-    return;
-  } else if (comm !== null) {
-    comm.send({event_type: 'delete', 'id': id});
-  }
-  delete PyViz.plot_index[id];
-  if ((window.Bokeh !== undefined) & (id in window.Bokeh.index)) {
-    var doc = window.Bokeh.index[id].model.document
-    doc.clear();
-    const i = window.Bokeh.documents.indexOf(doc);
-    if (i > -1) {
-      window.Bokeh.documents.splice(i, 1);
-    }
-  }
-}
-
-/**
- * Handle kernel restart event
- */
-function handle_kernel_cleanup(event, handle) {
-  delete PyViz.comms["hv-extension-comm"];
-  window.PyViz.plot_index = {}
-}
-
-/**
- * Handle update_display_data messages
- */
-function handle_update_output(event, handle) {
-  handle_clear_output(event, {cell: {output_area: handle.output_area}})
-  handle_add_output(event, handle)
-}
-
-function register_renderer(events, OutputArea) {
-  function append_mime(data, metadata, element) {
-    // create a DOM node to render to
-    var toinsert = this.create_output_subarea(
-    metadata,
-    CLASS_NAME,
-    EXEC_MIME_TYPE
-    );
-    this.keyboard_manager.register_events(toinsert);
-    // Render to node
-    var props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
-    render(props, toinsert[0]);
-    element.append(toinsert);
-    return toinsert
-  }
-
-  events.on('output_added.OutputArea', handle_add_output);
-  events.on('output_updated.OutputArea', handle_update_output);
-  events.on('clear_output.CodeCell', handle_clear_output);
-  events.on('delete.Cell', handle_clear_output);
-  events.on('kernel_ready.Kernel', handle_kernel_cleanup);
-
-  OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
-    safe: true,
-    index: 0
-  });
-}
-
-if (window.Jupyter !== undefined) {
-  try {
-    var events = require('base/js/events');
-    var OutputArea = require('notebook/js/outputarea').OutputArea;
-    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
-      register_renderer(events, OutputArea);
-    }
-  } catch(err) {
-  }
-}
-
-</script>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-
-
-
-<div id="9bbf062d-67b3-4be9-9f82-02b89660f805"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#9bbf062d-67b3-4be9-9f82-02b89660f805');
-
-(function(root) {
-  function now() {
-    return new Date();
-  }
-
-  var force = true;
-
-  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
-    root._bokeh_onload_callbacks = [];
-    root._bokeh_is_loading = undefined;
-  }
-
-  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
-    root._bokeh_timeout = Date.now() + 5000;
-    root._bokeh_failed_load = false;
-  }
-
-  function run_callbacks() {
-    try {
-      root._bokeh_onload_callbacks.forEach(function(callback) {
-        if (callback != null)
-          callback();
-      });
-    } finally {
-      delete root._bokeh_onload_callbacks
-    }
-    console.debug("Bokeh: all callbacks have finished");
-  }
-
-  function load_libs(css_urls, js_urls, js_modules, callback) {
-    if (css_urls == null) css_urls = [];
-    if (js_urls == null) js_urls = [];
-    if (js_modules == null) js_modules = [];
-
-    root._bokeh_onload_callbacks.push(callback);
-    if (root._bokeh_is_loading > 0) {
-      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
-      return null;
-    }
-    if (js_urls.length === 0 && js_modules.length === 0) {
-      run_callbacks();
-      return null;
-    }
-    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
-    root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
-
-    function on_load() {
-      root._bokeh_is_loading--;
-      if (root._bokeh_is_loading === 0) {
-        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
-        run_callbacks()
-      }
-    }
-
-    function on_error() {
-      console.error("failed to load " + url);
-    }
-
-    for (var i = 0; i < css_urls.length; i++) {
-      var url = css_urls[i];
-      const element = document.createElement("link");
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.rel = "stylesheet";
-      element.type = "text/css";
-      element.href = url;
-      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
-      document.body.appendChild(element);
-    }
-
-    var skip = [];
-    if (window.requirejs) {
-      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
-      
-    }
-    for (var i = 0; i < js_urls.length; i++) {
-      var url = js_urls[i];
-      if (skip.indexOf(url) >= 0) { on_load(); continue; }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    for (var i = 0; i < js_modules.length; i++) {
-      var url = js_modules[i];
-      if (skip.indexOf(url) >= 0) { on_load(); continue; }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      element.type = "module";
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    if (!js_urls.length && !js_modules.length) {
-      on_load()
-    }
-  };
-
-  function inject_raw_css(css) {
-    const element = document.createElement("style");
-    element.appendChild(document.createTextNode(css));
-    document.body.appendChild(element);
-  }
-
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.3.min.js", "https://unpkg.com/@holoviz/panel@0.12.1/dist/panel.min.js"];
-  var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.1/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/dataframe.css"];
-  var inline_js = [
-    function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\")\n    }\n    ");
-    },
-    function(Bokeh) {
-      Bokeh.set_log_level("info");
-    },
-    function(Bokeh) {} // ensure no trailing comma for IE
-  ];
-
-  function run_inline_js() {
-    if ((root.Bokeh !== undefined) || (force === true)) {
-      for (var i = 0; i < inline_js.length; i++) {
-        inline_js[i].call(root, root.Bokeh);
-      }} else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(run_inline_js, 100);
-    } else if (!root._bokeh_failed_load) {
-      console.log("Bokeh: BokehJS failed to load within specified timeout.");
-      root._bokeh_failed_load = true;
-    }
-  }
-
-  if (root._bokeh_is_loading === 0) {
-    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
-    run_inline_js();
-  } else {
-    load_libs(css_urls, js_urls, js_modules, function() {
-      console.debug("Bokeh: BokehJS plotting callback run at", now());
-      run_inline_js();
-    });
-  }
-}(window));
-</script>
-</div>
-
-</div>
-
-<div class="output_area">
-
-
-
-
-<div id="233e1953-da1a-4d18-9357-fd4a020bc237"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#233e1953-da1a-4d18-9357-fd4a020bc237');
+var element = $('#c84fde7a-75be-4a6d-8f82-ac561f007662');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -1308,10 +882,10 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="11ed92a7-bc24-4a32-97c4-d74d3d30f993"></div>
+<div id="950649d8-9486-4672-abec-b856b77ece98"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#11ed92a7-bc24-4a32-97c4-d74d3d30f993');
+var element = $('#950649d8-9486-4672-abec-b856b77ece98');
 
 (function(root) {
   function now() {
@@ -1467,10 +1041,436 @@ var element = $('#11ed92a7-bc24-4a32-97c4-d74d3d30f993');
 
 
 
-<div id="afacb64d-8df0-405b-be36-44f6b64c0c0c"></div>
+<div id="3195657b-d646-4b54-9987-4907b255b90b"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#afacb64d-8df0-405b-be36-44f6b64c0c0c');
+var element = $('#3195657b-d646-4b54-9987-4907b255b90b');
+
+if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
+  window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
+}
+
+
+    function JupyterCommManager() {
+    }
+
+    JupyterCommManager.prototype.register_target = function(plot_id, comm_id, msg_handler) {
+      if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
+        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
+        comm_manager.register_target(comm_id, function(comm) {
+          comm.on_msg(msg_handler);
+        });
+      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
+        window.PyViz.kernels[plot_id].registerCommTarget(comm_id, function(comm) {
+          comm.onMsg = msg_handler;
+        });
+      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
+        google.colab.kernel.comms.registerTarget(comm_id, (comm) => {
+          var messages = comm.messages[Symbol.asyncIterator]();
+          function processIteratorResult(result) {
+            var message = result.value;
+            console.log(message)
+            var content = {data: message.data, comm_id};
+            var buffers = []
+            for (var buffer of message.buffers ?? []) {
+              buffers.push(new DataView(buffer))
+            }
+            var metadata = message.metadata ?? {};
+            var msg = {content, buffers, metadata}
+            msg_handler(msg);
+            return messages.next().then(processIteratorResult);
+          }
+          return messages.next().then(processIteratorResult);
+        })
+      }
+    }
+
+    JupyterCommManager.prototype.get_client_comm = function(plot_id, comm_id, msg_handler) {
+      if (comm_id in window.PyViz.comms) {
+        return window.PyViz.comms[comm_id];
+      } else if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
+        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
+        var comm = comm_manager.new_comm(comm_id, {}, {}, {}, comm_id);
+        if (msg_handler) {
+          comm.on_msg(msg_handler);
+        }
+      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
+        var comm = window.PyViz.kernels[plot_id].connectToComm(comm_id);
+        comm.open();
+        if (msg_handler) {
+          comm.onMsg = msg_handler;
+        }
+      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
+        var comm_promise = google.colab.kernel.comms.open(comm_id)
+        comm_promise.then((comm) => {
+          window.PyViz.comms[comm_id] = comm;
+          if (msg_handler) {
+            var messages = comm.messages[Symbol.asyncIterator]();
+            function processIteratorResult(result) {
+              var message = result.value;
+              var content = {data: message.data};
+              var metadata = message.metadata ?? {comm_id};
+              var msg = {content, metadata}
+              msg_handler(msg);
+              return messages.next().then(processIteratorResult);
+            }
+            return messages.next().then(processIteratorResult);
+          }
+        }) 
+        var sendClosure = (data, metadata, buffers, disposeOnDone) => {
+          return comm_promise.then((comm) => {
+            comm.send(data, metadata, buffers, disposeOnDone);
+          });
+        };
+        var comm = {
+          send: sendClosure
+        };
+      }
+      window.PyViz.comms[comm_id] = comm;
+      return comm;
+    }
+    window.PyViz.comm_manager = new JupyterCommManager();
+    
+
+
+var JS_MIME_TYPE = 'application/javascript';
+var HTML_MIME_TYPE = 'text/html';
+var EXEC_MIME_TYPE = 'application/vnd.holoviews_exec.v0+json';
+var CLASS_NAME = 'output';
+
+/**
+ * Render data to the DOM node
+ */
+function render(props, node) {
+  var div = document.createElement("div");
+  var script = document.createElement("script");
+  node.appendChild(div);
+  node.appendChild(script);
+}
+
+/**
+ * Handle when a new output is added
+ */
+function handle_add_output(event, handle) {
+  var output_area = handle.output_area;
+  var output = handle.output;
+  if ((output.data == undefined) || (!output.data.hasOwnProperty(EXEC_MIME_TYPE))) {
+    return
+  }
+  var id = output.metadata[EXEC_MIME_TYPE]["id"];
+  var toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
+  if (id !== undefined) {
+    var nchildren = toinsert.length;
+    var html_node = toinsert[nchildren-1].children[0];
+    html_node.innerHTML = output.data[HTML_MIME_TYPE];
+    var scripts = [];
+    var nodelist = html_node.querySelectorAll("script");
+    for (var i in nodelist) {
+      if (nodelist.hasOwnProperty(i)) {
+        scripts.push(nodelist[i])
+      }
+    }
+
+    scripts.forEach( function (oldScript) {
+      var newScript = document.createElement("script");
+      var attrs = [];
+      var nodemap = oldScript.attributes;
+      for (var j in nodemap) {
+        if (nodemap.hasOwnProperty(j)) {
+          attrs.push(nodemap[j])
+        }
+      }
+      attrs.forEach(function(attr) { newScript.setAttribute(attr.name, attr.value) });
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+    if (JS_MIME_TYPE in output.data) {
+      toinsert[nchildren-1].children[1].textContent = output.data[JS_MIME_TYPE];
+    }
+    output_area._hv_plot_id = id;
+    if ((window.Bokeh !== undefined) && (id in Bokeh.index)) {
+      window.PyViz.plot_index[id] = Bokeh.index[id];
+    } else {
+      window.PyViz.plot_index[id] = null;
+    }
+  } else if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
+    var bk_div = document.createElement("div");
+    bk_div.innerHTML = output.data[HTML_MIME_TYPE];
+    var script_attrs = bk_div.children[0].attributes;
+    for (var i = 0; i < script_attrs.length; i++) {
+      toinsert[toinsert.length - 1].childNodes[1].setAttribute(script_attrs[i].name, script_attrs[i].value);
+    }
+    // store reference to server id on output_area
+    output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
+  }
+}
+
+/**
+ * Handle when an output is cleared or removed
+ */
+function handle_clear_output(event, handle) {
+  var id = handle.cell.output_area._hv_plot_id;
+  var server_id = handle.cell.output_area._bokeh_server_id;
+  if (((id === undefined) || !(id in PyViz.plot_index)) && (server_id !== undefined)) { return; }
+  var comm = window.PyViz.comm_manager.get_client_comm("hv-extension-comm", "hv-extension-comm", function () {});
+  if (server_id !== null) {
+    comm.send({event_type: 'server_delete', 'id': server_id});
+    return;
+  } else if (comm !== null) {
+    comm.send({event_type: 'delete', 'id': id});
+  }
+  delete PyViz.plot_index[id];
+  if ((window.Bokeh !== undefined) & (id in window.Bokeh.index)) {
+    var doc = window.Bokeh.index[id].model.document
+    doc.clear();
+    const i = window.Bokeh.documents.indexOf(doc);
+    if (i > -1) {
+      window.Bokeh.documents.splice(i, 1);
+    }
+  }
+}
+
+/**
+ * Handle kernel restart event
+ */
+function handle_kernel_cleanup(event, handle) {
+  delete PyViz.comms["hv-extension-comm"];
+  window.PyViz.plot_index = {}
+}
+
+/**
+ * Handle update_display_data messages
+ */
+function handle_update_output(event, handle) {
+  handle_clear_output(event, {cell: {output_area: handle.output_area}})
+  handle_add_output(event, handle)
+}
+
+function register_renderer(events, OutputArea) {
+  function append_mime(data, metadata, element) {
+    // create a DOM node to render to
+    var toinsert = this.create_output_subarea(
+    metadata,
+    CLASS_NAME,
+    EXEC_MIME_TYPE
+    );
+    this.keyboard_manager.register_events(toinsert);
+    // Render to node
+    var props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
+    render(props, toinsert[0]);
+    element.append(toinsert);
+    return toinsert
+  }
+
+  events.on('output_added.OutputArea', handle_add_output);
+  events.on('output_updated.OutputArea', handle_update_output);
+  events.on('clear_output.CodeCell', handle_clear_output);
+  events.on('delete.Cell', handle_clear_output);
+  events.on('kernel_ready.Kernel', handle_kernel_cleanup);
+
+  OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
+    safe: true,
+    index: 0
+  });
+}
+
+if (window.Jupyter !== undefined) {
+  try {
+    var events = require('base/js/events');
+    var OutputArea = require('notebook/js/outputarea').OutputArea;
+    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
+      register_renderer(events, OutputArea);
+    }
+  } catch(err) {
+  }
+}
+
+</script>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+
+<div id="41164acd-a6fb-435a-a152-7ca1fbc67b0d"></div>
+<div class="output_subarea output_javascript ">
+<script type="text/javascript">
+var element = $('#41164acd-a6fb-435a-a152-7ca1fbc67b0d');
+
+(function(root) {
+  function now() {
+    return new Date();
+  }
+
+  var force = true;
+
+  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
+    root._bokeh_onload_callbacks = [];
+    root._bokeh_is_loading = undefined;
+  }
+
+  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
+    root._bokeh_timeout = Date.now() + 5000;
+    root._bokeh_failed_load = false;
+  }
+
+  function run_callbacks() {
+    try {
+      root._bokeh_onload_callbacks.forEach(function(callback) {
+        if (callback != null)
+          callback();
+      });
+    } finally {
+      delete root._bokeh_onload_callbacks
+    }
+    console.debug("Bokeh: all callbacks have finished");
+  }
+
+  function load_libs(css_urls, js_urls, js_modules, callback) {
+    if (css_urls == null) css_urls = [];
+    if (js_urls == null) js_urls = [];
+    if (js_modules == null) js_modules = [];
+
+    root._bokeh_onload_callbacks.push(callback);
+    if (root._bokeh_is_loading > 0) {
+      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
+      return null;
+    }
+    if (js_urls.length === 0 && js_modules.length === 0) {
+      run_callbacks();
+      return null;
+    }
+    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
+    root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
+
+    function on_load() {
+      root._bokeh_is_loading--;
+      if (root._bokeh_is_loading === 0) {
+        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
+        run_callbacks()
+      }
+    }
+
+    function on_error() {
+      console.error("failed to load " + url);
+    }
+
+    for (var i = 0; i < css_urls.length; i++) {
+      var url = css_urls[i];
+      const element = document.createElement("link");
+      element.onload = on_load;
+      element.onerror = on_error;
+      element.rel = "stylesheet";
+      element.type = "text/css";
+      element.href = url;
+      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
+      document.body.appendChild(element);
+    }
+
+    var skip = [];
+    if (window.requirejs) {
+      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
+      
+    }
+    for (var i = 0; i < js_urls.length; i++) {
+      var url = js_urls[i];
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
+      var element = document.createElement('script');
+      element.onload = on_load;
+      element.onerror = on_error;
+      element.async = false;
+      element.src = url;
+      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
+      document.head.appendChild(element);
+    }
+    for (var i = 0; i < js_modules.length; i++) {
+      var url = js_modules[i];
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
+      var element = document.createElement('script');
+      element.onload = on_load;
+      element.onerror = on_error;
+      element.async = false;
+      element.src = url;
+      element.type = "module";
+      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
+      document.head.appendChild(element);
+    }
+    if (!js_urls.length && !js_modules.length) {
+      on_load()
+    }
+  };
+
+  function inject_raw_css(css) {
+    const element = document.createElement("style");
+    element.appendChild(document.createTextNode(css));
+    document.body.appendChild(element);
+  }
+
+  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.3.min.js", "https://unpkg.com/@holoviz/panel@0.12.1/dist/panel.min.js"];
+  var js_modules = [];
+  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.1/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/dataframe.css"];
+  var inline_js = [
+    function(Bokeh) {
+      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\")\n    }\n    ");
+    },
+    function(Bokeh) {
+      Bokeh.set_log_level("info");
+    },
+    function(Bokeh) {} // ensure no trailing comma for IE
+  ];
+
+  function run_inline_js() {
+    if ((root.Bokeh !== undefined) || (force === true)) {
+      for (var i = 0; i < inline_js.length; i++) {
+        inline_js[i].call(root, root.Bokeh);
+      }} else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(run_inline_js, 100);
+    } else if (!root._bokeh_failed_load) {
+      console.log("Bokeh: BokehJS failed to load within specified timeout.");
+      root._bokeh_failed_load = true;
+    }
+  }
+
+  if (root._bokeh_is_loading === 0) {
+    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
+    run_inline_js();
+  } else {
+    load_libs(css_urls, js_urls, js_modules, function() {
+      console.debug("Bokeh: BokehJS plotting callback run at", now());
+      run_inline_js();
+    });
+  }
+}(window));
+</script>
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+
+
+<div id="18da9953-78a6-4e7d-a508-58c49417cea9"></div>
+<div class="output_subarea output_javascript ">
+<script type="text/javascript">
+var element = $('#18da9953-78a6-4e7d-a508-58c49417cea9');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
