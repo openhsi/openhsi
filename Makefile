@@ -12,7 +12,8 @@ docs_serve: docs
 docs: $(SRC)
 	nbdev_build_docs
 	touch docs
-	cp assets/combo_logos.png docs/_site/assets/images/company_logo.png 
+	cp assets/combo_logos.png docs/_site/assets/images/company_logo.png
+	cp assets/favicon.ico docs/_site/assets/images/favicon.ico
 
 test:
 	nbdev_test_nbs --verbose --flags test

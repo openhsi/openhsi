@@ -163,8 +163,10 @@ def tfm_setup(self:CameraProperties, more_setup:Callable[[CameraProperties],None
 
     # update the wavelengths for slow binning
     n_bands = int(np.ptp(self.calibration["wavelengths"])//self.settings["fwhm_nm"])
-    λs = [np.min(self.calibration["wavelengths"]) + i*self.settings["fwhm_nm"] for i in range(n_bands)]
-    self.bin_idxs = [np.argmin(np.abs(self.calibration["wavelengths"]-λ)) for λ in λs]
+    # jump by `fwhm_nm` and find closest array index, then let the wavelengths be in the middle between jumps
+    self.λs = np.around(np.array([np.min(self.calibration["wavelengths"]) + i*self.settings["fwhm_nm"] for i in range(n_bands+1)]),decimals=1)
+    self.bin_idxs = [np.argmin(np.abs(self.calibration["wavelengths"]-λ)) for λ in self.λs]
+    self.λs += self.settings["fwhm_nm"]//2 #
     self.bin_buff = CircArrayBuffer((np.ptp(self.settings["row_slice"]),n_bands), axis=1, dtype=dtype)
 
     # precompute some reference data for converting digital number to radiance
@@ -374,11 +376,13 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
     self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
+    wavelengths = self.binned_wavelengths if self.proc_lvl != 3 else self.λs
+
     # time coordinates can only be saved in np.datetime64 format
     self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"],self.dc.data)),
                          coords=dict(x=(["x"],np.arange(self.dc.data.shape[0])),
                                       y=(["y"],np.arange(self.dc.data.shape[1])),
-                                      wavelength=(["wavelength"],self.binned_wavelengths),
+                                      wavelength=(["wavelength"],wavelengths),
                                       time=(["time"],self.timestamps.data.astype(np.datetime64))), attrs=attrs)
 
     """provide metadata to NetCDF coordinates"""
