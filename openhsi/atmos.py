@@ -27,7 +27,7 @@ from Py6S import *
 
 # Cell
 
-from .data import *
+#from openhsi.data import *
 
 
 # Cell

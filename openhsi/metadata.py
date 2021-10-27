@@ -153,18 +153,43 @@ class MetadataEditor():
         """"""
         self.event_msg = pnw.StaticText(name="", value="")
         self.title_txt = pn.pane.Markdown("**Interactive Metadata Editor**: ISO 19115-2",)
-        self.file_path_box = pnw.input.TextAreaInput(name="NetCDF file path:",placeholder="Enter path string here...",value="")
-        self.extract_button = pnw.Button(name="Extract Metadata",button_type="primary",width=150,height=25)
-        self.update_button = pnw.Button(name="Update Metadata",button_type="primary",width=150,height=25)
+        self.file_path_box = pnw.input.TextAreaInput(name="File path:",placeholder="Enter path string here...",value="")
+        self.extract_button = pnw.Button(name="Extract Metadata",button_type="primary",width=150,height=20)
+        self.update_button = pnw.Button(name="Update Metadata",button_type="primary",width=150,height=20)
+        self.export_button = pnw.Button(name="Export to JSON",button_type="primary",width=150,height=20)
         self.extracted = False
 
+        self.update_export()
         self.update_extract()
         self.update_save()
 
         self.make_widgets()
 
     def __call__(self):
-        return pn.Column( self.title_txt, pn.Row( self.file_path_box, pn.Column(self.extract_button,self.update_button),self.event_msg ), self.metadata_tool )
+        return pn.Column( self.title_txt, pn.Row( self.file_path_box,
+                               pn.Column(self.extract_button,self.update_button,self.export_button),self.event_msg ), self.metadata_tool )
+
+    def update_export(self):
+
+        def click_func(event):
+            try:
+                self.attrs = {}
+                for w_list in [self.identity_values,self.text_search_values,self.extent_search_values,self.other_extent_values,self.creator_search_values,
+                          self.contributor_search_values,self.publisher_search_values,self.other_values,self.instrument_values]:
+                    for w in w_list:
+                        if w.value is not None:
+                            self.attrs[w.name] = w.value
+                self.attrs = dict(sorted(self.attrs.items()))
+
+                with open(self.file_path_box.value.split(".")[0]+".json", 'w') as outfile:
+                    json.dump(self.attrs, outfile, indent=4,)
+
+                self.event_msg.value = f"Metadata exported {self.export_button.clicks} time(s)"
+
+            except FileNotFoundError:
+                self.event_msg.value = f"No such file or directory. Export button clicked {self.export_button.clicks} time(s)"
+
+        self.export_button.on_click(click_func)
 
     def update_extract(self):
 
@@ -190,8 +215,6 @@ class MetadataEditor():
                 self.event_msg.value = f"No such file or unknown format. Extract button clicked {self.extract_button.clicks} time(s)"
             except ValueError:
                 self.event_msg.value = f"Rerun code. Need to input NetCDF file before making changes. Update button clicked {self.update_button.clicks} time(s)"
-
-
 
         self.extract_button.on_click(click_func)
 
