@@ -96,20 +96,16 @@ class CircArrayBuffer():
         """Display the data """
         if self.show_func is None:
             if len(self.size) == 2:
-                plt.imshow(self.data,cmap="gray")
-                plt.xlabel("wavelength index")
-                plt.ylabel("cross-track")
-                plt.show()
+                return hv.Image(self.data.copy(), bounds=(0,0,*self.size)).opts(
+                    xlabel="wavelength index",ylabel="cross-track",cmap="gray")
             elif len(self.size) == 3:
                 # Sum over the last dimensions (assumed wavelength) and show as monochrome
-                plt.imshow(np.sum(self.data,axis=-1),cmap="gray")
-                plt.xlabel("along-track")
-                plt.ylabel("cross-track")
-                plt.show()
+                return hv.Image(np.sum(self.data,axis=-1), bounds=(0,0,*self.size[:2])).opts(
+                    xlabel="along-track",ylabel="cross-track",cmap="gray")
             elif len(self.size) == 1:
                 print(f"#({self.size[0]}) {self.data}")
         elif self.show_func is not None:
-            self.show_func(self.data)
+            return self.show_func(self.data)
         else:
             print("Unsupported array shape. Please use 2D or 3D shapes or use your own custom show function")
 
@@ -118,27 +114,27 @@ class CircArrayBuffer():
 
 class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
-    def __init__(self, txt_path:str = "assets/cam_settings.txt", pkl_path:str = "assets/cam_calibration.pkl"):
+    def __init__(self, json_path:str = "assets/cam_settings.json", pkl_path:str = "assets/cam_calibration.pkl"):
         """Load the settings and calibration files"""
-        self.txt_path = txt_path
+        self.json_path = json_path
         self.pkl_path = pkl_path
 
-        with open(self.txt_path) as json_file:
+        with open(self.json_path) as json_file:
             self.settings = json.load(json_file)
         with open(self.pkl_path,'rb') as handle:
             self.calibration = pickle.load(handle)
 
-        self.wavelengths = np.arange(*self.settings["index2wavelength_range"])
+        #self.wavelengths = np.arange(*self.settings["index2wavelength_range"])
 
     def __repr__(self):
         return "settings = \n" + self.settings.__repr__() + \
                "\n\ncalibration = \n" + self.calibration.__repr__()
 
-    def dump(self):
+    def dump(self, json_path:str = None, pkl_path:str = None):
         """Save the settings and calibration files"""
-        with open(self.txt_path, 'w') as outfile:
+        with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
             json.dump(self.settings, outfile,indent=4,)
-        with open(self.pkl_path,'wb') as handle:
+        with open(self.pkl_path[:-4]+"_updated.pkl" if pkl_path is None else pkl_path,'wb') as handle:
             pickle.dump(self.calibration,handle)
 
 
@@ -153,17 +149,23 @@ def tfm_setup(self:CameraProperties, more_setup:Callable[[CameraProperties],None
 
     # for collapsing spectral pixels into bands
     self.byte_sz = dtype(0).nbytes
-    self.width = np.uint16(self.settings["fwhm_nm"]*self.settings["resolution"][1]/np.ptp(self.settings["index2wavelength_range"][:2]))
+    self.width = np.uint16(self.settings["fwhm_nm"]*self.settings["resolution"][1]/np.ptp(self.calibration["wavelengths_linear"]))
     self.bin_rows = np.ptp(self.settings["row_slice"])
     self.bin_cols = self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"])
     self.reduced_shape = (self.bin_rows,self.bin_cols//self.width,self.width)
 
-    # update the wavelengths
-    self.binned_wavelengths = np.linspace(*self.settings["index2wavelength_range"][:2],num=self.settings["resolution"][1],dtype=np.float32)[np.max(self.calibration["smile_shifts"]):]
+    # update the wavelengths for fast binning
+    self.binned_wavelengths = self.calibration["wavelengths_linear"].astype(np.float32)
     self.binned_wavelengths = np.lib.stride_tricks.as_strided(self.binned_wavelengths,
                                         strides=(self.width*4,4), # assumed np.float32
                                         shape=(len(self.binned_wavelengths)//self.width,self.width))
     self.binned_wavelengths = np.around(self.binned_wavelengths.mean(axis=1),decimals=1)
+
+    # update the wavelengths for slow binning
+    n_bands = int(np.ptp(self.calibration["wavelengths"])//self.settings["fwhm_nm"])
+    λs = [np.min(self.calibration["wavelengths"]) + i*self.settings["fwhm_nm"] for i in range(n_bands)]
+    self.bin_idxs = [np.argmin(np.abs(self.calibration["wavelengths"]-λ)) for λ in λs]
+    self.bin_buff = CircArrayBuffer((np.ptp(self.settings["row_slice"]),n_bands), axis=1, dtype=dtype)
 
     # precompute some reference data for converting digital number to radiance
     self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
@@ -173,10 +175,10 @@ def tfm_setup(self:CameraProperties, more_setup:Callable[[CameraProperties],None
     self.ref_luminance = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
                          self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]) - \
                          self.dark_current )
-    self.spec_rad_ref = np.float32(self.calibration["sfit"](self.wavelengths))
+    self.spec_rad_ref = np.float32(self.calibration["sfit"](self.calibration["wavelengths"]))
 
     # prep for converting radiance to reflectance
-    self.rad_6SV = np.float32(self.calibration["rad_fit"](self.wavelengths))
+    self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
 
     if more_setup is not None:
         more_setup(self)
@@ -196,6 +198,12 @@ def fast_smile(self:CameraProperties, x:np.ndarray) -> np.ndarray:
             self.line_buff.put(x[i,self.calibration["smile_shifts"][i]:self.calibration["smile_shifts"][i]+self.smiled_size[1]])
     return self.line_buff.data
 
+
+
+
+
+# Cell
+
 @patch
 def fast_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
     """Changes the view of the datacube so that everything that needs to be binned is in the last axis. The last axis is then binned."""
@@ -203,7 +211,12 @@ def fast_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
                         strides=(self.bin_cols*self.byte_sz,self.width*self.byte_sz,self.byte_sz))
     return buff.sum(axis=-1)
 
-
+@patch
+def slow_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
+    """Bins spectral bands accounting for the slight nonlinearity in the index-wavelength map"""
+    for i in range(len(self.bin_idxs)-1):
+        self.bin_buff.put( x[:,self.bin_idxs[i]:self.bin_idxs[i+1]].sum(axis=1) )
+    return self.bin_buff.data
 
 # Cell
 
@@ -215,7 +228,7 @@ def dn2rad(self:CameraProperties, x:Array['λ,x',np.int32]) -> Array['λ,x',np.f
     if x.shape[1] < self.spec_rad_ref.shape[0]:   # use wavelengths after binning to match input
         self.spec_rad_ref = np.float64(self.calibration["sfit"]( self.binned_wavelengths ))
     elif x.shape[1] > self.spec_rad_ref.shape[0]: # upsize wavelength range to match input
-        self.spec_rad_ref = np.float64(self.calibration["sfit"]( np.resize(self.wavelengths,x.shape[1]) ))
+        self.spec_rad_ref = np.float64(self.calibration["sfit"]( np.resize(self.calibration["wavelengths"],x.shape[1]) ))
     if x.shape[1] > self.dark_current.shape[1]:   # upsizing rad cal variables to match input
         mult = self.ref_luminance.size/x.size
         self.ref_luminance = np.resize(self.ref_luminance,x.shape)*mult
@@ -238,7 +251,7 @@ def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,
     if x.shape[1] < self.rad_6SV.shape[0]:   # use wavelengths after binning to match input
         self.rad_6SV = np.float32(self.calibration["rad_fit"](self.binned_wavelengths))
     elif x.shape[1] < self.rad_6SV.shape[0]: # upsize wavelength range to match input
-        self.rad_6SV = np.float64(self.calibration["rad_fit"]( np.resize(self.wavelengths,x.shape[1]) ))
+        self.rad_6SV = np.float64(self.calibration["rad_fit"]( np.resize(self.calibration["wavelengths"],x.shape[1]) ))
 
     return x/self.rad_6SV
 
@@ -246,15 +259,16 @@ def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,
 
 @patch
 def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Callable[[np.ndarray],np.ndarray]] = None):
-    """Define the output of the transform pipeline.
+    """Define the output `lvl` of the transform pipeline.
     0 : raw digital numbers cropped to useable sensor area
     1 : case 0 + fast smile correction
     2 : case 1 + fast binning (default)
-    3 : case 2 + conversion to radiance in units of uW/cm^2/sr/nm
-    4 : case 3 except radiance conversion moved to 2nd step
-    5 : case 3 + conversion to reflectance
-    6 : smile corrected and binned -> radiance
-    7 : case 6 + converted to reflectance
+    3 : case 1 + slow binning
+    4 : case 2 + conversion to radiance in units of uW/cm^2/sr/nm
+    5 : case 4 except radiance conversion moved to 2nd step
+    6 : case 4 + conversion to reflectance
+    7 : smile corrected and binned -> radiance
+    8 : case 7 + converted to reflectance
     """
     if   lvl == 0:
         self.tfm_list = [self.crop]
@@ -263,14 +277,16 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
     elif lvl == 2:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin]
     elif lvl == 3:
-        self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad]
+        self.tfm_list = [self.crop,self.fast_smile,self.slow_bin]
     elif lvl == 4:
-        self.tfm_list = [self.crop,self.dn2rad,self.fast_smile,self.fast_bin]
+        self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad]
     elif lvl == 5:
-        self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad,self.rad2ref_6SV]
+        self.tfm_list = [self.crop,self.dn2rad,self.fast_smile,self.fast_bin]
     elif lvl == 6:
-        self.tfm_list = [self.dn2rad]
+        self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad,self.rad2ref_6SV]
     elif lvl == 7:
+        self.tfm_list = [self.dn2rad]
+    elif lvl == 8:
         self.tfm_list = [self.dn2rad,self.rad2ref_6SV]
     else:
         self.tfm_list = []
@@ -348,8 +364,12 @@ class DataCube(CameraProperties):
 # Cell
 
 @patch
-def save(self:DataCube, save_dir:str):
-    """Saves to a NetCDF file to directory dir_path in folder given by date with file name given by UTC time."""
+def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str=""):
+    """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time."""
+    if preconfig_meta_path is not None:
+        with open(preconfig_meta_path) as json_file:
+            attrs = json.load(json_file)
+    else: attrs = {}
 
     self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
@@ -359,7 +379,7 @@ def save(self:DataCube, save_dir:str):
                          coords=dict(x=(["x"],np.arange(self.dc.data.shape[0])),
                                       y=(["y"],np.arange(self.dc.data.shape[1])),
                                       wavelength=(["wavelength"],self.binned_wavelengths),
-                                      time=(["time"],self.timestamps.data.astype(np.datetime64))), attrs={})
+                                      time=(["time"],self.timestamps.data.astype(np.datetime64))), attrs=attrs)
 
     """provide metadata to NetCDF coordinates"""
     self.nc.x.attrs["long_name"]   = "cross-track"
@@ -379,8 +399,8 @@ def save(self:DataCube, save_dir:str):
     self.nc.datacube.attrs["units"]       = "uW/cm^2/sr/nm" if self.proc_lvl in (3,4,6) else "digital number"
     self.nc.datacube.attrs["description"] = "hyperspectral datacube"
 
-    self.nc.to_netcdf(f"{self.directory}/{self.timestamps[0].strftime('%H_%M_%S')}.nc")
-    hv.save(self.show("matplotlib",robust=True),f"{self.directory}/{self.timestamps[0].strftime('%H_%M_%S')}.png")
+    self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
+    hv.save(self.show("matplotlib",robust=True),f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png")
 
 # Cell
 
