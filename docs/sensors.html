@@ -51,6 +51,98 @@ nb_path: "07_sensors.ipynb"
 </div>
     {% endraw %}
 
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Sensor data packet read and decode pyserial code below. Modified from a past project of mine.</p>
+<p>Todo: Read the RTC timestamp at beginning of collection. The data packets only contain timestamp offsets.</p>
+
+</div>
+</div>
+</div>
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">read_packet</span><span class="p">(</span><span class="n">header</span><span class="p">:</span><span class="nb">chr</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">num_bytes</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">80</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span><span class="nb">float</span> <span class="o">=</span> <span class="mf">6.</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;byte string&quot;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reads `num_bytes` of a data packet starting with `header` and timing out after `timeout` seconds if packet is invalid.&quot;&quot;&quot;</span>
+    <span class="n">buff</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
+    
+    <span class="c1"># Check for packet start of frame</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ser</span><span class="o">.</span><span class="n">in_waiting</span><span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">ser</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">b</span> <span class="o">==</span>  <span class="sa">b</span><span class="s1">&#39;*&#39;</span><span class="p">:</span>
+                <span class="c1">#print(&quot;Received Packet&quot;)</span>
+                <span class="k">break</span>
+            
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span> 
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data packets.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="c1"># read the rest of data packet</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_bytes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Received Incomplete Packet&quot;</span><span class="p">)</span>
+            <span class="k">break</span>
+        
+        <span class="k">if</span> <span class="n">ser</span><span class="o">.</span><span class="n">in_waiting</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">buff</span> <span class="o">+=</span> <span class="n">ser</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            
+    <span class="k">return</span> <span class="n">buff</span>
+
+<span class="k">def</span> <span class="nf">decode_packet</span><span class="p">(</span><span class="n">buff</span><span class="p">:</span><span class="s2">&quot;byte string&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Decode `buff` into a list of decoded variables&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">buff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    
+    <span class="n">contents</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">np_buff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">buff</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;uint8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    
+    <span class="c1"># Real Time Clock</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>    <span class="p">)</span> <span class="c1"># rtc timestamp offset [ms]</span>
+    
+    <span class="c1"># Humidity, Pressure sensor</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>    <span class="p">)</span> <span class="c1"># humidity timestamp offset [ms]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  <span class="p">)</span> <span class="c1"># temperature [deg C]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="p">)</span> <span class="c1"># pressure [hPa]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">20</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="p">)</span> <span class="c1"># humidity [relative humidity %]</span>
+    
+    <span class="c1"># Inertial Measurement Unit</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">20</span><span class="p">:</span><span class="mi">24</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>  <span class="p">)</span> <span class="c1"># imu timestamp offset [ms]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">24</span><span class="p">:</span><span class="mi">28</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="p">)</span> <span class="c1"># quaternion w</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">28</span><span class="p">:</span><span class="mi">32</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="p">)</span> <span class="c1"># quaternion x</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">32</span><span class="p">:</span><span class="mi">36</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="p">)</span> <span class="c1"># quaternion y</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">36</span><span class="p">:</span><span class="mi">40</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="p">)</span> <span class="c1"># quaternion z</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">41</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>   <span class="p">)</span> <span class="c1"># calibration status</span>
+    
+    <span class="c1"># Global Positioning System</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">41</span><span class="p">:</span><span class="mi">45</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>  <span class="p">)</span> <span class="c1"># gps timestamp offset [ms]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">45</span><span class="p">:</span><span class="mi">49</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>   <span class="p">)</span> <span class="c1"># latitude [deg *10^-7]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">49</span><span class="p">:</span><span class="mi">53</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>   <span class="p">)</span> <span class="c1"># longitude [deg *10^-7]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">53</span><span class="p">:</span><span class="mi">57</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>   <span class="p">)</span> <span class="c1"># altitude [mm above ellipsoid]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">57</span><span class="p">:</span><span class="mi">58</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>   <span class="p">)</span> <span class="c1"># number of satellites in view and used in compute</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">58</span><span class="p">:</span><span class="mi">62</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>   <span class="p">)</span> <span class="c1"># ground speed [mm/s]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">62</span><span class="p">:</span><span class="mi">66</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>   <span class="p">)</span> <span class="c1"># heading of motion [deg *10^-5]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">66</span><span class="p">:</span><span class="mi">68</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>  <span class="p">)</span> <span class="c1"># position DOP [*0.01]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">68</span><span class="p">:</span><span class="mi">72</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>  <span class="p">)</span> <span class="c1"># horizontal accuracy estimate [mm]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">72</span><span class="p">:</span><span class="mi">76</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>  <span class="p">)</span> <span class="c1"># vertical accuracy estimate [mm]</span>
+    <span class="n">contents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np_buff</span><span class="p">[</span><span class="mi">76</span><span class="p">:</span><span class="mi">80</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">)</span>  <span class="p">)</span> <span class="c1"># heading accuracy estimate (both motion and vehicle) [deg *10^-5]</span>
+    
+    <span class="k">return</span> <span class="n">contents</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
