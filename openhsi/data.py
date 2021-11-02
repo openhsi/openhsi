@@ -135,7 +135,7 @@ class CameraProperties():
         with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
             json.dump(self.settings, outfile,indent=4,)
         with open(self.pkl_path[:-4]+"_updated.pkl" if pkl_path is None else pkl_path,'wb') as handle:
-            pickle.dump(self.calibration,handle)
+            pickle.dump(self.calibration,handle,protocol=4)
 
 
 # Cell
