@@ -119,10 +119,17 @@ class CameraProperties():
         self.json_path = json_path
         self.pkl_path = pkl_path
 
-        with open(self.json_path) as json_file:
-            self.settings = json.load(json_file)
-        with open(self.pkl_path,'rb') as handle:
-            self.calibration = pickle.load(handle)
+        if json_path:
+            with open(self.json_path) as json_file:
+                self.settings = json.load(json_file)
+        else:
+            self.settings = {}
+
+        if pkl_path:
+            with open(self.pkl_path,'rb') as handle:
+                self.calibration = pickle.load(handle)
+        else:
+            self.calibration = {}
 
         #self.wavelengths = np.arange(*self.settings["index2wavelength_range"])
 
@@ -298,8 +305,11 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
 
     self.dtype_in = np.float32 if lvl in (4,) else np.int32 # we need floats if we convert to radiance from the beginning
     self.dtype_out = np.float32 if lvl in (3,4,5,6,7,) else np.int32
-    self.tfm_setup(dtype=self.dtype_in)
-    self.dc_shape = self.pipeline(self.calibration["flat_field_pic"]).shape
+    if len(self.tfm_list) > 0:
+        self.tfm_setup(dtype=self.dtype_in)
+        self.dc_shape = self.pipeline(self.calibration["flat_field_pic"]).shape
+    else:
+        self.dc_shape = tuple(self.settings["resolution"])
 
 # Cell
 

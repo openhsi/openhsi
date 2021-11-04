@@ -71,11 +71,6 @@ class WebCamera(OpenHSI):
 
 @delegates()
 class XimeaCamera(OpenHSI):
-    try:
-        from ximea import xiapi
-        xicam = xiapi.Camera()
-    except ModuleNotFoundError:
-        warnings.warn("ModuleNotFoundError: No module named 'ximea'.",stacklevel=2)
 
     """Core functionality for Ximea cameras"""
     # https://www.ximea.com/support/wiki/apis/Python
@@ -83,6 +78,14 @@ class XimeaCamera(OpenHSI):
         """Initialise Camera"""
 
         super().__init__(**kwargs)
+
+        try:
+            from ximea import xiapi
+            self.xiapi=xiapi # make avalaible for later access just in case.
+        except ModuleNotFoundError:
+            warnings.warn("ModuleNotFoundError: No module named 'ximea'.",stacklevel=2)
+
+        self.xicam = xiapi.Camera()
 
         self.xicam.open_device_by_SN(serial_num) if serial_num else self.xicam.open_device()
 
@@ -109,14 +112,17 @@ class XimeaCamera(OpenHSI):
         self.rows, self.cols = self.xicam.get_height(), self.xicam.get_width()
         self.img = xiapi.Image()
 
-        self.load_cam_settings()
+        #self.load_cam_settings()
+
+    def __exit__(self, *args, **kwargs):
+        self.xicam.stop_acquisition()
+        self.xicam.close_device()
 
     def start_cam(self):
         self.xicam.start_acquisition()
 
     def stop_cam(self):
         self.xicam.stop_acquisition()
-        self.xicam.close_device()
 
     def get_img(self) -> np.ndarray:
         self.xicam.get_image(self.img)
