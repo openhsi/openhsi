@@ -1,4 +1,4 @@
-name: openhsi
+name: openhsi_tests
 channels:
   - fastai
   - conda-forge
@@ -22,7 +22,7 @@ dependencies:
   - param 
   - pyserial
   - netcdf4
+  - Py6S
   - pip
   - pip:
     - opencv-python
-    - Py6S
