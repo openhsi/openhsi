@@ -18,8 +18,13 @@ Install all python dependancies for OpenHSI (excepts cameras) and 6SV.
     cmake -D CMAKE_INSTALL_PREFIX=/usr/local .
 
 
-## Install LUCIDVISION SDK (Sydney Photonics OpenHSI)
+## Install LUCIDVISION SDK (Sydney Photonics/Robonation OpenHSI)
+The Robonation OpenHSI uses the detectr fromLucid Vision systems. The full SDK is required to use the sensor with the OpenHSI libary. This can be aquirred from https://thinklucid.com/downloads-hub/.
 
+To ensure opitmal performace you need to make sure your GigE link is setup for jumbo packets.
+
+On Ubuntu system this can be done using (you may want to set this up to occur on startup):
+    sudo ip link set eth0 mtu 9000
 
 
 ## Weird Specific things using some cameras
