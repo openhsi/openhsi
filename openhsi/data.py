@@ -25,7 +25,7 @@ import pickle
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import warnings
-
+import pprint
 
 # Cell
 #hide
@@ -114,7 +114,7 @@ class CircArrayBuffer():
 
 class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
-    def __init__(self, json_path:str = "assets/cam_settings.json", pkl_path:str = "assets/cam_calibration.pkl"):
+    def __init__(self, json_path:str = "assets/cam_settings.json", pkl_path:str = "assets/cam_calibration.pkl", print_settings=False, **kwargs):
         """Load the settings and calibration files"""
         self.json_path = json_path
         self.pkl_path = pkl_path
@@ -131,6 +131,14 @@ class CameraProperties():
         else:
             self.calibration = {}
 
+        # overide any settings from settings file with keywords value pairs.
+        for key,value in kwargs.items():
+            if key in self.settings.keys():
+                self.settings[key] = value
+                if print_settings:
+                    print("Setting File Override: {0} = {1}".format(key, value))
+        if print_settings:
+            pprint.pprint(self.settings)
         #self.wavelengths = np.arange(*self.settings["index2wavelength_range"])
 
     def __repr__(self):

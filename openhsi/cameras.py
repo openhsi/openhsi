@@ -8,13 +8,13 @@ from fastcore.foundation import patch
 from fastcore.meta import delegates
 import cv2
 import numpy as np
+import ctypes
 import matplotlib.pyplot as plt
 import warnings
+from tqdm import tqdm
 
 # Cell
-
-from .data import *
-from .capture import *
+from .capture import OpenHSI
 
 # Cell
 
@@ -66,6 +66,9 @@ class WebCamera(OpenHSI):
         while True:
             yield img
 
+    def get_temp(self) -> float:
+        return 20.0
+
 
 # Cell
 
@@ -85,7 +88,7 @@ class XimeaCamera(OpenHSI):
         except ModuleNotFoundError:
             warnings.warn("ModuleNotFoundError: No module named 'ximea'.",stacklevel=2)
 
-        self.xicam = xiapi.Camera()
+        self.xicam = self.xiapi.Camera()
 
         self.xicam.open_device_by_SN(serial_num) if serial_num else self.xicam.open_device()
 
@@ -128,25 +131,28 @@ class XimeaCamera(OpenHSI):
         self.xicam.get_image(self.img)
         return self.img.get_image_data_numpy()
 
-# Cell
+    def get_temp(self) -> float:
+        return self.xicam.get_temp()
 
+# Cell
 
 @delegates()
 class LucidCamera(OpenHSI):
 
-    """Core functionality for Lucid Vision Lab cameras"""
+    """Core functionality for Lucid Vision Lab cameras
+
+        Any keyword-value pair arguments must match the those avaliable in settings file. camera specfic ones are:
+
+        binxy: number of pixels to bin in (x,y) direction
+        win_resolution: size of area on detector to readout (width, height)
+        win_offset: offsets (x,y) from edge of detector for a selective
+        exposure_ms: is the camera exposure time to use
+        pixel_format: format of pixels readout sensor, ie Mono8, Mono10, Mono10p, Mono10Packed, Mono12, Mono12p, Mono12Packed, Mono16
+        mac_addr: str = "1c:0f:af:01:7b:a0",
+    """
 
     # https://thinklucid.com/downloads-hub/
-    def __init__(
-        self,
-        xbinwidth: int = 0,
-        xbinoffset: int = 0,
-        ybinwidth: int = 0,
-        ybinoffset: int = 0,
-        exposure_ms: float = 10,
-        mac_addr: str = "1c:0f:af:01:7b:a0",
-        **kwargs
-    ):
+    def __init__(self, **kwargs):
         """Initialise Camera"""
 
         super().__init__(**kwargs)
@@ -155,27 +161,31 @@ class LucidCamera(OpenHSI):
             from arena_api.system import system as arsys
 
             self.arsys = arsys  # make avalaible for later access just in case.
-            import ctypes
         except ModuleNotFoundError:
             warnings.warn(
                 "ModuleNotFoundError: No module named 'arena_api'.", stacklevel=2
             )
 
+        #init api and connect to device
         try:
             self.arsys.device_infos
-            self.device = arsys.create_device(device_infos=[{"mac": mac_addr}])[0]
+            if self.settings["mac_addr"]:
+                device_infos={"mac": self.settings["mac_addr"]} # use specfic camera
+            else:
+                device_infos={} # or use first camera found
+            print("{}".format(device_infos))
+            self.device = arsys.create_device()[0]
         except:
             warnings.warn(
                 "DeviceNotFoundError: Please connect a lucid vision camera and run again.",
-                stacklevel=2,
-            )
-
+                stacklevel=2)
+        # allow api to optimise stream
         tl_stream_nodemap = self.device.tl_stream_nodemap
         tl_stream_nodemap["StreamAutoNegotiatePacketSize"].value = True
         tl_stream_nodemap["StreamPacketResendEnable"].value = True
 
-        self.deviceSettings = self.device.nodemap.get_node(
-            [
+        # init access to device settings
+        self.deviceSettings = self.device.nodemap.get_node([
                 "AcquisitionFrameRate",
                 "AcquisitionFrameRateEnable",
                 "AcquisitionMode",
@@ -201,44 +211,23 @@ class LucidCamera(OpenHSI):
             ]
         )
 
-        #         print(f'Connected to device {self.deviceSettings['DeviceUserID'].value})
-
-        self.xbinwidth = xbinwidth
-        self.xbinoffset = xbinoffset
-        self.ybinwidth = ybinwidth
-        self.ybinoffset = ybinoffset
-        self.exposure = exposure_ms
-        self.gain = 0
-
-        self.deviceSettings["Height"].value = (
-            self.ybinwidth if self.ybinwidth else self.deviceSettings["Height"].max
-        )
-        self.deviceSettings["OffsetX"].value = (
-            self.ybinoffset if self.ybinoffset else self.deviceSettings["OffsetY"].max
+        (self.deviceSettings["Height"].value, self.deviceSettings["Width"].value) = (
+            (self.settings["win_resolution"][1], self.settings["win_resolution"][0]) if self.settings["win_resolution"][0] else (self.deviceSettings["Height"].max,  self.deviceSettings["Width"].max)
         )
 
-        self.deviceSettings["Width"].value = (
-            self.xbinwidth if self.xbinwidth else self.deviceSettings["Width"].max
-        )
-        self.deviceSettings["OffsetY"].value = (
-            self.xbinoffset if self.xbinoffset else self.deviceSettings["OffsetX"].max
+        (self.deviceSettings["OffsetY"].value, self.deviceSettings["OffsetX"].value) = (
+            (self.settings["win_offset"][1], self.settings["win_offset"][0]) if self.settings["win_offset"][0] else (self.deviceSettings["OffsetX"].max,  self.deviceSettings["OffsetY"].max)
         )
 
-        self.deviceSettings["ExposureAuto"].value = "Off"
-        self.deviceSettings["ExposureTime"].value = (
-            exposure_ms * 1000.0
-        )  # requires time in us
-        self.exposure = self.deviceSettings[
-            "ExposureTime"
-        ]  # exposure time rounds, so storing actual value
+        self.deviceSettings["ExposureAuto"].value = "Off" # always off as we need to match exposure to calibration data
+        self.deviceSettings["ExposureTime"].value = self.settings["exposure_ms"] * 1000.0 # requires time in us float
+        self.settings["exposure_ms"] = self.deviceSettings["ExposureTime"].value/1000.00  # exposure time rounds, so storing actual value
 
-        self.deviceSettings["Gain"].value = 0.0
+        self.deviceSettings["Gain"].value = 0.0 # always 0 as we need to match to calibration data
 
-        self.deviceSettings["PixelFormat"].value = "Mono10Packed"
+        self.deviceSettings["PixelFormat"].value = self.settings["pixel_format"]
 
-        self.deviceSettings["PixelFormat"]
-
-        self.deviceSettings["BinningHorizontal"].value = 1
+        self.deviceSettings["BinningHorizontal"].value = self.settings["binxy"][0] # binning is symetric on this sensor, no need to set vertical
 
         self.rows, self.cols = (
             self.deviceSettings["Height"].value,
@@ -247,7 +236,7 @@ class LucidCamera(OpenHSI):
 
     def __exit__(self, *args, **kwargs):
         self.device.stop_stream()
-        self.arsys.destroy_device()
+        #self.arsys.destroy_device()
 
     def start_cam(self):
         self.device.start_stream(1)
@@ -256,7 +245,7 @@ class LucidCamera(OpenHSI):
         self.device.stop_stream()
 
     def get_img(self) -> np.ndarray:
-        image_buffer = device.get_buffer()
+        image_buffer = self.device.get_buffer()
         pdata_as16 = ctypes.cast(image_buffer.pdata, ctypes.POINTER(ctypes.c_ushort))
         nparray_reshaped = np.ctypeslib.as_array(
             pdata_as16, (image_buffer.height, image_buffer.width)
@@ -264,3 +253,5 @@ class LucidCamera(OpenHSI):
         self.device.requeue_buffer(image_buffer)
         return nparray_reshaped
 
+    def get_temp(self) -> float:
+        return self.deviceSettings["DeviceTemperature"].value
