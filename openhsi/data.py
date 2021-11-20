@@ -396,12 +396,21 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
 
     wavelengths = self.binned_wavelengths if self.proc_lvl != 3 else self.λs
 
+    if hasattr(self,cam_temperatures):
+        self.coords = dict(x=(["x"],np.arange(self.dc.data.shape[0])),
+                           y=(["y"],np.arange(self.dc.data.shape[1])),
+                           wavelength=(["wavelength"],wavelengths),
+                           time=(["time"],self.timestamps.data.astype(np.datetime64)),
+                           temperature=(["temperature"],self.cam_temperatures))
+    else:
+        self.coords = dict(x=(["x"],np.arange(self.dc.data.shape[0])),
+                           y=(["y"],np.arange(self.dc.data.shape[1])),
+                           wavelength=(["wavelength"],wavelengths),
+                           time=(["time"],self.timestamps.data.astype(np.datetime64)))
+
     # time coordinates can only be saved in np.datetime64 format
     self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"],self.dc.data)),
-                         coords=dict(x=(["x"],np.arange(self.dc.data.shape[0])),
-                                      y=(["y"],np.arange(self.dc.data.shape[1])),
-                                      wavelength=(["wavelength"],wavelengths),
-                                      time=(["time"],self.timestamps.data.astype(np.datetime64))), attrs=attrs)
+                         coords=self.coords, attrs=attrs)
 
     """provide metadata to NetCDF coordinates"""
     self.nc.x.attrs["long_name"]   = "cross-track"
@@ -412,10 +421,13 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
     self.nc.y.attrs["description"] = "along-track spatial coordinates"
     self.nc.time.attrs["long_name"]   = "along-track"
     self.nc.time.attrs["description"] = "along-track spatial coordinates"
-
     self.nc.wavelength.attrs["long_name"]   = "wavelength_nm"
     self.nc.wavelength.attrs["units"]       = "nanometers"
     self.nc.wavelength.attrs["description"] = "wavelength in nanometers."
+    if hasattr(self,cam_temperatures):
+        self.nc.temperature.attrs["long_name"] = "camera temperature"
+        self.nc.temperature.attrs["units"] = "degrees Celsius"
+        self.nc.temperature.attrs["description"] = "temperature of sensor at time of image capture"
 
     self.nc.datacube.attrs["long_name"]   = "hyperspectral datacube"
     self.nc.datacube.attrs["units"]       = "uW/cm^2/sr/nm" if self.proc_lvl in (3,4,6) else "digital number"
@@ -423,6 +435,7 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
 
     self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
     hv.save(self.show("matplotlib",robust=True),f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png")
+
 
 # Cell
 

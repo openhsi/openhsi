@@ -3,6 +3,8 @@
 __all__ = ['fields_dict', 'SensorStream']
 
 # Cell
+#hardware
+
 import time
 import serial
 import numpy as np

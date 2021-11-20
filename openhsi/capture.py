@@ -32,6 +32,8 @@ class OpenHSI(DataCube):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         super().set_processing_lvl(self.proc_lvl)
+        if hasattr(self,get_temp):
+            self.cam_temperatures = CircArrayBuffer(size=(self.n_lines,),dtype=np.float32)
 
     def __enter__(self):
         return self
@@ -47,6 +49,9 @@ class OpenHSI(DataCube):
         self.start_cam()
         for i in tqdm(range(self.n_lines)):
             self.put(self.get_img())
+
+            if hasattr(self,get_temp):
+                self.cam_temperatures.put( self.get_temp() )
         self.stop_cam()
 
 
