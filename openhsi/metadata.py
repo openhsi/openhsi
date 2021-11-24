@@ -154,9 +154,9 @@ class MetadataEditor():
         self.event_msg = pnw.StaticText(name="", value="")
         self.title_txt = pn.pane.Markdown("**Interactive Metadata Editor**: ISO 19115-2",)
         self.file_path_box = pnw.input.TextAreaInput(name="File path:",placeholder="Enter path string here...",value="")
-        self.extract_button = pnw.Button(name="Extract Metadata",button_type="primary",width=150,height=20)
-        self.update_button = pnw.Button(name="Update Metadata",button_type="primary",width=150,height=20)
-        self.export_button = pnw.Button(name="Export to JSON",button_type="primary",width=150,height=20)
+        self.extract_button = pnw.Button(name="Extract Metadata",button_type="primary",width=150,height=25)
+        self.update_button = pnw.Button(name="Update Metadata",button_type="primary",width=150,height=25)
+        self.export_button = pnw.Button(name="Export to JSON",button_type="primary",width=150,height=25)
         self.extracted = False
 
         self.update_export()
@@ -167,7 +167,8 @@ class MetadataEditor():
 
     def __call__(self):
         return pn.Column( self.title_txt, pn.Row( self.file_path_box,
-                               pn.Column(self.extract_button,self.update_button,self.export_button),self.event_msg ), self.metadata_tool )
+                               pn.Column(self.extract_button,self.update_button,self.export_button),self.event_msg ),
+                                         self.metadata_tool )
 
     def update_export(self):
 
