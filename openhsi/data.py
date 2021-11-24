@@ -396,12 +396,12 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
 
     wavelengths = self.binned_wavelengths if self.proc_lvl != 3 else self.λs
 
-    if hasattr(self,cam_temperatures):
+    if getattr(self,"cam_temperatures",None):
         self.coords = dict(x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
                            wavelength=(["wavelength"],wavelengths),
                            time=(["time"],self.timestamps.data.astype(np.datetime64)),
-                           temperature=(["temperature"],self.cam_temperatures))
+                           temperature=(["temperature"],self.cam_temperatures.data))
     else:
         self.coords = dict(x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
@@ -424,7 +424,7 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
     self.nc.wavelength.attrs["long_name"]   = "wavelength_nm"
     self.nc.wavelength.attrs["units"]       = "nanometers"
     self.nc.wavelength.attrs["description"] = "wavelength in nanometers."
-    if hasattr(self,cam_temperatures):
+    if getattr(self,"cam_temperatures",None):
         self.nc.temperature.attrs["long_name"] = "camera temperature"
         self.nc.temperature.attrs["units"] = "degrees Celsius"
         self.nc.temperature.attrs["description"] = "temperature of sensor at time of image capture"
