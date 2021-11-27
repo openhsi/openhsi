@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 import warnings
 from tqdm import tqdm
 
+import holoviews as hv
+hv.extension('bokeh',logo=False)
+
 # Cell
 from .capture import OpenHSI
 
@@ -161,6 +164,7 @@ class LucidCamera(OpenHSI):
             from arena_api.system import system as arsys
 
             self.arsys = arsys  # make avalaible for later access just in case.
+            arsys.destroy_device() # reset an existing connections.
         except ModuleNotFoundError:
             warnings.warn(
                 "ModuleNotFoundError: No module named 'arena_api'.", stacklevel=2
@@ -179,6 +183,7 @@ class LucidCamera(OpenHSI):
             warnings.warn(
                 "DeviceNotFoundError: Please connect a lucid vision camera and run again.",
                 stacklevel=2)
+
         # allow api to optimise stream
         tl_stream_nodemap = self.device.tl_stream_nodemap
         tl_stream_nodemap["StreamAutoNegotiatePacketSize"].value = True
@@ -236,7 +241,7 @@ class LucidCamera(OpenHSI):
 
     def __exit__(self, *args, **kwargs):
         self.device.stop_stream()
-        #self.arsys.destroy_device()
+        self.arsys.destroy_device()
 
     def start_cam(self):
         self.device.start_stream(1)
@@ -246,10 +251,24 @@ class LucidCamera(OpenHSI):
 
     def get_img(self) -> np.ndarray:
         image_buffer = self.device.get_buffer()
-        pdata_as16 = ctypes.cast(image_buffer.pdata, ctypes.POINTER(ctypes.c_ushort))
-        nparray_reshaped = np.ctypeslib.as_array(
-            pdata_as16, (image_buffer.height, image_buffer.width)
-        )
+        if image_buffer.bits_per_pixel == 8:
+            nparray_reshaped = np.ctypeslib.as_array(
+                image_buffer.pdata, (image_buffer.height, image_buffer.width)
+            ).copy()
+
+        elif image_buffer.bits_per_pixel == 12 or image_buffer.bits_per_pixel == 10:
+            pdata_as8 = ctypes.cast(image_buffer.pdata, ctypes.POINTER(ctypes.c_ubyte))
+            fst_uint8, mid_uint8, lst_uint8=np.ctypeslib.as_array(pdata_as8,(image_buffer.buffer_size // 3,3)).astype(np.uint16).T
+            fst_uint12 = (fst_uint8 << 4) + (mid_uint8 >> 4)
+            snd_uint12 = (lst_uint8 << 4) + (np.bitwise_and(15, mid_uint8))
+            nparray_reshaped = np.reshape(np.concatenate((fst_uint12[:, None], snd_uint12[:, None]), axis=1), (image_buffer.height, image_buffer.width))
+
+        elif image_buffer.bits_per_pixel == 16:
+            pdata_as16 = ctypes.cast(image_buffer.pdata, ctypes.POINTER(ctypes.c_ushort))
+            nparray_reshaped = np.ctypeslib.as_array(
+                pdata_as16, (image_buffer.height, image_buffer.width)
+            ).copy()
+
         self.device.requeue_buffer(image_buffer)
         return nparray_reshaped
 
