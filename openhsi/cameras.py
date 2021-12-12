@@ -144,14 +144,14 @@ class LucidCamera(OpenHSI):
 
     """Core functionality for Lucid Vision Lab cameras
 
-        Any keyword-value pair arguments must match the those avaliable in settings file. camera specfic ones are:
+        Any keyword-value pair arguments must match the those avaliable in settings file. LucidCamera expects the ones listed below:
 
-        binxy: number of pixels to bin in (x,y) direction
-        win_resolution: size of area on detector to readout (width, height)
-        win_offset: offsets (x,y) from edge of detector for a selective
-        exposure_ms: is the camera exposure time to use
-        pixel_format: format of pixels readout sensor, ie Mono8, Mono10, Mono10p, Mono10Packed, Mono12, Mono12p, Mono12Packed, Mono16
-        mac_addr: str = "1c:0f:af:01:7b:a0",
+        - `binxy`: number of pixels to bin in (x,y) direction
+        - `win_resolution`: size of area on detector to readout (width, height)
+        - `win_offset`: offsets (x,y) from edge of detector for a selective
+        - `exposure_ms`: is the camera exposure time to use
+        - `pixel_format`: format of pixels readout sensor, ie Mono8, Mono10, Mono10p, Mono10Packed, Mono12, Mono12p, Mono12Packed, Mono16
+        - `mac_addr`: str = "1c:0f:af:01:7b:a0",
     """
 
     # https://thinklucid.com/downloads-hub/
@@ -177,7 +177,6 @@ class LucidCamera(OpenHSI):
                 device_infos={"mac": self.settings["mac_addr"]} # use specfic camera
             else:
                 device_infos={} # or use first camera found
-            print("{}".format(device_infos))
             self.device = arsys.create_device()[0]
         except:
             warnings.warn(
@@ -213,6 +212,8 @@ class LucidCamera(OpenHSI):
                 "ReverseX",
                 "ReverseY",
                 "Width",
+                "GevMACAddress",
+                "DeviceSerialNumber"
             ]
         )
 
@@ -220,9 +221,15 @@ class LucidCamera(OpenHSI):
             (self.settings["win_resolution"][1], self.settings["win_resolution"][0]) if self.settings["win_resolution"][0] else (self.deviceSettings["Height"].max,  self.deviceSettings["Width"].max)
         )
 
+#         self.deviceSettings["Height"].value = self.settings["win_resolution"][1] if self.settings["win_resolution"][1] else self.deviceSettings["Height"].max
+#         self.deviceSettings["Width"].value = self.settings["win_resolution"][0] if self.settings["win_resolution"][0] else self.deviceSettings["Width"].max
+
         (self.deviceSettings["OffsetY"].value, self.deviceSettings["OffsetX"].value) = (
             (self.settings["win_offset"][1], self.settings["win_offset"][0]) if self.settings["win_offset"][0] else (self.deviceSettings["OffsetX"].max,  self.deviceSettings["OffsetY"].max)
         )
+
+#         self.deviceSettings["OffsetY"].value = self.settings["win_offset"][1] if self.settings["win_offset"][1] else self.deviceSettings["OffsetX"].max
+#         self.deviceSettings["OffsetX"].value = self.settings["win_offset"][0] if self.settings["win_offset"][0] else self.deviceSettings["OffsetY"].max
 
         self.deviceSettings["ExposureAuto"].value = "Off" # always off as we need to match exposure to calibration data
         self.deviceSettings["ExposureTime"].value = self.settings["exposure_ms"] * 1000.0 # requires time in us float
@@ -257,11 +264,11 @@ class LucidCamera(OpenHSI):
             ).copy()
 
         elif image_buffer.bits_per_pixel == 12 or image_buffer.bits_per_pixel == 10:
-            pdata_as8 = ctypes.cast(image_buffer.pdata, ctypes.POINTER(ctypes.c_ubyte))
-            fst_uint8, mid_uint8, lst_uint8=np.ctypeslib.as_array(pdata_as8,(image_buffer.buffer_size // 3,3)).astype(np.uint16).T
-            fst_uint12 = (fst_uint8 << 4) + (mid_uint8 >> 4)
-            snd_uint12 = (lst_uint8 << 4) + (np.bitwise_and(15, mid_uint8))
-            nparray_reshaped = np.reshape(np.concatenate((fst_uint12[:, None], snd_uint12[:, None]), axis=1), (image_buffer.height, image_buffer.width))
+            split=np.ctypeslib.as_array(image_buffer.pdata,(image_buffer.buffer_size,1)).astype(np.uint16)
+            fst_uint12 = (split[0::3] << 4) + (split[1::3] >> 4)
+            snd_uint12 = (split[2::3] << 4) + (np.bitwise_and(15, split[1::3]))
+            nparray_reshaped = np.reshape(np.concatenate((fst_uint12[:, None], snd_uint12[:, None]), axis=1),
+                                          (image_buffer.height, image_buffer.width))
 
         elif image_buffer.bits_per_pixel == 16:
             pdata_as16 = ctypes.cast(image_buffer.pdata, ctypes.POINTER(ctypes.c_ushort))
@@ -269,8 +276,14 @@ class LucidCamera(OpenHSI):
                 pdata_as16, (image_buffer.height, image_buffer.width)
             ).copy()
 
+        #nparray_reshaped=np.ctypeslib.as_array(image_buffer,(1,image_buffer.buffer_size))
         self.device.requeue_buffer(image_buffer)
         return nparray_reshaped
 
     def get_temp(self) -> float:
         return self.deviceSettings["DeviceTemperature"].value
+
+    def get_mac(self)-> str:
+        return ':'.join(['{}{}'.format(a, b)
+                         for a, b
+                         in zip(*[iter('{:012x}'.format(cam.deviceSettings['GevMACAddress'].value))]*2)])
