@@ -16,38 +16,43 @@ Documentation can be found here: [https://openhsi.github.io/openhsi/](https://op
 
 - Python 3.6+
 - Ximea SDK (See https://www.ximea.com/support/wiki/apis/Python)
+- FLIR or LUCID SDKs accordingly.
 
 ## Development and Contributions
 
 This whole software library, testing suite, documentation website, and PyPI package was developed in Jupyter Notebooks using [nbdev](https://nbdev.fast.ai/). 
 {% include important.html content='This library is under active development and new features are still being added. ' %}
 
+## Citation
+
+If OpenHSI has been useful for your research, please acknowledge the project in your academic publication. We have a publication in progress. 
+
+```
+@Article{        mao2022openhsi,
+ title         = {OpenHSI: A complete open-source hyperspectral imaging solution for everyone},
+ author        = {Yiwei Mao, and Christopher H. Betters, et al.},
+ year          = {2022},
+ journal       = {},
+}
+```
+
+
 ## How to use
 
 ### Taking a single hyperspectral datacube
 
-The example shown here uses a simulated camera for testing purposes. Replace `SimulatedCamera` with the appropriate Python class for your own camera to work with real hardware. 
+The example shown here uses a simulated camera for testing purposes. Replace `SimulatedCamera` with the appropriate Python class for your own camera to work with real hardware. For example, use `XimeaCamera` inplace of `SimulatedCamera`. 
 
 ```python
+#hide_output
+
 from openhsi.capture import *
 
 with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing_lvl = 3) as cam:
     cam.collect()
     fig = cam.show(plot_lib="matplotlib",robust=True)
 
-
 ```
-
-    100%|██████████| 1024/1024 [00:18<00:00, 55.21it/s]
-
-
-
-
-
-
-
-
-
 
 
 
@@ -57,5 +62,5 @@ with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing
 
 
 
-![png](docs/images/output_9_1.png)
+![png](docs/images/output_10_1.png)
 
