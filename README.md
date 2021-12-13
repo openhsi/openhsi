@@ -28,7 +28,7 @@ This whole software library, testing suite, documentation website, and PyPI pack
 
 The example shown here uses a simulated camera for testing purposes. Replace `SimulatedCamera` with the appropriate Python class for your own camera to work with real hardware. 
 
-```python
+```
 from openhsi.capture import *
 
 with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing_lvl = 3) as cam:
