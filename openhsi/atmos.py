@@ -167,7 +167,7 @@ class SpectralMatcher(object):
 
         if save:
             if "gzip" in self.speclib_path: self.orig_speclib.to_parquet(self.speclib_path,compression="gzip")
-            else: self.orig_speclib.to_pickle(self.speclib_path)
+            else: self.orig_speclib.to_pickle(self.speclib_path,protocol=4)
             print(f"Added {label} into your spectral library at {self.speclib_path}")
 
         if show: return self.show("bokeh")

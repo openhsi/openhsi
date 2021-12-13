@@ -479,10 +479,9 @@ def show(self:DataCube, plot_lib:str = "bokeh",
         rgb /= np.max(rgb)
 
     rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
-                     rgb[:,:,0],rgb[:,:,1],rgb[:,:,2])).opts(width=1000,height=250,
-                     xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+                     rgb[:,:,0],rgb[:,:,1],rgb[:,:,2])).opts(xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 
     if plot_lib == "bokeh":
-        return rgb_hv.opts(frame_height=int(rgb.shape[0]//3))
+        return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3))
     else: # plot_lib == "matplotlib"
         return rgb_hv.opts(fig_inches=22)
