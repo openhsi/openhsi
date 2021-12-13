@@ -397,19 +397,19 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
     wavelengths = self.binned_wavelengths if self.proc_lvl != 3 else self.λs
 
     if getattr(self,"cam_temperatures",None):
-        self.coords = dict(x=(["x"],np.arange(self.dc.data.shape[0])),
+        self.coords = dict(wavelength=(["wavelength"],wavelengths),
+                           x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
-                           wavelength=(["wavelength"],wavelengths),
                            time=(["time"],self.timestamps.data.astype(np.datetime64)),
                            temperature=(["temperature"],self.cam_temperatures.data))
     else:
-        self.coords = dict(x=(["x"],np.arange(self.dc.data.shape[0])),
+        self.coords = dict(wavelength=(["wavelength"],wavelengths),
+                           x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
-                           wavelength=(["wavelength"],wavelengths),
                            time=(["time"],self.timestamps.data.astype(np.datetime64)))
 
     # time coordinates can only be saved in np.datetime64 format
-    self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"],self.dc.data)),
+    self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
                          coords=self.coords, attrs=attrs)
 
     """provide metadata to NetCDF coordinates"""
@@ -440,11 +440,11 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
 # Cell
 
 @patch
-def load_nc(self:DataCube, nc_path:str):
+def load_nc(self:DataCube, nc_path:str, old_style:bool = False):
     """Lazy load a NetCDF datacube into the DataCube buffer."""
     with xr.open_dataset(nc_path) as ds:
         self.dc = CircArrayBuffer(size=ds.datacube.shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
-        self.dc.data = np.array(ds.datacube)
+        self.dc.data = np.array(ds.datacube) if old_style else np.moveaxis(np.array(ds.datacube), 0, -1)
         self.binned_wavelengths = np.array(ds.wavelength)
 
 # Cell

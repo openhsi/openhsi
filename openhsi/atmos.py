@@ -221,7 +221,10 @@ class SpectralMatcher(object):
             temp = self.speclib_ref.copy() if is_ref else self.spectra.copy()
             temp.insert(0,"wavelength",self.wavelengths)
             curve_list = [hv.Curve(temp,kdims="wavelength",vdims=i,label=i) for i in temp.columns[1:] ]
-            return (hv.Overlay(curve_list)*hv.Curve(pd.DataFrame({"wavelength":self.wavelengths,"last_input":self.last_spectra}),kdims="wavelength")).opts(
+            if getattr(self,"last_spectra",None):
+                return (hv.Overlay(curve_list)*hv.Curve(zip(self.wavelengths,self.last_spectra),label="last spectra")).opts(
+                                width=1000, height=600,xlabel="wavelength (nm)",ylabel="reflectance",ylim=(0,1.1))
+            return (hv.Overlay(curve_list)).opts(
                                 width=1000, height=600,xlabel="wavelength (nm)",ylabel="reflectance",ylim=(0,1.1))
 
 
@@ -268,8 +271,8 @@ class ELC(SpectralMatcher):
         self.RGB = self.dc.show("bokeh",robust=True).opts(height=250, width=1000, invert_yaxis=True,tools=["tap"],toolbar="below")
         self.a_ELC = np.ones((self.dc.dc.data.shape[-1],))
         self.b_ELC = np.zeros((self.dc.dc.data.shape[-1],))
-
         super().__init__(**kwargs)
+        self.xx = np.zeros((len(self.wavelengths),2))
 
     def __call__(self):
 
@@ -335,6 +338,7 @@ class ELC(SpectralMatcher):
             A = []; b = []
             data = zip(np.int32(data['x0']), np.int32(data['x1']), np.int32(data['y0']), np.int32(data['y1']) )
             for i, (x0, x1, y0, y1) in enumerate(data):
+                if y1 > y0: y0, y1 = y1, y0
                 sz = ((y0-y1)*(x1-x0),len(self.wavelengths))
                 selection = np.reshape(np.array(self.dc.dc.data[y1:y0,x0:x1,:]),sz)
 
@@ -353,8 +357,8 @@ class ELC(SpectralMatcher):
             A = np.concatenate(A,axis=1); b = np.concatenate(b,axis=1)
             x = np.linalg.pinv(A) @ b
 
-            xx[:,0] = x[:,0,0]; xx[:,1] = x[:,1,0]
-            self.a_ELC = xx[:,0]; self.b_ELC = xx[:,1]
+            self.xx[:,0] = x[:,0,0]; self.xx[:,1] = x[:,1,0]
+            self.a_ELC = self.xx[:,0]; self.b_ELC = self.xx[:,1]
             return hv.Curve([])
         self.ELC_dmap = hv.DynamicMap(update_ELC, streams=[self.box_stream])
 

@@ -34,6 +34,8 @@ nb_path: "06_metadata.ipynb"
 <div class="output_subarea output_stream output_stderr output_text">
 <pre>/Users/eway/.pyenv/versions/3.8.3/lib/python3.8/site-packages/pandas/compat/__init__.py:97: UserWarning: Could not import the lzma module. Your installed Python is incomplete. Attempting to use lzma compression will result in a RuntimeError.
   warnings.warn(msg)
+/Users/eway/.pyenv/versions/3.8.3/lib/python3.8/site-packages/requests/__init__.py:89: RequestsDependencyWarning: urllib3 (1.26.7) or chardet (3.0.4) doesn&#39;t match a supported version!
+  warnings.warn(&#34;urllib3 ({}) or chardet ({}) doesn&#39;t match a supported &#34;
 </pre>
 </div>
 </div>
@@ -43,10 +45,10 @@ nb_path: "06_metadata.ipynb"
 
 
 
-<div id="f1d584fd-6e2b-4dbf-8142-ba56bac7cf77"></div>
+<div id="6dbc9da0-b7be-49d6-82ab-9b345b651353"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#f1d584fd-6e2b-4dbf-8142-ba56bac7cf77');
+var element = $('#6dbc9da0-b7be-49d6-82ab-9b345b651353');
 
 (function(root) {
   function now() {
@@ -202,10 +204,10 @@ var element = $('#f1d584fd-6e2b-4dbf-8142-ba56bac7cf77');
 
 
 
-<div id="1db7cbfb-ee6f-418c-824a-53684b2634a5"></div>
+<div id="557a6c90-8acd-4945-82f1-7bc97a12658f"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#1db7cbfb-ee6f-418c-824a-53684b2634a5');
+var element = $('#557a6c90-8acd-4945-82f1-7bc97a12658f');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -456,10 +458,10 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="9400dc01-166c-4c5d-be6a-8ba36b23748f"></div>
+<div id="fe622bb6-4dae-4846-944a-2b0e658f0592"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#9400dc01-166c-4c5d-be6a-8ba36b23748f');
+var element = $('#fe622bb6-4dae-4846-944a-2b0e658f0592');
 
 (function(root) {
   function now() {
@@ -615,436 +617,10 @@ var element = $('#9400dc01-166c-4c5d-be6a-8ba36b23748f');
 
 
 
-<div id="63e523f9-674a-40e5-a7f4-a61acb9074e1"></div>
+<div id="a7baf079-defd-4217-a55e-48a8ae2fd4d9"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#63e523f9-674a-40e5-a7f4-a61acb9074e1');
-
-if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
-  window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
-}
-
-
-    function JupyterCommManager() {
-    }
-
-    JupyterCommManager.prototype.register_target = function(plot_id, comm_id, msg_handler) {
-      if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        comm_manager.register_target(comm_id, function(comm) {
-          comm.on_msg(msg_handler);
-        });
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        window.PyViz.kernels[plot_id].registerCommTarget(comm_id, function(comm) {
-          comm.onMsg = msg_handler;
-        });
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        google.colab.kernel.comms.registerTarget(comm_id, (comm) => {
-          var messages = comm.messages[Symbol.asyncIterator]();
-          function processIteratorResult(result) {
-            var message = result.value;
-            console.log(message)
-            var content = {data: message.data, comm_id};
-            var buffers = []
-            for (var buffer of message.buffers ?? []) {
-              buffers.push(new DataView(buffer))
-            }
-            var metadata = message.metadata ?? {};
-            var msg = {content, buffers, metadata}
-            msg_handler(msg);
-            return messages.next().then(processIteratorResult);
-          }
-          return messages.next().then(processIteratorResult);
-        })
-      }
-    }
-
-    JupyterCommManager.prototype.get_client_comm = function(plot_id, comm_id, msg_handler) {
-      if (comm_id in window.PyViz.comms) {
-        return window.PyViz.comms[comm_id];
-      } else if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        var comm = comm_manager.new_comm(comm_id, {}, {}, {}, comm_id);
-        if (msg_handler) {
-          comm.on_msg(msg_handler);
-        }
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        var comm = window.PyViz.kernels[plot_id].connectToComm(comm_id);
-        comm.open();
-        if (msg_handler) {
-          comm.onMsg = msg_handler;
-        }
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        var comm_promise = google.colab.kernel.comms.open(comm_id)
-        comm_promise.then((comm) => {
-          window.PyViz.comms[comm_id] = comm;
-          if (msg_handler) {
-            var messages = comm.messages[Symbol.asyncIterator]();
-            function processIteratorResult(result) {
-              var message = result.value;
-              var content = {data: message.data};
-              var metadata = message.metadata ?? {comm_id};
-              var msg = {content, metadata}
-              msg_handler(msg);
-              return messages.next().then(processIteratorResult);
-            }
-            return messages.next().then(processIteratorResult);
-          }
-        }) 
-        var sendClosure = (data, metadata, buffers, disposeOnDone) => {
-          return comm_promise.then((comm) => {
-            comm.send(data, metadata, buffers, disposeOnDone);
-          });
-        };
-        var comm = {
-          send: sendClosure
-        };
-      }
-      window.PyViz.comms[comm_id] = comm;
-      return comm;
-    }
-    window.PyViz.comm_manager = new JupyterCommManager();
-    
-
-
-var JS_MIME_TYPE = 'application/javascript';
-var HTML_MIME_TYPE = 'text/html';
-var EXEC_MIME_TYPE = 'application/vnd.holoviews_exec.v0+json';
-var CLASS_NAME = 'output';
-
-/**
- * Render data to the DOM node
- */
-function render(props, node) {
-  var div = document.createElement("div");
-  var script = document.createElement("script");
-  node.appendChild(div);
-  node.appendChild(script);
-}
-
-/**
- * Handle when a new output is added
- */
-function handle_add_output(event, handle) {
-  var output_area = handle.output_area;
-  var output = handle.output;
-  if ((output.data == undefined) || (!output.data.hasOwnProperty(EXEC_MIME_TYPE))) {
-    return
-  }
-  var id = output.metadata[EXEC_MIME_TYPE]["id"];
-  var toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
-  if (id !== undefined) {
-    var nchildren = toinsert.length;
-    var html_node = toinsert[nchildren-1].children[0];
-    html_node.innerHTML = output.data[HTML_MIME_TYPE];
-    var scripts = [];
-    var nodelist = html_node.querySelectorAll("script");
-    for (var i in nodelist) {
-      if (nodelist.hasOwnProperty(i)) {
-        scripts.push(nodelist[i])
-      }
-    }
-
-    scripts.forEach( function (oldScript) {
-      var newScript = document.createElement("script");
-      var attrs = [];
-      var nodemap = oldScript.attributes;
-      for (var j in nodemap) {
-        if (nodemap.hasOwnProperty(j)) {
-          attrs.push(nodemap[j])
-        }
-      }
-      attrs.forEach(function(attr) { newScript.setAttribute(attr.name, attr.value) });
-      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-    if (JS_MIME_TYPE in output.data) {
-      toinsert[nchildren-1].children[1].textContent = output.data[JS_MIME_TYPE];
-    }
-    output_area._hv_plot_id = id;
-    if ((window.Bokeh !== undefined) && (id in Bokeh.index)) {
-      window.PyViz.plot_index[id] = Bokeh.index[id];
-    } else {
-      window.PyViz.plot_index[id] = null;
-    }
-  } else if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
-    var bk_div = document.createElement("div");
-    bk_div.innerHTML = output.data[HTML_MIME_TYPE];
-    var script_attrs = bk_div.children[0].attributes;
-    for (var i = 0; i < script_attrs.length; i++) {
-      toinsert[toinsert.length - 1].childNodes[1].setAttribute(script_attrs[i].name, script_attrs[i].value);
-    }
-    // store reference to server id on output_area
-    output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
-  }
-}
-
-/**
- * Handle when an output is cleared or removed
- */
-function handle_clear_output(event, handle) {
-  var id = handle.cell.output_area._hv_plot_id;
-  var server_id = handle.cell.output_area._bokeh_server_id;
-  if (((id === undefined) || !(id in PyViz.plot_index)) && (server_id !== undefined)) { return; }
-  var comm = window.PyViz.comm_manager.get_client_comm("hv-extension-comm", "hv-extension-comm", function () {});
-  if (server_id !== null) {
-    comm.send({event_type: 'server_delete', 'id': server_id});
-    return;
-  } else if (comm !== null) {
-    comm.send({event_type: 'delete', 'id': id});
-  }
-  delete PyViz.plot_index[id];
-  if ((window.Bokeh !== undefined) & (id in window.Bokeh.index)) {
-    var doc = window.Bokeh.index[id].model.document
-    doc.clear();
-    const i = window.Bokeh.documents.indexOf(doc);
-    if (i > -1) {
-      window.Bokeh.documents.splice(i, 1);
-    }
-  }
-}
-
-/**
- * Handle kernel restart event
- */
-function handle_kernel_cleanup(event, handle) {
-  delete PyViz.comms["hv-extension-comm"];
-  window.PyViz.plot_index = {}
-}
-
-/**
- * Handle update_display_data messages
- */
-function handle_update_output(event, handle) {
-  handle_clear_output(event, {cell: {output_area: handle.output_area}})
-  handle_add_output(event, handle)
-}
-
-function register_renderer(events, OutputArea) {
-  function append_mime(data, metadata, element) {
-    // create a DOM node to render to
-    var toinsert = this.create_output_subarea(
-    metadata,
-    CLASS_NAME,
-    EXEC_MIME_TYPE
-    );
-    this.keyboard_manager.register_events(toinsert);
-    // Render to node
-    var props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
-    render(props, toinsert[0]);
-    element.append(toinsert);
-    return toinsert
-  }
-
-  events.on('output_added.OutputArea', handle_add_output);
-  events.on('output_updated.OutputArea', handle_update_output);
-  events.on('clear_output.CodeCell', handle_clear_output);
-  events.on('delete.Cell', handle_clear_output);
-  events.on('kernel_ready.Kernel', handle_kernel_cleanup);
-
-  OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
-    safe: true,
-    index: 0
-  });
-}
-
-if (window.Jupyter !== undefined) {
-  try {
-    var events = require('base/js/events');
-    var OutputArea = require('notebook/js/outputarea').OutputArea;
-    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
-      register_renderer(events, OutputArea);
-    }
-  } catch(err) {
-  }
-}
-
-</script>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-
-
-
-<div id="430d2dd2-af80-40c9-ac32-71d9d8b3f098"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#430d2dd2-af80-40c9-ac32-71d9d8b3f098');
-
-(function(root) {
-  function now() {
-    return new Date();
-  }
-
-  var force = true;
-
-  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
-    root._bokeh_onload_callbacks = [];
-    root._bokeh_is_loading = undefined;
-  }
-
-  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
-    root._bokeh_timeout = Date.now() + 5000;
-    root._bokeh_failed_load = false;
-  }
-
-  function run_callbacks() {
-    try {
-      root._bokeh_onload_callbacks.forEach(function(callback) {
-        if (callback != null)
-          callback();
-      });
-    } finally {
-      delete root._bokeh_onload_callbacks
-    }
-    console.debug("Bokeh: all callbacks have finished");
-  }
-
-  function load_libs(css_urls, js_urls, js_modules, callback) {
-    if (css_urls == null) css_urls = [];
-    if (js_urls == null) js_urls = [];
-    if (js_modules == null) js_modules = [];
-
-    root._bokeh_onload_callbacks.push(callback);
-    if (root._bokeh_is_loading > 0) {
-      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
-      return null;
-    }
-    if (js_urls.length === 0 && js_modules.length === 0) {
-      run_callbacks();
-      return null;
-    }
-    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
-    root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
-
-    function on_load() {
-      root._bokeh_is_loading--;
-      if (root._bokeh_is_loading === 0) {
-        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
-        run_callbacks()
-      }
-    }
-
-    function on_error() {
-      console.error("failed to load " + url);
-    }
-
-    for (var i = 0; i < css_urls.length; i++) {
-      var url = css_urls[i];
-      const element = document.createElement("link");
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.rel = "stylesheet";
-      element.type = "text/css";
-      element.href = url;
-      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
-      document.body.appendChild(element);
-    }
-
-    var skip = [];
-    if (window.requirejs) {
-      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
-      
-    }
-    for (var i = 0; i < js_urls.length; i++) {
-      var url = js_urls[i];
-      if (skip.indexOf(url) >= 0) { on_load(); continue; }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    for (var i = 0; i < js_modules.length; i++) {
-      var url = js_modules[i];
-      if (skip.indexOf(url) >= 0) { on_load(); continue; }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      element.type = "module";
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    if (!js_urls.length && !js_modules.length) {
-      on_load()
-    }
-  };
-
-  function inject_raw_css(css) {
-    const element = document.createElement("style");
-    element.appendChild(document.createTextNode(css));
-    document.body.appendChild(element);
-  }
-
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.3.min.js", "https://unpkg.com/@holoviz/panel@0.12.1/dist/panel.min.js"];
-  var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.1/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/dataframe.css"];
-  var inline_js = [
-    function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\")\n    }\n    ");
-    },
-    function(Bokeh) {
-      Bokeh.set_log_level("info");
-    },
-    function(Bokeh) {} // ensure no trailing comma for IE
-  ];
-
-  function run_inline_js() {
-    if ((root.Bokeh !== undefined) || (force === true)) {
-      for (var i = 0; i < inline_js.length; i++) {
-        inline_js[i].call(root, root.Bokeh);
-      }} else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(run_inline_js, 100);
-    } else if (!root._bokeh_failed_load) {
-      console.log("Bokeh: BokehJS failed to load within specified timeout.");
-      root._bokeh_failed_load = true;
-    }
-  }
-
-  if (root._bokeh_is_loading === 0) {
-    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
-    run_inline_js();
-  } else {
-    load_libs(css_urls, js_urls, js_modules, function() {
-      console.debug("Bokeh: BokehJS plotting callback run at", now());
-      run_inline_js();
-    });
-  }
-}(window));
-</script>
-</div>
-
-</div>
-
-<div class="output_area">
-
-
-
-
-<div id="c7a60902-fc87-4b7a-a05a-73f3c54528af"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#c7a60902-fc87-4b7a-a05a-73f3c54528af');
+var element = $('#a7baf079-defd-4217-a55e-48a8ae2fd4d9');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -1308,10 +884,10 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="332d7353-8e58-4a60-9dd9-648dc412ab6c"></div>
+<div id="3da35037-e106-4a3c-9dd5-a0f3f465025b"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#332d7353-8e58-4a60-9dd9-648dc412ab6c');
+var element = $('#3da35037-e106-4a3c-9dd5-a0f3f465025b');
 
 (function(root) {
   function now() {
@@ -1467,10 +1043,436 @@ var element = $('#332d7353-8e58-4a60-9dd9-648dc412ab6c');
 
 
 
-<div id="6762a896-15e0-4702-86c6-84fdce18c17c"></div>
+<div id="68ad2737-9c57-4405-a4dd-f8c6d14df9e7"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#6762a896-15e0-4702-86c6-84fdce18c17c');
+var element = $('#68ad2737-9c57-4405-a4dd-f8c6d14df9e7');
+
+if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
+  window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
+}
+
+
+    function JupyterCommManager() {
+    }
+
+    JupyterCommManager.prototype.register_target = function(plot_id, comm_id, msg_handler) {
+      if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
+        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
+        comm_manager.register_target(comm_id, function(comm) {
+          comm.on_msg(msg_handler);
+        });
+      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
+        window.PyViz.kernels[plot_id].registerCommTarget(comm_id, function(comm) {
+          comm.onMsg = msg_handler;
+        });
+      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
+        google.colab.kernel.comms.registerTarget(comm_id, (comm) => {
+          var messages = comm.messages[Symbol.asyncIterator]();
+          function processIteratorResult(result) {
+            var message = result.value;
+            console.log(message)
+            var content = {data: message.data, comm_id};
+            var buffers = []
+            for (var buffer of message.buffers ?? []) {
+              buffers.push(new DataView(buffer))
+            }
+            var metadata = message.metadata ?? {};
+            var msg = {content, buffers, metadata}
+            msg_handler(msg);
+            return messages.next().then(processIteratorResult);
+          }
+          return messages.next().then(processIteratorResult);
+        })
+      }
+    }
+
+    JupyterCommManager.prototype.get_client_comm = function(plot_id, comm_id, msg_handler) {
+      if (comm_id in window.PyViz.comms) {
+        return window.PyViz.comms[comm_id];
+      } else if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
+        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
+        var comm = comm_manager.new_comm(comm_id, {}, {}, {}, comm_id);
+        if (msg_handler) {
+          comm.on_msg(msg_handler);
+        }
+      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
+        var comm = window.PyViz.kernels[plot_id].connectToComm(comm_id);
+        comm.open();
+        if (msg_handler) {
+          comm.onMsg = msg_handler;
+        }
+      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
+        var comm_promise = google.colab.kernel.comms.open(comm_id)
+        comm_promise.then((comm) => {
+          window.PyViz.comms[comm_id] = comm;
+          if (msg_handler) {
+            var messages = comm.messages[Symbol.asyncIterator]();
+            function processIteratorResult(result) {
+              var message = result.value;
+              var content = {data: message.data};
+              var metadata = message.metadata ?? {comm_id};
+              var msg = {content, metadata}
+              msg_handler(msg);
+              return messages.next().then(processIteratorResult);
+            }
+            return messages.next().then(processIteratorResult);
+          }
+        }) 
+        var sendClosure = (data, metadata, buffers, disposeOnDone) => {
+          return comm_promise.then((comm) => {
+            comm.send(data, metadata, buffers, disposeOnDone);
+          });
+        };
+        var comm = {
+          send: sendClosure
+        };
+      }
+      window.PyViz.comms[comm_id] = comm;
+      return comm;
+    }
+    window.PyViz.comm_manager = new JupyterCommManager();
+    
+
+
+var JS_MIME_TYPE = 'application/javascript';
+var HTML_MIME_TYPE = 'text/html';
+var EXEC_MIME_TYPE = 'application/vnd.holoviews_exec.v0+json';
+var CLASS_NAME = 'output';
+
+/**
+ * Render data to the DOM node
+ */
+function render(props, node) {
+  var div = document.createElement("div");
+  var script = document.createElement("script");
+  node.appendChild(div);
+  node.appendChild(script);
+}
+
+/**
+ * Handle when a new output is added
+ */
+function handle_add_output(event, handle) {
+  var output_area = handle.output_area;
+  var output = handle.output;
+  if ((output.data == undefined) || (!output.data.hasOwnProperty(EXEC_MIME_TYPE))) {
+    return
+  }
+  var id = output.metadata[EXEC_MIME_TYPE]["id"];
+  var toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
+  if (id !== undefined) {
+    var nchildren = toinsert.length;
+    var html_node = toinsert[nchildren-1].children[0];
+    html_node.innerHTML = output.data[HTML_MIME_TYPE];
+    var scripts = [];
+    var nodelist = html_node.querySelectorAll("script");
+    for (var i in nodelist) {
+      if (nodelist.hasOwnProperty(i)) {
+        scripts.push(nodelist[i])
+      }
+    }
+
+    scripts.forEach( function (oldScript) {
+      var newScript = document.createElement("script");
+      var attrs = [];
+      var nodemap = oldScript.attributes;
+      for (var j in nodemap) {
+        if (nodemap.hasOwnProperty(j)) {
+          attrs.push(nodemap[j])
+        }
+      }
+      attrs.forEach(function(attr) { newScript.setAttribute(attr.name, attr.value) });
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+    if (JS_MIME_TYPE in output.data) {
+      toinsert[nchildren-1].children[1].textContent = output.data[JS_MIME_TYPE];
+    }
+    output_area._hv_plot_id = id;
+    if ((window.Bokeh !== undefined) && (id in Bokeh.index)) {
+      window.PyViz.plot_index[id] = Bokeh.index[id];
+    } else {
+      window.PyViz.plot_index[id] = null;
+    }
+  } else if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
+    var bk_div = document.createElement("div");
+    bk_div.innerHTML = output.data[HTML_MIME_TYPE];
+    var script_attrs = bk_div.children[0].attributes;
+    for (var i = 0; i < script_attrs.length; i++) {
+      toinsert[toinsert.length - 1].childNodes[1].setAttribute(script_attrs[i].name, script_attrs[i].value);
+    }
+    // store reference to server id on output_area
+    output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
+  }
+}
+
+/**
+ * Handle when an output is cleared or removed
+ */
+function handle_clear_output(event, handle) {
+  var id = handle.cell.output_area._hv_plot_id;
+  var server_id = handle.cell.output_area._bokeh_server_id;
+  if (((id === undefined) || !(id in PyViz.plot_index)) && (server_id !== undefined)) { return; }
+  var comm = window.PyViz.comm_manager.get_client_comm("hv-extension-comm", "hv-extension-comm", function () {});
+  if (server_id !== null) {
+    comm.send({event_type: 'server_delete', 'id': server_id});
+    return;
+  } else if (comm !== null) {
+    comm.send({event_type: 'delete', 'id': id});
+  }
+  delete PyViz.plot_index[id];
+  if ((window.Bokeh !== undefined) & (id in window.Bokeh.index)) {
+    var doc = window.Bokeh.index[id].model.document
+    doc.clear();
+    const i = window.Bokeh.documents.indexOf(doc);
+    if (i > -1) {
+      window.Bokeh.documents.splice(i, 1);
+    }
+  }
+}
+
+/**
+ * Handle kernel restart event
+ */
+function handle_kernel_cleanup(event, handle) {
+  delete PyViz.comms["hv-extension-comm"];
+  window.PyViz.plot_index = {}
+}
+
+/**
+ * Handle update_display_data messages
+ */
+function handle_update_output(event, handle) {
+  handle_clear_output(event, {cell: {output_area: handle.output_area}})
+  handle_add_output(event, handle)
+}
+
+function register_renderer(events, OutputArea) {
+  function append_mime(data, metadata, element) {
+    // create a DOM node to render to
+    var toinsert = this.create_output_subarea(
+    metadata,
+    CLASS_NAME,
+    EXEC_MIME_TYPE
+    );
+    this.keyboard_manager.register_events(toinsert);
+    // Render to node
+    var props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
+    render(props, toinsert[0]);
+    element.append(toinsert);
+    return toinsert
+  }
+
+  events.on('output_added.OutputArea', handle_add_output);
+  events.on('output_updated.OutputArea', handle_update_output);
+  events.on('clear_output.CodeCell', handle_clear_output);
+  events.on('delete.Cell', handle_clear_output);
+  events.on('kernel_ready.Kernel', handle_kernel_cleanup);
+
+  OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
+    safe: true,
+    index: 0
+  });
+}
+
+if (window.Jupyter !== undefined) {
+  try {
+    var events = require('base/js/events');
+    var OutputArea = require('notebook/js/outputarea').OutputArea;
+    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
+      register_renderer(events, OutputArea);
+    }
+  } catch(err) {
+  }
+}
+
+</script>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+
+<div id="08bc058c-b45c-4157-9d21-a398cb7d25c6"></div>
+<div class="output_subarea output_javascript ">
+<script type="text/javascript">
+var element = $('#08bc058c-b45c-4157-9d21-a398cb7d25c6');
+
+(function(root) {
+  function now() {
+    return new Date();
+  }
+
+  var force = true;
+
+  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
+    root._bokeh_onload_callbacks = [];
+    root._bokeh_is_loading = undefined;
+  }
+
+  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
+    root._bokeh_timeout = Date.now() + 5000;
+    root._bokeh_failed_load = false;
+  }
+
+  function run_callbacks() {
+    try {
+      root._bokeh_onload_callbacks.forEach(function(callback) {
+        if (callback != null)
+          callback();
+      });
+    } finally {
+      delete root._bokeh_onload_callbacks
+    }
+    console.debug("Bokeh: all callbacks have finished");
+  }
+
+  function load_libs(css_urls, js_urls, js_modules, callback) {
+    if (css_urls == null) css_urls = [];
+    if (js_urls == null) js_urls = [];
+    if (js_modules == null) js_modules = [];
+
+    root._bokeh_onload_callbacks.push(callback);
+    if (root._bokeh_is_loading > 0) {
+      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
+      return null;
+    }
+    if (js_urls.length === 0 && js_modules.length === 0) {
+      run_callbacks();
+      return null;
+    }
+    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
+    root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
+
+    function on_load() {
+      root._bokeh_is_loading--;
+      if (root._bokeh_is_loading === 0) {
+        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
+        run_callbacks()
+      }
+    }
+
+    function on_error() {
+      console.error("failed to load " + url);
+    }
+
+    for (var i = 0; i < css_urls.length; i++) {
+      var url = css_urls[i];
+      const element = document.createElement("link");
+      element.onload = on_load;
+      element.onerror = on_error;
+      element.rel = "stylesheet";
+      element.type = "text/css";
+      element.href = url;
+      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
+      document.body.appendChild(element);
+    }
+
+    var skip = [];
+    if (window.requirejs) {
+      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
+      
+    }
+    for (var i = 0; i < js_urls.length; i++) {
+      var url = js_urls[i];
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
+      var element = document.createElement('script');
+      element.onload = on_load;
+      element.onerror = on_error;
+      element.async = false;
+      element.src = url;
+      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
+      document.head.appendChild(element);
+    }
+    for (var i = 0; i < js_modules.length; i++) {
+      var url = js_modules[i];
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
+      var element = document.createElement('script');
+      element.onload = on_load;
+      element.onerror = on_error;
+      element.async = false;
+      element.src = url;
+      element.type = "module";
+      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
+      document.head.appendChild(element);
+    }
+    if (!js_urls.length && !js_modules.length) {
+      on_load()
+    }
+  };
+
+  function inject_raw_css(css) {
+    const element = document.createElement("style");
+    element.appendChild(document.createTextNode(css));
+    document.body.appendChild(element);
+  }
+
+  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.3.min.js", "https://unpkg.com/@holoviz/panel@0.12.1/dist/panel.min.js"];
+  var js_modules = [];
+  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.1/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/dataframe.css"];
+  var inline_js = [
+    function(Bokeh) {
+      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\")\n    }\n    ");
+    },
+    function(Bokeh) {
+      Bokeh.set_log_level("info");
+    },
+    function(Bokeh) {} // ensure no trailing comma for IE
+  ];
+
+  function run_inline_js() {
+    if ((root.Bokeh !== undefined) || (force === true)) {
+      for (var i = 0; i < inline_js.length; i++) {
+        inline_js[i].call(root, root.Bokeh);
+      }} else if (Date.now() < root._bokeh_timeout) {
+      setTimeout(run_inline_js, 100);
+    } else if (!root._bokeh_failed_load) {
+      console.log("Bokeh: BokehJS failed to load within specified timeout.");
+      root._bokeh_failed_load = true;
+    }
+  }
+
+  if (root._bokeh_is_loading === 0) {
+    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
+    run_inline_js();
+  } else {
+    load_libs(css_urls, js_urls, js_modules, function() {
+      console.debug("Bokeh: BokehJS plotting callback run at", now());
+      run_inline_js();
+    });
+  }
+}(window));
+</script>
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+
+
+<div id="78e0d03f-925b-4f92-b879-1270bf579e1c"></div>
+<div class="output_subarea output_javascript ">
+<script type="text/javascript">
+var element = $('#78e0d03f-925b-4f92-b879-1270bf579e1c');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -1875,18 +1877,18 @@ if (window.Jupyter !== undefined) {
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
-<div id='1333'>
+<div id='1221'>
 
 
 
 
 
-  <div class="bk-root" id="360c6ba1-9aad-47f6-a4ad-6494ae3d1f9d" data-root-id="1333"></div>
+  <div class="bk-root" id="49d2fca6-c6f5-483a-abfe-7db4be09d7e4" data-root-id="1221"></div>
 </div>
 <script type="application/javascript">(function(root) {
   function embed_document(root) {
-    var docs_json = {"5e70e32d-9a61-4bdd-8e3e-ec9ff55a7b31":{"defs":[{"extends":null,"module":null,"name":"ReactiveHTML1","overrides":[],"properties":[]},{"extends":null,"module":null,"name":"FlexBox1","overrides":[],"properties":[{"default":"flex-start","kind":null,"name":"align_content"},{"default":"flex-start","kind":null,"name":"align_items"},{"default":"row","kind":null,"name":"flex_direction"},{"default":"wrap","kind":null,"name":"flex_wrap"},{"default":"flex-start","kind":null,"name":"justify_content"}]},{"extends":null,"module":null,"name":"TemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]},{"extends":null,"module":null,"name":"MaterialTemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]}],"roots":{"references":[{"attributes":{"children":[[{"id":"1357"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00628"},"id":"1356","type":"GridBox"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00626","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1355","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum latitude","title":"geospatial_lat_min"},"id":"1381","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00641","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1367","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00659","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1379","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A textual description of the processing (or quality control) level of the data","title":"processing_level"},"id":"1454","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00730","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1452","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1391"},{"id":"1399"}],"margin":[0,0,0,0],"name":"Column00684"},"id":"1390","type":"Column"},{"attributes":{"children":[{"id":"1411"},{"id":"1421"}],"margin":[0,0,0,0],"name":"Column00705"},"id":"1410","type":"Column"},{"attributes":{"child":{"id":"1377"},"name":"Column00663","title":"Extent"},"id":"1389","type":"Panel"},{"attributes":{"children":[{"id":"1378"}],"margin":[0,0,0,0],"name":"Column00663"},"id":"1377","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Describe the restrictions to data access and distribution","title":"license"},"id":"1455","type":"TextAreaInput"},{"attributes":{"child":{"id":"1344"},"name":"Column00630","title":"Identification Reference"},"id":"1358","type":"Panel"},{"attributes":{"children":[{"id":"1363"},{"id":"1364"},{"id":"1365"}],"margin":[0,0,0,0],"name":"Row00636"},"id":"1362","type":"Row"},{"attributes":{"children":[[{"id":"1375"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00648"},"id":"1374","type":"GridBox"},{"attributes":{"children":[{"id":"1361"},{"id":"1362"}],"margin":[0,0,0,0],"name":"Column00637"},"id":"1360","type":"Column"},{"attributes":{"children":[{"id":"1367"},{"id":"1368"}],"margin":[0,0,0,0],"name":"Column00644"},"id":"1366","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00646","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1373","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1352"},0,0,1,1],[{"id":"1353"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00623"},"id":"1351","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Unique name or identifier of vocabulary from which keywords are taken. E.g. CF:NetCDF COARDS Climate and Forecast Standard Names","title":"keywords_vocabulary"},"id":"1375","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Provides an audit trail for modifications to the original data","title":"history"},"id":"1370","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1348"}],"margin":[0,0,0,0],"name":"Row00617"},"id":"1347","type":"Row"},{"attributes":{"children":[[{"id":"1454"},0,0,1,1],[{"id":"1455"},0,1,1,1],[{"id":"1456"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00732"},"id":"1453","type":"GridBox"},{"attributes":{"children":[{"id":"1392"},{"id":"1393"}],"margin":[0,0,0,0],"name":"Column00672"},"id":"1391","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset conventions. E.g. CF-1.6, ISO 19115-2, COARDS","title":"Conventions"},"id":"1348","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The name of the controlled vocabulary from which variable standard names are taken","title":"standard_name_vocabulary"},"id":"1369","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum longitude","title":"geospatial_lon_max"},"id":"1384","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A paragraph describing the dataset","title":"summary"},"id":"1364","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Miscellaneous information about the data.","title":"comment"},"id":"1371","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in latitude with units specified","title":"geospatial_lat_resolution"},"id":"1405","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum longitude","title":"geospatial_lon_min"},"id":"1383","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in longitude with units specified","title":"geospatial_lon_resolution"},"id":"1403","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_north","title":"geospatial_lat_units"},"id":"1404","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1432"},{"id":"1433"}],"margin":[0,0,0,0],"name":"Column00711"},"id":"1431","type":"Column"},{"attributes":{"client_comm_id":"4142851bff4c4d47a24bbb026c2633b5","comm_id":"8eafa41763e04d36ab59df45b8d445e6","plot_id":"1333"},"id":"1477","type":"panel.models.comm_manager.CommManager"},{"attributes":{"child":{"id":"1390"},"name":"Column00684","title":"Other Extent"},"id":"1409","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum latitude","title":"geospatial_lat_max"},"id":"1382","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1402"},0,0,1,1],[{"id":"1403"},0,1,1,1],[{"id":"1404"},0,2,1,1],[{"id":"1405"},1,0,1,1],[{"id":"1406"},1,1,1,1],[{"id":"1407"},1,2,1,1],[{"id":"1408"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00682"},"id":"1401","type":"GridBox"},{"attributes":{"child":{"id":"1410"},"name":"Column00705","title":"Creator"},"id":"1429","type":"Panel"},{"attributes":{"children":[[{"id":"1381"},0,0,1,1],[{"id":"1382"},0,1,1,1],[{"id":"1383"},0,2,1,1],[{"id":"1384"},1,0,1,1],[{"id":"1385"},1,1,1,1],[{"id":"1386"},1,2,1,1],[{"id":"1387"},2,0,1,1],[{"id":"1388"},2,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00661"},"id":"1380","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The method of production of the original data. E.g. model-generated","title":"source"},"id":"1456","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1334"},{"id":"1335"},{"id":"1342"}],"margin":[0,0,0,0],"name":"Column00759"},"id":"1333","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00680","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1400","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_east","title":"geospatial_lon_units"},"id":"1402","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Certical spacing of points with units specified","title":"geospatial_vertical_resolution"},"id":"1407","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of first data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_start"},"id":"1385","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'up' or 'down'","title":"geospatial_vertical_positive"},"id":"1408","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the vertical axis E.g. EPSG:4979","title":"geospatial_vertical_units"},"id":"1406","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1346"},{"id":"1347"}],"margin":[0,0,0,0],"name":"Column00618"},"id":"1345","type":"Column"},{"attributes":{"children":[{"id":"1345"},{"id":"1349"},{"id":"1354"}],"margin":[0,0,0,0],"name":"Column00630"},"id":"1344","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of last data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_end"},"id":"1386","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1350"},{"id":"1351"}],"margin":[0,0,0,0],"name":"Column00624"},"id":"1349","type":"Column"},{"attributes":{"children":[[{"id":"1414"},0,0,1,1],[{"id":"1415"},0,1,1,1],[{"id":"1416"},0,2,1,1],[{"id":"1417"},1,0,1,1],[{"id":"1418"},1,1,1,1],[{"id":"1419"},1,2,1,1],[{"id":"1420"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00694"},"id":"1413","type":"GridBox"},{"attributes":{"children":[{"id":"1438"},{"id":"1444"}],"margin":[0,0,0,0],"name":"Column00726"},"id":"1437","type":"Column"},{"attributes":{"children":[{"id":"1379"},{"id":"1380"}],"margin":[0,0,0,0],"name":"Column00662"},"id":"1378","type":"Column"},{"attributes":{"child":{"id":"1359"},"name":"Column00650","title":"Text"},"id":"1376","type":"Panel"},{"attributes":{"children":[{"id":"1431"}],"margin":[0,0,0,0],"name":"Column00712"},"id":"1430","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum altitude","title":"geospatial_vertical_max"},"id":"1388","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum altitude","title":"geospatial_vertical_min"},"id":"1387","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00692","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1412","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"acknowledge various type of support for the project that produced this data","title":"acknowledgment"},"id":"1414","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_url"},"id":"1416","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A comma separated list of key words and phrases","title":"keywords"},"id":"1365","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A short description of the dataset","title":"title"},"id":"1363","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_name"},"id":"1415","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00615","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1346","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_email"},"id":"1417","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00634","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1361","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1412"},{"id":"1413"}],"margin":[0,0,0,0],"name":"Column00695"},"id":"1411","type":"Column"},{"attributes":{"children":[[{"id":"1424"},0,0,1,1],[{"id":"1425"},0,1,1,1],[{"id":"1426"},0,2,1,1],[{"id":"1427"},1,0,1,1],[{"id":"1428"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00703"},"id":"1423","type":"GridBox"},{"attributes":{"children":[{"id":"1360"},{"id":"1366"},{"id":"1372"}],"margin":[0,0,0,0],"name":"Column00650"},"id":"1359","type":"Column"},{"attributes":{"children":[{"id":"1458"},{"id":"1459"}],"margin":[0,0,0,0],"name":"Column00744"},"id":"1457","type":"Column"},{"attributes":{"children":[[{"id":"1460"},0,0,1,1],[{"id":"1461"},0,1,1,1],[{"id":"1462"},0,2,1,1],[{"id":"1463"},1,0,1,1],[{"id":"1464"},1,1,1,1],[{"id":"1465"},1,2,1,1],[{"id":"1466"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00743"},"id":"1459","type":"GridBox"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00701","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1422","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1373"},{"id":"1374"}],"margin":[0,0,0,0],"name":"Column00649"},"id":"1372","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00741","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1458","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_institution"},"id":"1424","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset datatype","title":"cdm_data_type"},"id":"1460","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was last modified","title":"date_modified"},"id":"1426","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1434"},0,0,1,1],[{"id":"1435"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00710"},"id":"1433","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"creator_type"},"id":"1425","type":"TextAreaInput"},{"attributes":{"child":{"id":"1437"},"name":"Column00726","title":"Publisher"},"id":"1449","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this metadata was last modified","title":"date_metadata_modified"},"id":"1427","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was formally issued","title":"date_issued"},"id":"1428","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1469"}],"margin":[0,0,0,0],"name":"Column00754"},"id":"1468","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the contributing instrument(s) or sensor(s) used to create this data set or product","title":"instrument"},"id":"1461","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1452"},{"id":"1453"}],"margin":[0,0,0,0],"name":"Column00733"},"id":"1451","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which the data was created","title":"date_created"},"id":"1419","type":"TextAreaInput"},{"attributes":{"child":{"id":"1430"},"name":"Column00712","title":"Contributor"},"id":"1436","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Controlled vocabulary for the names used in the `instrument` attribute","title":"instrument_vocabulary"},"id":"1462","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1472"},0,0,1,1],[{"id":"1473"},0,1,1,1],[{"id":"1474"},0,2,1,1],[{"id":"1475"},1,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00752"},"id":"1471","type":"GridBox"},{"attributes":{"children":[{"id":"1336"},{"id":"1337"},{"id":"1341"}],"margin":[0,0,0,0],"name":"Row00758"},"id":"1335","type":"Row"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time period between each datapoint in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_resolution"},"id":"1398","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The scientific project that produced the data","title":"project"},"id":"1420","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00750","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1470","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Link to a complete metadata record (or collection)","title":"metadata_link"},"id":"1357","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Exposure time for each camera frame in ms","title":"camera_exposure_time"},"id":"1472","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Which rows are extracted from each camera frame","title":"camera_row_slice"},"id":"1474","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00608","text":"&lt;p&gt;&lt;strong&gt;Interactive Metadata Editor&lt;/strong&gt;: ISO 19115-2&lt;/p&gt;"},"id":"1334","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Gain used for the camera","title":"camera_gain"},"id":"1473","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Full Width Half Maximum for spectral bands","title":"camera_fwhm"},"id":"1475","type":"TextAreaInput"},{"attributes":{"margin":[0,0,0,0],"tabs":[{"id":"1358"},{"id":"1376"},{"id":"1389"},{"id":"1409"},{"id":"1429"},{"id":"1436"},{"id":"1449"},{"id":"1467"},{"id":"1476"}]},"id":"1343","type":"Tabs"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Extract Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1338","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"institution"},"id":"1418","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Published or web-based references that describe the data or methods used to produce it","title":"references"},"id":"1466","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_name"},"id":"1434","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter path string here...","title":"File path:"},"id":"1336","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Version identifier of the data file or product as assigned by the data creator","title":"product_version"},"id":"1464","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1338"},{"id":"1339"},{"id":"1340"}],"margin":[0,0,0,0],"name":"Column00757"},"id":"1337","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Globally unique identifier for the dataset","title":"id"},"id":"1352","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The overarching program(s) of which the dataset is a part","title":"program"},"id":"1465","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00722","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1445","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1422"},{"id":"1423"}],"margin":[0,0,0,0],"name":"Column00704"},"id":"1421","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_role"},"id":"1435","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the platform(s) E.g. satellite, ship, station, aircraft","title":"platform"},"id":"1463","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1400"},{"id":"1401"}],"margin":[0,0,0,0],"name":"Column00683"},"id":"1399","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"publisher_type"},"id":"1447","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1343"}],"margin":[0,0,0,0],"name":"Column00756"},"id":"1342","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00669","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1392","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Email address of those responsible for publishing the data, with its current metadata and format","title":"publisher_institution"},"id":"1448","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00716","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1439","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1441"},0,0,1,1],[{"id":"1442"},0,1,1,1],[{"id":"1443"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00718"},"id":"1440","type":"GridBox"},{"attributes":{"child":{"id":"1468"},"name":"Column00754","title":"Instrument"},"id":"1476","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00621","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1350","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The north, south, east, west bouding box","title":"geospatial_bounds"},"id":"1394","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1445"},{"id":"1446"}],"margin":[0,0,0,0],"name":"Column00725"},"id":"1444","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The coordinate reference system (CRS) of the point coordinates geospatial_bounds","title":"geospatial_bounds_crs"},"id":"1395","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1355"},{"id":"1356"}],"margin":[0,0,0,0],"name":"Column00629"},"id":"1354","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The vertical coordinate reference system (CRS) for the Z axis","title":"geospatial_bounds_vertical_crs"},"id":"1396","type":"TextAreaInput"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Export to JSON","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1340","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The organization that provides the initial id","title":"naming_authority"},"id":"1353","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"name":""},"id":"1341","type":"Div"},{"attributes":{"children":[[{"id":"1394"},0,0,1,1],[{"id":"1395"},0,1,1,1],[{"id":"1396"},0,2,1,1],[{"id":"1397"},1,0,1,1],[{"id":"1398"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00671"},"id":"1393","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Duration of the dataset in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_duration"},"id":"1397","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00708","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1432","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's URL. Can be an individual or an institution","title":"publisher_url"},"id":"1442","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1470"},{"id":"1471"}],"margin":[0,0,0,0],"name":"Column00753"},"id":"1469","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's name. Can be an individual or an institution","title":"publisher_name"},"id":"1441","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1447"},0,0,1,1],[{"id":"1448"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00724"},"id":"1446","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's email. Can be an individual or an institution","title":"publisher_email"},"id":"1443","type":"TextAreaInput"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Update Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1339","type":"Button"},{"attributes":{"children":[{"id":"1451"},{"id":"1457"}],"margin":[0,0,0,0],"name":"Column00745"},"id":"1450","type":"Column"},{"attributes":{"children":[{"id":"1439"},{"id":"1440"}],"margin":[0,0,0,0],"name":"Column00719"},"id":"1438","type":"Column"},{"attributes":{"children":[[{"id":"1369"},0,0,1,1],[{"id":"1370"},0,1,1,1],[{"id":"1371"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00643"},"id":"1368","type":"GridBox"},{"attributes":{"child":{"id":"1450"},"name":"Column00745","title":"Other Attributes"},"id":"1467","type":"Panel"}],"root_ids":["1333","1477"]},"title":"Bokeh Application","version":"2.3.3"}};
-    var render_items = [{"docid":"5e70e32d-9a61-4bdd-8e3e-ec9ff55a7b31","root_ids":["1333"],"roots":{"1333":"360c6ba1-9aad-47f6-a4ad-6494ae3d1f9d"}}];
+    var docs_json = {"bbbeb4d0-be89-4f33-97f5-b5e371230318":{"defs":[{"extends":null,"module":null,"name":"ReactiveHTML1","overrides":[],"properties":[]},{"extends":null,"module":null,"name":"FlexBox1","overrides":[],"properties":[{"default":"flex-start","kind":null,"name":"align_content"},{"default":"flex-start","kind":null,"name":"align_items"},{"default":"row","kind":null,"name":"flex_direction"},{"default":"wrap","kind":null,"name":"flex_wrap"},{"default":"flex-start","kind":null,"name":"justify_content"}]},{"extends":null,"module":null,"name":"TemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]},{"extends":null,"module":null,"name":"MaterialTemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]}],"roots":{"references":[{"attributes":{"children":[{"id":"1243"},{"id":"1244"}],"margin":[0,0,0,0],"name":"Column00313"},"id":"1242","type":"Column"},{"attributes":{"children":[[{"id":"1312"},0,0,1,1],[{"id":"1313"},0,1,1,1],[{"id":"1314"},0,2,1,1],[{"id":"1315"},1,0,1,1],[{"id":"1316"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00387"},"id":"1311","type":"GridBox"},{"attributes":{"children":[[{"id":"1263"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00332"},"id":"1262","type":"GridBox"},{"attributes":{"children":[[{"id":"1322"},0,0,1,1],[{"id":"1323"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00394"},"id":"1321","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Which rows are extracted from each camera frame","title":"camera_row_slice"},"id":"1362","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1300"},{"id":"1301"}],"margin":[0,0,0,0],"name":"Column00379"},"id":"1299","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00392","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1320","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Full Width Half Maximum for spectral bands","title":"camera_fwhm"},"id":"1363","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1282"},0,0,1,1],[{"id":"1283"},0,1,1,1],[{"id":"1284"},0,2,1,1],[{"id":"1285"},1,0,1,1],[{"id":"1286"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00355"},"id":"1281","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Unique name or identifier of vocabulary from which keywords are taken. E.g. CF:NetCDF COARDS Climate and Forecast Standard Names","title":"keywords_vocabulary"},"id":"1263","type":"TextAreaInput"},{"attributes":{"child":{"id":"1298"},"name":"Column00389","title":"Creator"},"id":"1317","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00353","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1280","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_name"},"id":"1322","type":"TextAreaInput"},{"attributes":{"child":{"id":"1318"},"name":"Column00396","title":"Contributor"},"id":"1324","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The scientific project that produced the data","title":"project"},"id":"1308","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1302"},0,0,1,1],[{"id":"1303"},0,1,1,1],[{"id":"1304"},0,2,1,1],[{"id":"1305"},1,0,1,1],[{"id":"1306"},1,1,1,1],[{"id":"1307"},1,2,1,1],[{"id":"1308"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00378"},"id":"1301","type":"GridBox"},{"attributes":{"children":[{"id":"1320"},{"id":"1321"}],"margin":[0,0,0,0],"name":"Column00395"},"id":"1319","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_role"},"id":"1323","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00376","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1300","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of last data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_end"},"id":"1274","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"acknowledge various type of support for the project that produced this data","title":"acknowledgment"},"id":"1302","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'up' or 'down'","title":"geospatial_vertical_positive"},"id":"1296","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The coordinate reference system (CRS) of the point coordinates geospatial_bounds","title":"geospatial_bounds_crs"},"id":"1283","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in longitude with units specified","title":"geospatial_lon_resolution"},"id":"1291","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Duration of the dataset in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_duration"},"id":"1285","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the vertical axis E.g. EPSG:4979","title":"geospatial_vertical_units"},"id":"1294","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in latitude with units specified","title":"geospatial_lat_resolution"},"id":"1293","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_name"},"id":"1303","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Certical spacing of points with units specified","title":"geospatial_vertical_resolution"},"id":"1295","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time period between each datapoint in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_resolution"},"id":"1286","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_url"},"id":"1304","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1335"},0,0,1,1],[{"id":"1336"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00408"},"id":"1334","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset conventions. E.g. CF-1.6, ISO 19115-2, COARDS","title":"Conventions"},"id":"1236","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_north","title":"geospatial_lat_units"},"id":"1292","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00299","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1234","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00385","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1310","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00406","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1333","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The vertical coordinate reference system (CRS) for the Z axis","title":"geospatial_bounds_vertical_crs"},"id":"1284","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"publisher_type"},"id":"1335","type":"TextAreaInput"},{"attributes":{"reload":false},"id":"1366","type":"panel.models.location.Location"},{"attributes":{"child":{"id":"1325"},"name":"Column00410","title":"Publisher"},"id":"1337","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_institution"},"id":"1312","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00414","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1340","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was last modified","title":"date_modified"},"id":"1314","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Email address of those responsible for publishing the data, with its current metadata and format","title":"publisher_institution"},"id":"1336","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"creator_type"},"id":"1313","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this metadata was last modified","title":"date_metadata_modified"},"id":"1315","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was formally issued","title":"date_issued"},"id":"1316","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The method of production of the original data. E.g. model-generated","title":"source"},"id":"1344","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1236"}],"margin":[0,0,0,0],"name":"Row00301"},"id":"1235","type":"Row"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The north, south, east, west bouding box","title":"geospatial_bounds"},"id":"1282","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1319"}],"margin":[0,0,0,0],"name":"Column00396"},"id":"1318","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A textual description of the processing (or quality control) level of the data","title":"processing_level"},"id":"1342","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1348"},0,0,1,1],[{"id":"1349"},0,1,1,1],[{"id":"1350"},0,2,1,1],[{"id":"1351"},1,0,1,1],[{"id":"1352"},1,1,1,1],[{"id":"1353"},1,2,1,1],[{"id":"1354"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00427"},"id":"1347","type":"GridBox"},{"attributes":{"children":[{"id":"1346"},{"id":"1347"}],"margin":[0,0,0,0],"name":"Column00428"},"id":"1345","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Published or web-based references that describe the data or methods used to produce it","title":"references"},"id":"1354","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1310"},{"id":"1311"}],"margin":[0,0,0,0],"name":"Column00388"},"id":"1309","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00425","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1346","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Describe the restrictions to data access and distribution","title":"license"},"id":"1343","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset datatype","title":"cdm_data_type"},"id":"1348","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1326"},{"id":"1332"}],"margin":[0,0,0,0],"name":"Column00410"},"id":"1325","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which the data was created","title":"date_created"},"id":"1307","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1342"},0,0,1,1],[{"id":"1343"},0,1,1,1],[{"id":"1344"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00416"},"id":"1341","type":"GridBox"},{"attributes":{"children":[{"id":"1280"},{"id":"1281"}],"margin":[0,0,0,0],"name":"Column00356"},"id":"1279","type":"Column"},{"attributes":{"child":{"id":"1278"},"name":"Column00368","title":"Other Extent"},"id":"1297","type":"Panel"},{"attributes":{"child":{"id":"1356"},"name":"Column00438","title":"Instrument"},"id":"1364","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the contributing instrument(s) or sensor(s) used to create this data set or product","title":"instrument"},"id":"1349","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1251"},{"id":"1252"},{"id":"1253"}],"margin":[0,0,0,0],"name":"Row00320"},"id":"1250","type":"Row"},{"attributes":{"client_comm_id":"566c7abe5ace452895c05140a67eda17","comm_id":"6db3a418c758426b843212dbe55804dc","plot_id":"1221"},"id":"1365","type":"panel.models.comm_manager.CommManager"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_email"},"id":"1305","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1222"},{"id":"1223"},{"id":"1230"}],"margin":[0,0,0,0],"name":"Column00443"},"id":"1221","type":"Column"},{"attributes":{"children":[[{"id":"1360"},0,0,1,1],[{"id":"1361"},0,1,1,1],[{"id":"1362"},0,2,1,1],[{"id":"1363"},1,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00436"},"id":"1359","type":"GridBox"},{"attributes":{"children":[{"id":"1299"},{"id":"1309"}],"margin":[0,0,0,0],"name":"Column00389"},"id":"1298","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00318","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1249","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1290"},0,0,1,1],[{"id":"1291"},0,1,1,1],[{"id":"1292"},0,2,1,1],[{"id":"1293"},1,0,1,1],[{"id":"1294"},1,1,1,1],[{"id":"1295"},1,2,1,1],[{"id":"1296"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00366"},"id":"1289","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A short description of the dataset","title":"title"},"id":"1251","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1255"},{"id":"1256"}],"margin":[0,0,0,0],"name":"Column00328"},"id":"1254","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_east","title":"geospatial_lon_units"},"id":"1290","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00434","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1358","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"institution"},"id":"1306","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1288"},{"id":"1289"}],"margin":[0,0,0,0],"name":"Column00367"},"id":"1287","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Exposure time for each camera frame in ms","title":"camera_exposure_time"},"id":"1360","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00364","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1288","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A paragraph describing the dataset","title":"summary"},"id":"1252","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Gain used for the camera","title":"camera_gain"},"id":"1361","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1358"},{"id":"1359"}],"margin":[0,0,0,0],"name":"Column00437"},"id":"1357","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A comma separated list of key words and phrases","title":"keywords"},"id":"1253","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1357"}],"margin":[0,0,0,0],"name":"Column00438"},"id":"1356","type":"Column"},{"attributes":{"children":[{"id":"1333"},{"id":"1334"}],"margin":[0,0,0,0],"name":"Column00409"},"id":"1332","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00310","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1243","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The organization that provides the initial id","title":"naming_authority"},"id":"1241","type":"TextAreaInput"},{"attributes":{"child":{"id":"1247"},"name":"Column00334","title":"Text"},"id":"1264","type":"Panel"},{"attributes":{"child":{"id":"1338"},"name":"Column00429","title":"Other Attributes"},"id":"1355","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00400","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1327","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Link to a complete metadata record (or collection)","title":"metadata_link"},"id":"1245","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's URL. Can be an individual or an institution","title":"publisher_url"},"id":"1330","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1267"},{"id":"1268"}],"margin":[0,0,0,0],"name":"Column00346"},"id":"1266","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's name. Can be an individual or an institution","title":"publisher_name"},"id":"1329","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's email. Can be an individual or an institution","title":"publisher_email"},"id":"1331","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The name of the controlled vocabulary from which variable standard names are taken","title":"standard_name_vocabulary"},"id":"1257","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1340"},{"id":"1341"}],"margin":[0,0,0,0],"name":"Column00417"},"id":"1339","type":"Column"},{"attributes":{"children":[[{"id":"1329"},0,0,1,1],[{"id":"1330"},0,1,1,1],[{"id":"1331"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00402"},"id":"1328","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum altitude","title":"geospatial_vertical_max"},"id":"1276","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1224"},{"id":"1225"},{"id":"1229"}],"margin":[0,0,0,0],"name":"Row00442"},"id":"1223","type":"Row"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum latitude","title":"geospatial_lat_max"},"id":"1270","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1257"},0,0,1,1],[{"id":"1258"},0,1,1,1],[{"id":"1259"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00327"},"id":"1256","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter path string here...","title":"File path:"},"id":"1224","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum longitude","title":"geospatial_lon_max"},"id":"1272","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of first data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_start"},"id":"1273","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1261"},{"id":"1262"}],"margin":[0,0,0,0],"name":"Column00333"},"id":"1260","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00305","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1238","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00343","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1267","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1327"},{"id":"1328"}],"margin":[0,0,0,0],"name":"Column00403"},"id":"1326","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Miscellaneous information about the data.","title":"comment"},"id":"1259","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Globally unique identifier for the dataset","title":"id"},"id":"1240","type":"TextAreaInput"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Update Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1227","type":"Button"},{"attributes":{"children":[{"id":"1339"},{"id":"1345"}],"margin":[0,0,0,0],"name":"Column00429"},"id":"1338","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00325","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1255","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1240"},0,0,1,1],[{"id":"1241"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00307"},"id":"1239","type":"GridBox"},{"attributes":{"children":[{"id":"1266"}],"margin":[0,0,0,0],"name":"Column00347"},"id":"1265","type":"Column"},{"attributes":{"child":{"id":"1232"},"name":"Column00314","title":"Identification Reference"},"id":"1246","type":"Panel"},{"attributes":{"children":[[{"id":"1269"},0,0,1,1],[{"id":"1270"},0,1,1,1],[{"id":"1271"},0,2,1,1],[{"id":"1272"},1,0,1,1],[{"id":"1273"},1,1,1,1],[{"id":"1274"},1,2,1,1],[{"id":"1275"},2,0,1,1],[{"id":"1276"},2,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00345"},"id":"1268","type":"GridBox"},{"attributes":{"children":[[{"id":"1245"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00312"},"id":"1244","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum altitude","title":"geospatial_vertical_min"},"id":"1275","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1226"},{"id":"1227"},{"id":"1228"}],"margin":[0,0,0,0],"name":"Column00441"},"id":"1225","type":"Column"},{"attributes":{"children":[{"id":"1248"},{"id":"1254"},{"id":"1260"}],"margin":[0,0,0,0],"name":"Column00334"},"id":"1247","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00330","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1261","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum longitude","title":"geospatial_lon_min"},"id":"1271","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1231"}],"margin":[0,0,0,0],"name":"Column00440"},"id":"1230","type":"Column"},{"attributes":{"children":[{"id":"1234"},{"id":"1235"}],"margin":[0,0,0,0],"name":"Column00302"},"id":"1233","type":"Column"},{"attributes":{"margin":[5,10,5,10],"name":""},"id":"1229","type":"Div"},{"attributes":{"child":{"id":"1265"},"name":"Column00347","title":"Extent"},"id":"1277","type":"Panel"},{"attributes":{"children":[{"id":"1233"},{"id":"1237"},{"id":"1242"}],"margin":[0,0,0,0],"name":"Column00314"},"id":"1232","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum latitude","title":"geospatial_lat_min"},"id":"1269","type":"TextAreaInput"},{"attributes":{"margin":[0,0,0,0],"tabs":[{"id":"1246"},{"id":"1264"},{"id":"1277"},{"id":"1297"},{"id":"1317"},{"id":"1324"},{"id":"1337"},{"id":"1355"},{"id":"1364"}]},"id":"1231","type":"Tabs"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Provides an audit trail for modifications to the original data","title":"history"},"id":"1258","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Version identifier of the data file or product as assigned by the data creator","title":"product_version"},"id":"1352","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1238"},{"id":"1239"}],"margin":[0,0,0,0],"name":"Column00308"},"id":"1237","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Controlled vocabulary for the names used in the `instrument` attribute","title":"instrument_vocabulary"},"id":"1350","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1279"},{"id":"1287"}],"margin":[0,0,0,0],"name":"Column00368"},"id":"1278","type":"Column"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Export to JSON","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1228","type":"Button"},{"attributes":{"children":[{"id":"1249"},{"id":"1250"}],"margin":[0,0,0,0],"name":"Column00321"},"id":"1248","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00292","text":"&lt;p&gt;&lt;strong&gt;Interactive Metadata Editor&lt;/strong&gt;: ISO 19115-2&lt;/p&gt;"},"id":"1222","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The overarching program(s) of which the dataset is a part","title":"program"},"id":"1353","type":"TextAreaInput"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Extract Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1226","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the platform(s) E.g. satellite, ship, station, aircraft","title":"platform"},"id":"1351","type":"TextAreaInput"}],"root_ids":["1221","1365","1366"]},"title":"Bokeh Application","version":"2.3.3"}};
+    var render_items = [{"docid":"bbbeb4d0-be89-4f33-97f5-b5e371230318","root_ids":["1221"],"roots":{"1221":"49d2fca6-c6f5-483a-abfe-7db4be09d7e4"}}];
     root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
   }
   if (root.Bokeh !== undefined && root.Bokeh.Panel !== undefined) {
