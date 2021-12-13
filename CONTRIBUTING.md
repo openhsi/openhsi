@@ -2,21 +2,55 @@
 
 ## How to get started
 
-Clone the repository
+Clone the repository (this is a shallow clone, remove depth tag for full history, much larger due to notebooks).
 ```
-git clone https://github.com/YiweiMao/openhsi
+git clone --depth 1 git@github.com:openhsi/openhsi.git
 cd openhsi
 ```
 
-You will need to install `nbdev` to extract the library and produce the documentation files from the notebooks. To upload to PyPi, you will need to install `twine` (so far, only yours truely can do this).
-```
-pip install nbdev
-pip install twine
-```
+You will need to install `nbdev` to extract the library and produce the documentation files from the notebooks. This should be done in the enviroment setup below.
 
-Before anything else, please install the git hooks that run automatic scripts during each commit and merge to strip the notebooks of superfluous metadata (and avoid merge conflicts). After cloning the repository, run the following command inside it:
+Before anything else, please install the git hooks that run automatic scripts during each commit and merge to strip the notebooks of superfluous metadata (and avoid merge conflicts). After cloning the repository and setting enviroment, run the following command inside it:
 ```
 nbdev_install_git_hooks
+```
+
+## Setuping up Python enviroment
+
+We recommend miniconda (https://docs.conda.io/en/latest/miniconda.html) or Miniforge (https://github.com/conda-forge/miniforge) as the base eniviroment for minimal effort. However any modern python install (py>3.6) should work.
+
+### Setup via conda
+Install all python dependancies for OpenHSI (excepts cameras) and 6SV.
+
+    conda env create -f environment.yml
+
+### Setup via pip
+
+    pip install -e .
+
+#### Install 6SV (only needed for pip install)
+
+    git clone https://github.com/robintw/6S.git
+    cd 6S
+    cmake -D CMAKE_INSTALL_PREFIX=/usr/local .
+
+
+### Install LUCIDVISION SDK (Sydney Photonics/Robonation OpenHSI)
+The Robonation OpenHSI uses the detectr fromLucid Vision systems. The full SDK is required to use the sensor with the OpenHSI libary. This can be aquirred from https://thinklucid.com/downloads-hub/.
+
+To ensure opitmal performace you need to make sure your GigE link is setup for jumbo packets.
+
+On Ubuntu system this can be done using (you may want to set this up to occur on startup):
+    
+    sudo ip link set eth0 mtu 9000
+
+
+### Weird Specific things using some cameras
+
+#### fix ximea thread warning
+```
+    sudo setcap cap_sys_nice+ep readlink -f $(which python)
+    sudo setcap cap_sys_nice+ep readlink -f $(which jupyter)
 ```
 
 ## A note on how the automation tools are set up
@@ -37,25 +71,6 @@ Docs are automatically created from the notebooks. The terminal command is
 ```
 make docs
 ```
-
-## Uploading to PyPi
-
-Version number is automatically incremented and uploaded to PyPi so people can `pip install openhsi`. To set this up, you first need to make an account on PyPi, then create a file `~/.pypirc` with the contents
-```
-[pypi]
-username = your_pypi_username
-password = your_pypi_password
-```
-
-To upload to PyPi, enter
-```
-make release
-```
-into the terminal. If you don't want to increment the version number, use `make pypi` instead.
-
-Settings such as dependencies, licence, version number, status, etc, can be changed in the `settings.ini` file.
-
-To include calibration files in the PyPi install, you need to add the file to the `MANIFEST.in` file. 
 
 
 ## Updating changes to GitHub

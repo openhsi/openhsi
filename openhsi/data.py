@@ -333,7 +333,7 @@ class DateTimeBuffer():
     """Records timestamps in UTC time."""
     def __init__(self, n:int = 16):
         """Initialise a nx1 array and write index"""
-        self.data = np.arange(datetime.now(), datetime.now() + timedelta(seconds=n-1), timedelta(seconds=1)).astype(datetime)
+        self.data = np.arange(n).astype(datetime)
         self.n = n
         self.write_pos = 0
 
