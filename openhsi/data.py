@@ -16,8 +16,6 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from PIL import Image
 from scipy.signal import decimate
-import holoviews as hv
-hv.extension('bokeh',logo=False)
 
 from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Optional
 import json
@@ -455,6 +453,7 @@ def show(self:DataCube, plot_lib:str = "bokeh",
          robust:bool = False, hist_eq:bool = False) -> "bokeh or matplotlib plot":
     """Generate a histogram equalised RGB plot from chosen RGB wavelengths.
     The plotting backend can be specified by plot_lib and can be "bokeh" or "matplotlib". """
+    import holoviews as hv
     hv.extension(plot_lib,logo=False)
 
     rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)

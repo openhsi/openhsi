@@ -263,11 +263,11 @@ def topk_spectra(self:SpectralMatcher,spectrum:np.array,k:int=5,refine=True):
 @delegates()
 class ELC(SpectralMatcher):
 
-    def __init__(self,nc_path:str,**kwargs):
+    def __init__(self,nc_path:str,old_style:bool=False,**kwargs):
         """Apply ELC for radiance datacubes"""
 
         self.dc = DataCube()
-        self.dc.load_nc(nc_path)
+        self.dc.load_nc(nc_path,old_style)
         self.RGB = self.dc.show("bokeh",robust=True).opts(height=250, width=1000, invert_yaxis=True,tools=["tap"],toolbar="below")
         self.a_ELC = np.ones((self.dc.dc.data.shape[-1],))
         self.b_ELC = np.zeros((self.dc.dc.data.shape[-1],))
