@@ -154,7 +154,10 @@ class CameraProperties():
 # Cell
 
 @patch
-def tfm_setup(self:CameraProperties, more_setup:Callable[[CameraProperties],None] = None, dtype:Union[np.int32,np.float32] = np.int32):
+def tfm_setup(self:CameraProperties,
+              more_setup:Callable[[CameraProperties],None] = None,
+              dtype:Union[np.int32,np.float32] = np.int32,
+              lvl:int = 0):
     """Setup for transforms"""
     # for fast smile correction
     self.smiled_size = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"]) )
@@ -186,14 +189,15 @@ def tfm_setup(self:CameraProperties, more_setup:Callable[[CameraProperties],None
     self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
     #
     self.dark_current = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
-                        self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0).to_array() )
+                        self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0) )
     self.ref_luminance = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
-                         self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]).to_array() - \
+                         self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]) - \
                          self.dark_current )
     self.spec_rad_ref = np.float32(self.calibration["sfit"](self.calibration["wavelengths"]))
 
-    # # prep for converting radiance to reflectance
-    # self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
+    # prep for converting radiance to reflectance
+    if lvl == 6 or lvl == 8:
+        self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
 
     if more_setup is not None:
         more_setup(self)
@@ -312,7 +316,7 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
     self.dtype_in = np.float32 if lvl in (4,) else np.int32 # we need floats if we convert to radiance from the beginning
     self.dtype_out = np.float32 if lvl in (3,4,5,6,7,) else np.int32
     if len(self.tfm_list) > 0:
-        self.tfm_setup(dtype=self.dtype_in)
+        self.tfm_setup(dtype=self.dtype_in, lvl=lvl)
         self.dc_shape = self.pipeline(self.calibration["flat_field_pic"]).shape
     else:
         self.dc_shape = tuple(self.settings["resolution"])

@@ -200,7 +200,7 @@ class SettingsBuilderMixin():
     def update_intsphere_cube(self,exposures:np.array,
                               luminances:np.array,
                               noframe:int=10,
-                              lum_chg_func=print,
+                              lum_chg_func:Callable=print,
                               interactive:bool=False,
                               ):
         shape = (np.ptp(self.settings["row_slice"]),self.settings["resolution"][1],len(exposures),len(luminances))
@@ -233,7 +233,7 @@ class SettingsBuilderMixin():
                                                  coords=dict(cross_track=(["cross_track"],np.arange(shape[0])),
                                                           wavelength_index=(["wavelength_index"],np.arange(shape[1])),
                                                           exposure=(["exposure"],exposures),
-                                                          luminance=(["luminance"],luminances)), attrs={})
+                                                          luminance=(["luminance"],luminances)), attrs={}).to_array()
 
 
 # Cell
@@ -256,8 +256,15 @@ import socket
 import collections
 import time
 import math
-import winsound
 
+try:
+    import winsound
+except ImportError:
+    def playAlert():
+        pass
+else:
+    def playAlert():
+        winsound.MessageBeep(type=winsound.MB_ICONHAND)
 
 class specta_pt_contoller:
     def __init__(self,
@@ -299,7 +306,7 @@ class specta_pt_contoller:
             lum.append(float(self.client("det:1:sca?")))
             time.sleep(0.1)
 
-        winsound.MessageBeep(type=winsound.MB_ICONHAND)
+        playAlert()
 
         return np.abs((np.mean(lum)-lumtarget))
 
