@@ -54,6 +54,15 @@ class OpenHSI(DataCube):
                 self.cam_temperatures.put( self.get_temp() )
         self.stop_cam()
 
+    def getNimgs(self, numframes):
+        data = np.zeros(tuple(self.settings['resolution'])+(numframes,),np.int32)
+
+        self.start_cam()
+        for f in range(numframes):
+            data[:,:,f]=self.get_img()
+        self.stop_cam()
+        return data
+
 
 # Cell
 
