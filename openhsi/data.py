@@ -186,14 +186,14 @@ def tfm_setup(self:CameraProperties, more_setup:Callable[[CameraProperties],None
     self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
     #
     self.dark_current = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
-                        self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0).isel(luminance=0) )
+                        self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0).to_array() )
     self.ref_luminance = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
-                         self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]) - \
+                         self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]).to_array() - \
                          self.dark_current )
     self.spec_rad_ref = np.float32(self.calibration["sfit"](self.calibration["wavelengths"]))
 
-    # prep for converting radiance to reflectance
-    self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
+    # # prep for converting radiance to reflectance
+    # self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
 
     if more_setup is not None:
         more_setup(self)

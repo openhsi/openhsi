@@ -162,26 +162,41 @@ class LucidCamera(OpenHSI):
 
         try:
             from arena_api.system import system as arsys
-
             self.arsys = arsys  # make avalaible for later access just in case.
             arsys.destroy_device() # reset an existing connections.
+
         except ModuleNotFoundError:
             warnings.warn(
                 "ModuleNotFoundError: No module named 'arena_api'.", stacklevel=2
             )
 
         #init api and connect to device
+#         try:
+#             self.arsys.device_infos
+#             print("2")
+#             if self.settings["mac_addr"]:
+#                 device_infos={"mac": self.settings["mac_addr"]} # use specfic camera
+#                 print("3")
+#             else:
+#                 device_infos={} # or use first camera found
+
+#             # self.device = arsys.create_device(device_infos=[{"mac": mac_addr}])[0]
+
+#             self.device = arsys.create_device(device_infos=[device_infos])[0]
+#         except:
+#             warnings.warn(
+#                 "DeviceNotFoundError: Please connect a lucid vision camera and run again.",
+#                 stacklevel=2)
+
         try:
             self.arsys.device_infos
-            if self.settings["mac_addr"]:
-                device_infos={"mac": self.settings["mac_addr"]} # use specfic camera
-            else:
-                device_infos={} # or use first camera found
+            #self.device = arsys.create_device(device_infos=[{"mac": mac_addr}])[0]
             self.device = arsys.create_device()[0]
         except:
             warnings.warn(
                 "DeviceNotFoundError: Please connect a lucid vision camera and run again.",
-                stacklevel=2)
+                stacklevel=2,
+            )
 
         # allow api to optimise stream
         tl_stream_nodemap = self.device.tl_stream_nodemap
@@ -217,34 +232,41 @@ class LucidCamera(OpenHSI):
             ]
         )
 
-        (self.deviceSettings["Height"].value, self.deviceSettings["Width"].value) = (
-            (self.settings["win_resolution"][1], self.settings["win_resolution"][0]) if self.settings["win_resolution"][0] else (self.deviceSettings["Height"].max,  self.deviceSettings["Width"].max)
-        )
-
-#         self.deviceSettings["Height"].value = self.settings["win_resolution"][1] if self.settings["win_resolution"][1] else self.deviceSettings["Height"].max
-#         self.deviceSettings["Width"].value = self.settings["win_resolution"][0] if self.settings["win_resolution"][0] else self.deviceSettings["Width"].max
-
-        (self.deviceSettings["OffsetY"].value, self.deviceSettings["OffsetX"].value) = (
-            (self.settings["win_offset"][1], self.settings["win_offset"][0]) if self.settings["win_offset"][0] else (self.deviceSettings["OffsetX"].max,  self.deviceSettings["OffsetY"].max)
-        )
-
-#         self.deviceSettings["OffsetY"].value = self.settings["win_offset"][1] if self.settings["win_offset"][1] else self.deviceSettings["OffsetX"].max
-#         self.deviceSettings["OffsetX"].value = self.settings["win_offset"][0] if self.settings["win_offset"][0] else self.deviceSettings["OffsetY"].max
-
-        self.deviceSettings["ExposureAuto"].value = "Off" # always off as we need to match exposure to calibration data
-        self.deviceSettings["ExposureTime"].value = self.settings["exposure_ms"] * 1000.0 # requires time in us float
-        self.settings["exposure_ms"] = self.deviceSettings["ExposureTime"].value/1000.00  # exposure time rounds, so storing actual value
-
-        self.deviceSettings["Gain"].value = 0.0 # always 0 as we need to match to calibration data
-
+        # set pixel settings
+        self.deviceSettings["BinningHorizontal"].value = self.settings["binxy"][0] # binning is symetric on this sensor, no need to set vertical
         self.deviceSettings["PixelFormat"].value = self.settings["pixel_format"]
 
-        self.deviceSettings["BinningHorizontal"].value = self.settings["binxy"][0] # binning is symetric on this sensor, no need to set vertical
+        # always reset to no window.
+        self.deviceSettings["OffsetY"].value = 0
+        self.deviceSettings["OffsetX"].value = 0
+        self.deviceSettings["Height"].value = self.deviceSettings["Height"].max
+        self.deviceSettings["Width"].value = self.deviceSettings["Width"].max
+
+        # print("Setting window to: height {}, offset y {}, width {}, offsetx {}".format(self.settings["win_resolution"][0],
+        #                                                                     self.settings["win_offset"][0],
+        #                                                                     self.settings["win_resolution"][1],
+        #                                                                     self.settings["win_offset"][1])
+        #      )
+
+        # set window up.
+        self.deviceSettings["Height"].value = self.settings["win_resolution"][0] if self.settings["win_resolution"][0] > 0 else self.deviceSettings["Height"].max
+        self.deviceSettings["Width"].value = self.settings["win_resolution"][1] if self.settings["win_resolution"][1] > 0 else self.deviceSettings["Width"].max
+
+        self.deviceSettings["OffsetY"].value = self.settings["win_offset"][0] if self.settings["win_offset"][0] > 0 else self.deviceSettings["OffsetY"].max
+        self.deviceSettings["OffsetX"].value = self.settings["win_offset"][1] if self.settings["win_offset"][1] > 0 else self.deviceSettings["OffsetX"].max
+
+        # set exposure realted props
+        self.deviceSettings["ExposureAuto"].value = "Off" # always off as we need to match exposure to calibration data
+        self.set_exposure(self.settings["exposure_ms"])
+
+        self.set_gain(0) # default to 0 as we need to match to calibration data
 
         self.rows, self.cols = (
             self.deviceSettings["Height"].value,
             self.deviceSettings["Width"].value,
         )
+
+        self.settings['camera_id'] = self.deviceSettings["DeviceUserID"].value
 
     def __exit__(self, *args, **kwargs):
         self.device.stop_stream()
@@ -255,6 +277,29 @@ class LucidCamera(OpenHSI):
 
     def stop_cam(self):
         self.device.stop_stream()
+
+    def set_exposure(self,exposure_ms):
+
+        if exposure_ms < self.deviceSettings["ExposureTime"].min/1000.0:
+            exposure_us=self.deviceSettings["ExposureTime"].min
+        else:
+            exposure_us = exposure_ms*1000.0
+
+        nominal_framerate = 1_000_000.0/exposure_us*0.98
+
+        # print("nominal_framerate {}, exposure_us {}".format(nominal_framerate,exposure_us))
+
+        if  nominal_framerate < self.deviceSettings['AcquisitionFrameRate'].max:
+            self.deviceSettings["AcquisitionFrameRateEnable"].value=True
+            self.deviceSettings['AcquisitionFrameRate'].value = nominal_framerate
+        else:
+            self.deviceSettings["AcquisitionFrameRateEnable"].value=False
+
+        self.deviceSettings["ExposureTime"].value = exposure_us # requires time in us float
+        self.settings["exposure_ms"] = self.deviceSettings["ExposureTime"].value/1000.00  # exposure time rounds, so storing actual value
+
+    def set_gain(self,gain_val):
+        self.deviceSettings["Gain"].value = gain_val * 1. # make float always
 
     def get_img(self) -> np.ndarray:
         image_buffer = self.device.get_buffer()
