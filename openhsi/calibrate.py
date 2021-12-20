@@ -74,14 +74,14 @@ class SettingsBuilderMixin():
     def update_resolution(self) -> None:
         self.settings["resolution"] = np.shape(self.calibration["flat_field_pic"])
 
-    def update_row_minmax(self) -> "figure object":
+    def update_row_minmax(self, edgezone:int=4) -> "figure object":
         """"""
         col_summed = np.sum(self.calibration["flat_field_pic"],axis=1)
         edges      = np.abs(np.gradient(col_summed))
         locs       = find_peaks(edges, height=5000, width=1.5, prominence=0.01)[0]
         print("Locs row_min: {} and row_max: {}".format(locs[0],locs[1]))
-        row_min  = int(locs[0]+2) # shift away from the edge a little to make sure we are in well lit region
-        row_max = int(locs[-1])
+        row_min  = int(locs[0]+edgezone) # shift away from the edges a little to make sure we are in well lit region
+        row_max = int(locs[-1]-edgezone)
         num   = len(col_summed)
         big   = np.max(col_summed)
         self.settings["row_slice"] = (row_min,row_max)
@@ -270,7 +270,7 @@ class specta_pt_contoller:
     def __init__(self,
                  lum_preset_dict={0:1, 1000:2, 2000:3, 3000:4, 4000:5, 5000:6,
                                   6000:7, 7000:8, 8000:9, 9000:10, 10000:11,
-                                  20000:12, 25000:12, 30000:13, 35000:14, 40000:15},
+                                  20000:12, 25000:13, 30000:14, 35000:15, 40000:16},
                  host="localhost",
                  port=3434):
         self.lum_preset_dict=lum_preset_dict
