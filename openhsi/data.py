@@ -159,44 +159,48 @@ def tfm_setup(self:CameraProperties,
               dtype:Union[np.int32,np.float32] = np.int32,
               lvl:int = 0):
     """Setup for transforms"""
-    # for fast smile correction
-    self.smiled_size = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"]) )
-    self.line_buff = CircArrayBuffer(self.smiled_size, axis=0, dtype=dtype)
+    if lvl in [1,2,3,4,5,6]:
+        # for fast smile correction
+        self.smiled_size = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"]) )
+        self.line_buff = CircArrayBuffer(self.smiled_size, axis=0, dtype=dtype)
 
-    # for collapsing spectral pixels into bands
-    self.byte_sz = dtype(0).nbytes
-    self.width = np.uint16(self.settings["fwhm_nm"]*self.settings["resolution"][1]/np.ptp(self.calibration["wavelengths_linear"]))
-    self.bin_rows = np.ptp(self.settings["row_slice"])
-    self.bin_cols = self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"])
-    self.reduced_shape = (self.bin_rows,self.bin_cols//self.width,self.width)
+        # for collapsing spectral pixels into bands
+        self.byte_sz = dtype(0).nbytes
+        self.width = np.uint16(self.settings["fwhm_nm"]*self.settings["resolution"][1]/np.ptp(self.calibration["wavelengths_linear"]))
+        self.bin_rows = np.ptp(self.settings["row_slice"])
+        self.bin_cols = self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"])
+        self.reduced_shape = (self.bin_rows,self.bin_cols//self.width,self.width)
 
-    # update the wavelengths for fast binning
-    self.binned_wavelengths = self.calibration["wavelengths_linear"].astype(np.float32)
-    self.binned_wavelengths = np.lib.stride_tricks.as_strided(self.binned_wavelengths,
-                                        strides=(self.width*4,4), # assumed np.float32
-                                        shape=(len(self.binned_wavelengths)//self.width,self.width))
-    self.binned_wavelengths = np.around(self.binned_wavelengths.mean(axis=1),decimals=1)
+    if lvl in [2,3,4,5,6]:
+        # update the wavelengths for fast binning
+        self.binned_wavelengths = self.calibration["wavelengths_linear"].astype(np.float32)
+        self.binned_wavelengths = np.lib.stride_tricks.as_strided(self.binned_wavelengths,
+                                            strides=(self.width*4,4), # assumed np.float32
+                                            shape=(len(self.binned_wavelengths)//self.width,self.width))
+        self.binned_wavelengths = np.around(self.binned_wavelengths.mean(axis=1),decimals=1)
 
-    # update the wavelengths for slow binning
-    n_bands = int(np.ptp(self.calibration["wavelengths"])//self.settings["fwhm_nm"])
-    # jump by `fwhm_nm` and find closest array index, then let the wavelengths be in the middle between jumps
-    self.λs = np.around(np.array([np.min(self.calibration["wavelengths"]) + i*self.settings["fwhm_nm"] for i in range(n_bands+1)]),decimals=1)
-    self.bin_idxs = [np.argmin(np.abs(self.calibration["wavelengths"]-λ)) for λ in self.λs]
-    self.λs += self.settings["fwhm_nm"]//2 #
-    self.bin_buff = CircArrayBuffer((np.ptp(self.settings["row_slice"]),n_bands), axis=1, dtype=dtype)
+    if lvl in [3]:
+        # update the wavelengths for slow binning
+        n_bands = int(np.ptp(self.calibration["wavelengths"])//self.settings["fwhm_nm"])
+        # jump by `fwhm_nm` and find closest array index, then let the wavelengths be in the middle between jumps
+        self.λs = np.around(np.array([np.min(self.calibration["wavelengths"]) + i*self.settings["fwhm_nm"] for i in range(n_bands+1)]),decimals=1)
+        self.bin_idxs = [np.argmin(np.abs(self.calibration["wavelengths"]-λ)) for λ in self.λs]
+        self.λs += self.settings["fwhm_nm"]//2 #
+        self.bin_buff = CircArrayBuffer((np.ptp(self.settings["row_slice"]),n_bands), axis=1, dtype=dtype)
 
-    # precompute some reference data for converting digital number to radiance
-    self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
-    #
-    self.dark_current = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
-                        self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0) )
-    self.ref_luminance = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
-                         self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]) - \
-                         self.dark_current )
-    self.spec_rad_ref = np.float32(self.calibration["sfit"](self.calibration["wavelengths"]))
+    if lvl in [4,5,6,7,8]:
+        # precompute some reference data for converting digital number to radiance
+        self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
+        #
+        self.dark_current = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
+                            self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0) )
+        self.ref_luminance = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
+                             self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]) - \
+                             self.dark_current )
+        self.spec_rad_ref = np.float32(self.calibration["sfit"](self.calibration["wavelengths"]))
 
     # prep for converting radiance to reflectance
-    if lvl == 6 or lvl == 8:
+    if lvl in [6, 8]:
         self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
 
     if more_setup is not None:
