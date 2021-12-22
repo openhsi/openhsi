@@ -159,7 +159,7 @@ def tfm_setup(self:CameraProperties,
               dtype:Union[np.int32,np.float32] = np.int32,
               lvl:int = 0):
     """Setup for transforms"""
-    if lvl in [1,2,3,4,5,6]:
+    if lvl in [1,2,3,4,5,6,7]:
         # for fast smile correction
         self.smiled_size = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"]) )
         self.line_buff = CircArrayBuffer(self.smiled_size, axis=0, dtype=dtype)
@@ -171,7 +171,7 @@ def tfm_setup(self:CameraProperties,
         self.bin_cols = self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"])
         self.reduced_shape = (self.bin_rows,self.bin_cols//self.width,self.width)
 
-    if lvl in [2,3,4,5,6]:
+    if lvl in [2,3,4,5,6,7]:
         # update the wavelengths for fast binning
         self.binned_wavelengths = self.calibration["wavelengths_linear"].astype(np.float32)
         self.binned_wavelengths = np.lib.stride_tricks.as_strided(self.binned_wavelengths,
@@ -190,10 +190,15 @@ def tfm_setup(self:CameraProperties,
 
     if lvl in [4,5,6,7,8]:
         # precompute some reference data for converting digital number to radiance
+
+        try:
+            radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0).isel(luminance=0)
+        except ValueError:
+            radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0)
+
         self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
         #
-        self.dark_current = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
-                            self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0) )
+        self.dark_current = np.array( self.settings["exposure_ms"]/self.nearest_exposure * radref )
         self.ref_luminance = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
                              self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]) - \
                              self.dark_current )
@@ -220,9 +225,6 @@ def fast_smile(self:CameraProperties, x:np.ndarray) -> np.ndarray:
     for i in range(self.smiled_size[0]):
             self.line_buff.put(x[i,self.calibration["smile_shifts"][i]:self.calibration["smile_shifts"][i]+self.smiled_size[1]])
     return self.line_buff.data
-
-
-
 
 
 # Cell
@@ -265,7 +267,7 @@ def dn2rad(self:CameraProperties, x:Array['λ,x',np.int32]) -> Array['λ,x',np.f
         self.dark_current = np.resize(decimate(self.dark_current,self.dark_current.shape[1]//x.shape[1]),x.shape)*mult
 
     # convert to luminance, then convert to radiance
-    return (x - self.dark_current)*self.settings["luminance"]/self.ref_luminance    *    self.spec_rad_ref/53_880
+    return (x - self.dark_current)*self.settings["luminance"]/self.ref_luminance    *    self.spec_rad_ref/self.calibration['spec_rad_ref_luminance']
 
 @patch
 def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,x',np.float32]:
@@ -364,7 +366,7 @@ class DateTimeBuffer():
 class DataCube(CameraProperties):
     """docstring."""
 
-    def __init__(self, n_lines:int = 16, processing_lvl:int = 2, **kwargs):
+    def __init__(self, n_lines:int = 16, processing_lvl:int = 2, preserve_raw:bool=False, **kwargs):
         """docstring"""
         self.n_lines = n_lines
         self.proc_lvl = processing_lvl
@@ -374,6 +376,9 @@ class DataCube(CameraProperties):
         self.timestamps = DateTimeBuffer(n_lines)
         self.dc_shape = (self.dc_shape[0],self.n_lines,self.dc_shape[1])
         self.dc = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
+        self.preserve_raw=preserve_raw
+        if self.preserve_raw:
+            self.dc_raw = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
 
     def __repr__(self):
         return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
@@ -397,12 +402,17 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
             attrs = json.load(json_file)
     else: attrs = {}
 
+    import holoviews as hv
+
     self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
-    wavelengths = self.binned_wavelengths if self.proc_lvl != 3 else self.λs
+    if hasattr(self, "binned_wavelengths"):
+        wavelengths = self.binned_wavelengths if self.proc_lvl != 3 else self.λs
+    else:
+        wavelengths = np.arange(self.dc.data.shape[2])
 
-    if getattr(self,"cam_temperatures",None):
+    if hasattr(self,"cam_temperatures"):
         self.coords = dict(wavelength=(["wavelength"],wavelengths),
                            x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
@@ -465,9 +475,15 @@ def show(self:DataCube, plot_lib:str = "bokeh",
     hv.extension(plot_lib,logo=False)
 
     rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
-    rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]
-    rgb[...,1] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-green_nm))]
-    rgb[...,2] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-blue_nm))]
+    if hasattr(self, "binned_wavelengths"):
+        rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]
+        rgb[...,1] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-green_nm))]
+        rgb[...,2] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-blue_nm))]
+    else:
+        rgb[...,0] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+        rgb[...,1] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+        rgb[...,2] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+
 
     if robust and not hist_eq: # scale everything to the 2% and 98% percentile
         vmax = np.nanpercentile(rgb, 98)
