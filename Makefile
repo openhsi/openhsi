@@ -16,7 +16,7 @@ docs: $(SRC)
 	cp assets/favicon.ico docs/_site/assets/images/favicon.ico
 
 test:
-	nbdev_test_nbs --verbose --flags test
+	nbdev_test_nbs --verbose True --flags test
 
 release: pypi
 	nbdev_bump_version

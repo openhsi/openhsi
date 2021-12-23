@@ -64,4 +64,3 @@ plugins:
     
 remote_theme: fastai/nbdev-jekyll-theme
 baseurl: /openhsi/
-theme: jekyll-theme-cayman

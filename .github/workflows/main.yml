@@ -13,13 +13,11 @@ jobs:
       run: |
         pip install nbdev jupyter
         pip install -e .
-        #conda config --add channels conda-forge
-        #conda config --set channel_priority strict
-        #conda install sixs
-        cd assets/6SV1.1
-        make clean
-        make sixs
-        cd ../..
+        conda install -c conda-forge sixs
+        #cd assets/6SV1.1
+        #make clean
+        #make sixs
+        #cd ../..
     - name: Read all notebooks
       run: |
         nbdev_read_nbs
