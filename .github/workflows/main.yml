@@ -12,34 +12,56 @@ jobs:
         uses: fkirc/skip-duplicate-actions@master
         with:
           # All of these options are optional, so you can remove them if you are happy with the defaults
-          concurrent_skipping: 'never'
+          concurrent_skipping: 'same_content_newer'
           skip_after_successful_duplicate: 'true'
           paths_ignore: '["**/README.md", "**/docs/**"]'
-          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
           
   build:
+    name: Test OpenHSI
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7]
+
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-python@v1
+    - uses: actions/checkout@v2
+
+    - name: Cache conda
+      uses: actions/cache@v2
+      env:
+        # Increase this value to reset cache if environment.yml has not changed
+        CACHE_NUMBER: 0
       with:
-        python-version: '3.7'
-        architecture: 'x64'
-    - name: Install the library
+        path: ~/conda_pkgs_dir
+        key:
+          ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+          hashFiles('environment.yml') }}
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        python-version:  ${{ matrix.python-version }}
+        activate-environment: openhsi_tests
+        environment-file: environment.yml
+        auto-activate-base: false
+        use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
+    - name: Install the OpenHSI
+      shell: bash -l {0}
       run: |
-        pip install nbdev jupyter
-        pip install -e .
-        conda install -c conda-forge sixs
-        #cd assets/6SV1.1
-        #make clean
-        #make sixs
-        #cd ../..
+        conda install conda-build
+        conda develop .
+
     - name: Read all notebooks
-      run: |
-        nbdev_read_nbs
+      shell: bash -l {0}
+      run: nbdev_read_nbs
+
     - name: Check if all notebooks are cleaned
+      shell: bash -l {0}
       run: |
         echo "Check we are starting with clean git checkout"
         git status -uno -s
@@ -49,9 +71,11 @@ jobs:
         echo "Check that strip out was unnecessary"
         git status -s # display the status to see which nbs need cleaning up
         if [ -n "$( git status -uno -s | grep -v "assets" )" ]; then echo -e "!!! Detected unstripped out notebooks\n!!!Remember to run nbdev_install_git_hooks"; false; fi
+    
     - name: Check if there is no diff library/notebooks
-      run: |
-        if [ -n "$(nbdev_diff_nbs)" ]; then echo -e "!!! Detected difference between the notebooks and the library"; false; fi
+      shell: bash -l {0}
+      run: if [ -n "$(nbdev_diff_nbs)" ]; then echo -e "!!! Detected difference between the notebooks and the library"; false; fi
+    
     - name: Run tests
-      run: |
-        nbdev_test_nbs --verbose True --flags test
+      shell: bash -l {0}
+      run: nbdev_test_nbs --verbose True --flags test
