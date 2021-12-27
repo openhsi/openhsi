@@ -112,7 +112,7 @@ class CircArrayBuffer():
 
 class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
-    def __init__(self, json_path:str = "assets/cam_settings.json", pkl_path:str = "assets/cam_calibration.pkl", print_settings=False, **kwargs):
+    def __init__(self, json_path:str = "../assets/cam_settings.json", pkl_path:str = "../assets/cam_calibration.pkl", print_settings=False, **kwargs):
         """Load the settings and calibration files"""
         self.json_path = json_path
         self.pkl_path = pkl_path

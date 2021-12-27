@@ -201,7 +201,7 @@ class SettingsBuilderMixin():
                     xlim=(final_fit(0),final_fit(len(spectra))),ylim=(0,np.max(spectra)),
                     xlabel="wavelength (nm)",ylabel="digital number",width=700,height=200,toolbar="below")
 
-    def update_intsphere_fit(self, spec_rad_ref_data="assets/112704-1-1_1nm_data.csv", spec_rad_ref_luminance:int=52_020) -> "figure object":
+    def update_intsphere_fit(self, spec_rad_ref_data="../assets/112704-1-1_1nm_data.csv", spec_rad_ref_luminance:int=52_020) -> "figure object":
 
         cal_data=np.genfromtxt(spec_rad_ref_data, delimiter=',', skip_header=1)
         wavelen=cal_data[:,0]
