@@ -1,4 +1,4 @@
-SRC = $(wildcard ./*.ipynb)
+SRC = $(wildcard ./nbs/*.ipynb)
 
 all: openhsi docs
 

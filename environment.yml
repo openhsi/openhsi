@@ -12,7 +12,7 @@ dependencies:
   - fastai::fastcore 
   - fastai::fastprogress
   - h5py
-  - xarray=0.15
+  - xarray
   - pillow
   - pandas
   - tqdm
