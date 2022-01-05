@@ -158,6 +158,7 @@ def tfm_setup(self:CameraProperties,
               more_setup:Callable[[CameraProperties],None] = None,
               dtype:Union[np.int32,np.float32] = np.int32,
               lvl:int = 0):
+
     """Setup for transforms"""
     if lvl in [1,2,3,4,5,6,7]:
         # for fast smile correction
@@ -192,21 +193,30 @@ def tfm_setup(self:CameraProperties,
         # precompute some reference data for converting digital number to radiance
 
         try:
-            radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0).isel(luminance=0)
-        except ValueError:
-            radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0)
+            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0).isel(luminance=0)
+        except (KeyError, ValueError):
+            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0)
 
         self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
-        #
-        self.dark_current = np.array( self.settings["exposure_ms"]/self.nearest_exposure * radref )
-        self.ref_luminance = np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
+
+        self.dark_current = np.squeeze( np.array( self.settings["exposure_ms"]/self.nearest_exposure * dark_radref ) )
+        self.ref_luminance = np.squeeze( np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
                              self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=self.settings["luminance"]) - \
-                             self.dark_current )
+                             self.dark_current ) )
         self.spec_rad_ref = np.float32(self.calibration["sfit"](self.calibration["wavelengths"]))
 
     # prep for converting radiance to reflectance
     if lvl in [6, 8]:
         self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
+
+    if lvl in [4, 6]:
+        self.dark_current = self.fast_bin(self.fast_smile(self.dark_current))
+        self.ref_luminance = self.fast_bin(self.fast_smile(self.ref_luminance))
+        self.spec_rad_ref = np.float32(self.calibration["sfit"]( self.binned_wavelengths ))
+
+    if lvl in [5]:
+        self.dark_current = (self.fast_smile(self.dark_current))
+        self.ref_luminance = (self.fast_smile(self.ref_luminance))
 
     if more_setup is not None:
         more_setup(self)
@@ -249,34 +259,16 @@ def slow_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
 def dn2rad(self:CameraProperties, x:Array['λ,x',np.int32]) -> Array['λ,x',np.float32]:
     """Converts digital numbers to radiance (uW/cm^2/sr/nm). Use after cropping to useable area."""
 
-    # If wavelength dimension shapes do not match, do some hacks
-    if x.shape[1] < self.spec_rad_ref.shape[0]:   # use wavelengths after binning to match input
-        self.spec_rad_ref = np.float64(self.calibration["sfit"]( self.binned_wavelengths ))
-    elif x.shape[1] > self.spec_rad_ref.shape[0]: # upsize wavelength range to match input
-        self.spec_rad_ref = np.float64(self.calibration["sfit"]( np.resize(self.calibration["wavelengths"],x.shape[1]) ))
-    if x.shape[1] > self.dark_current.shape[1]:   # upsizing rad cal variables to match input
-        mult = self.ref_luminance.size/x.size
-        self.ref_luminance = np.resize(self.ref_luminance,x.shape)*mult
-        self.dark_current  = np.resize(self.dark_current ,x.shape)*mult
-    elif x.shape[1] < self.dark_current.shape[1]: # binning radiance cal variables to match input
-        # the following two commented lines will crash the kernel using the radiance variables I have
-        #self.ref_luminance = self.fast_bin(self.ref_luminance)
-        #self.dark_current  = self.fast_bin(self.dark_current)
-        mult = self.ref_luminance.size/x.size
-        self.ref_luminance = np.resize(decimate(self.ref_luminance,self.ref_luminance.shape[1]//x.shape[1]),x.shape)*mult
-        self.dark_current = np.resize(decimate(self.dark_current,self.dark_current.shape[1]//x.shape[1]),x.shape)*mult
-
-    # convert to luminance, then convert to radiance
-    return (x - self.dark_current)*self.settings["luminance"]/self.ref_luminance    *    self.spec_rad_ref/self.calibration['spec_rad_ref_luminance']
+    return (x - self.dark_current) * self.settings["luminance"]/self.ref_luminance  *  self.spec_rad_ref/self.calibration['spec_rad_ref_luminance']
 
 @patch
 def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,x',np.float32]:
     """"""
-    # If wavelength dimension shapes do not match, do some hacks
-    if x.shape[1] < self.rad_6SV.shape[0]:   # use wavelengths after binning to match input
-        self.rad_6SV = np.float32(self.calibration["rad_fit"](self.binned_wavelengths))
-    elif x.shape[1] < self.rad_6SV.shape[0]: # upsize wavelength range to match input
-        self.rad_6SV = np.float64(self.calibration["rad_fit"]( np.resize(self.calibration["wavelengths"],x.shape[1]) ))
+    # # If wavelength dimension shapes do not match, do some hacks
+    # if x.shape[1] < self.rad_6SV.shape[0]:   # use wavelengths after binning to match input
+    #     self.rad_6SV = np.float32(self.calibration["rad_fit"](self.binned_wavelengths))
+    # elif x.shape[1] < self.rad_6SV.shape[0]: # upsize wavelength range to match input
+    #     self.rad_6SV = np.float64(self.calibration["rad_fit"]( np.resize(self.calibration["wavelengths"],x.shape[1]) ))
 
     return x/self.rad_6SV
 
@@ -306,7 +298,7 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
     elif lvl == 4:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad]
     elif lvl == 5:
-        self.tfm_list = [self.crop,self.dn2rad,self.fast_smile,self.fast_bin]
+        self.tfm_list = [self.crop,self.fast_smile,self.dn2rad,self.fast_bin]
     elif lvl == 6:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad,self.rad2ref_6SV]
     elif lvl == 7:
@@ -360,6 +352,7 @@ class DateTimeBuffer():
         if self.write_pos == self.n:
             self.write_pos = 0
 
+
 # Cell
 
 @delegates()
@@ -387,9 +380,6 @@ class DataCube(CameraProperties):
         """Applies the composed tranforms and writes the 2D array into the data cube. Stores a timestamp for each push."""
         self.timestamps.update()
         self.dc.put( self.pipeline(x) )
-
-
-
 
 
 # Cell
