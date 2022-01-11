@@ -20,9 +20,7 @@ import json
 import pickle
 
 # Cell
-
 from .data import *
-
 
 # Cell
 
