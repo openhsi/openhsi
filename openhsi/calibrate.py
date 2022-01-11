@@ -115,11 +115,11 @@ class SettingsBuilderMixin():
                         invert_axes=True,invert_yaxis=True,xlabel="row index",ylabel="pixel shift")
 
     def fit_HgAr_lines(self, top_k:int = 10,
-                       brightest_peaks:list = [435.833,546.074,763.511],
-                       interactive_peak_id:bool = False,
-                       find_peaks_height:int = 10,
-                       prominence=0.2,
-                       width=1.5) -> "figure object":
+                           brightest_peaks:list = [435.833,546.074,763.511],
+                           interactive_peak_id:bool = False,
+                           find_peaks_height:int = 10,
+                           prominence=0.2,
+                           width=1.5) -> "figure object":
         """finds the index to wavelength map given a spectra and a list of emission lines."""
 
         cropped      = self.calibration["HgAr_pic"][slice(*self.settings["row_slice"]),:]
@@ -129,8 +129,8 @@ class SettingsBuilderMixin():
         _num_idx     = self.settings["resolution"][1]-np.max(self.calibration["smile_shifts"]) # how many pixels kept per row
         shifted_idxs = np.arange(len(spectra))[_start_idx:_start_idx+_num_idx]
 
-        filtered_spec = spectra #savgol_filter(spectra, 9, 3)
-        μ, props      = find_peaks(filtered_spec, height = find_peaks_height, width = 1.5, prominence = 0.1)
+        filtered_spec = savgol_filter(spectra, 5, 3)
+        μ, props      = find_peaks(filtered_spec, height = find_peaks_height, width = width, prominence = prominence)
         A = props["peak_heights"] # amplitude
         σ = 0.5 * props["widths"] # standard deviation
         c = 0                    # constant
@@ -143,44 +143,30 @@ class SettingsBuilderMixin():
         μ = coeffs[split:2*split]
         σ = coeffs[2*split:-1]
 
-        plt.plot(filtered_spec)
-        plt.pause(1)
+        plt.subplots(figsize=(15,3))
+        plt.plot(filtered_spec,"b-",label="filtered spectra")
+        plt.plot(sum_gaussians(np.arange(len(spectra)),*coeffs),"r:",label="curve fit")
+        plt.legend(); plt.xlabel("array index"); plt.ylabel("digital number")
+        plt.show()
 
         # interpolate with top 3 spectral lines
         top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
         if interactive_peak_id:
             for i, pk in enumerate(top_A_idx.tolist()):
-                print("Peak {} at col {} - default wavelength {}:".format(i,μ[pk],brightest_peaks[i]))
+                print(f"Peak {i} at col {μ[pk]} - default wavelength {brightest_peaks[i]}:")
                 res = input()
                 if res:
                     brightest_peaks[i]=float(res)
 
-        print(top_A_idx)
-        print(A[top_A_idx])
-        print(μ[top_A_idx])
-        print(σ[top_A_idx])
-        print(brightest_peaks)
+            print(f"top_A_idx={top_A_idx}\nA[top_A_idx]={A[top_A_idx]}\nμ[top_A_idx]={μ[top_A_idx]}\nσ[top_A_idx]={σ[top_A_idx]}\nbrightest_peaks={brightest_peaks}")
 
-        # top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
+        #top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
         first_fit = np.poly1d( np.polyfit(np.sort(μ[top_A_idx]),brightest_peaks,1) )
         predicted_λ = first_fit(μ)
 
         plt.plot(first_fit(np.arange(len(spectra))))
-        plt.pause(1)
-
-        #predict wavelengths for the rest of the peaks and get the nearest indicies
-#         closest_λ=np.empty(0)
-#         it = np.nditer(predicted_λ,flags=['f_index'])
-#         for λ in it:
-#             diff = np.min(np.abs(HgAr_lines-λ))
-#             if diff>5:
-#                 np.delete(predicted_λ, it.index)
-#                 np.delete(A, it.index)
-#                 np.delete(μ, it.index)
-#                 np.delete(σ, it.index)
-
-#             else:
-#                 np.append(closest_λ,HgAr_lines[np.argmin(np.abs(HgAr_lines-λ))])
+        plt.xlabel("array index"); plt.ylabel("fitted wavelength")
+        plt.show()
 
         closest_λ = np.array([ HgAr_lines[np.argmin(np.abs(HgAr_lines-λ))] for λ in predicted_λ])
         top_A_idx = np.flip(np.argsort(A))[:max(min(top_k,len(HgAr_lines)),4)]
@@ -200,6 +186,7 @@ class SettingsBuilderMixin():
         return reduce((lambda x, y: x * y), plots_list).opts(
                     xlim=(final_fit(0),final_fit(len(spectra))),ylim=(0,np.max(spectra)),
                     xlabel="wavelength (nm)",ylabel="digital number",width=700,height=200,toolbar="below")
+
 
     def update_intsphere_fit(self, spec_rad_ref_data="../assets/112704-1-1_1nm_data.csv", spec_rad_ref_luminance:int=52_020) -> "figure object":
 

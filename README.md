@@ -43,12 +43,12 @@ If OpenHSI has been useful for your research, please acknowledge the project in 
 
 The example shown here uses a simulated camera for testing purposes. Replace `SimulatedCamera` with the appropriate Python class for your own camera to work with real hardware. For example, use `XimeaCamera` inplace of `SimulatedCamera`. 
 
-```python
+```
 #hide_output
 
 from openhsi.capture import *
 
-with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing_lvl = 3) as cam:
+with SimulatedCamera(img_path="../assets/rocky_beach.png", n_lines=1024, processing_lvl = 3) as cam:
     cam.collect()
     fig = cam.show(plot_lib="matplotlib",robust=True)
 

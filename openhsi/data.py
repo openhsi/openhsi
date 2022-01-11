@@ -112,7 +112,7 @@ class CircArrayBuffer():
 
 class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
-    def __init__(self, json_path:str = "../assets/cam_settings.json", pkl_path:str = "../assets/cam_calibration.pkl", print_settings=False, **kwargs):
+    def __init__(self, json_path:str = None, pkl_path:str = None, print_settings=False, **kwargs):
         """Load the settings and calibration files"""
         self.json_path = json_path
         self.pkl_path = pkl_path
@@ -277,15 +277,16 @@ def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,
 @patch
 def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Callable[[np.ndarray],np.ndarray]] = None):
     """Define the output `lvl` of the transform pipeline.
-    0 : raw digital numbers cropped to useable sensor area
-    1 : case 0 + fast smile correction
-    2 : case 1 + fast binning (default)
-    3 : case 1 + slow binning
-    4 : case 2 + conversion to radiance in units of uW/cm^2/sr/nm
-    5 : case 4 except radiance conversion moved to 2nd step
-    6 : case 4 + conversion to reflectance
-    7 : smile corrected and binned -> radiance
-    8 : case 7 + converted to reflectance
+    -1: do not apply any transforms,
+    0 : raw digital numbers cropped to useable sensor area,
+    1 : case 0 + fast smile correction,
+    2 : case 1 + fast binning (default),
+    3 : case 1 + slow binning,
+    4 : case 2 + conversion to radiance in units of uW/cm^2/sr/nm,
+    5 : case 4 except radiance conversion moved to 2nd step,
+    6 : case 4 + conversion to reflectance,
+    7 : smile corrected and binned -> radiance,
+    8 : case 7 + converted to reflectance.
     """
     if   lvl == 0:
         self.tfm_list = [self.crop]
@@ -316,6 +317,8 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
     if len(self.tfm_list) > 0:
         self.tfm_setup(dtype=self.dtype_in, lvl=lvl)
         self.dc_shape = self.pipeline(self.calibration["flat_field_pic"]).shape
+    elif lvl == -1:
+        self.dc_shape = (1,1) # placeholder. This is only for calibration.
     else:
         self.dc_shape = tuple(self.settings["resolution"])
 
