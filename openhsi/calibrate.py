@@ -53,182 +53,254 @@ def sum_gaussians(x:"indices np.array",
 
 # Cell
 
-class SettingsBuilderMixin():
-
-    def retake_flat_field(self, show:bool = False):
+class SettingsBuilderMixin:
+    def retake_flat_field(self, show: bool = False):
         self.start_cam()
         self.calibration["flat_field_pic"] = self.get_img()
         self.stop_cam()
 
         if show:
-            return hv.Image(self.calibration["flat_field_pic"], bounds=(0,0,*self.calibration["flat_field_pic"].shape)).opts(
-                    xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="flat field picture")
+            return hv.Image(
+                self.calibration["flat_field_pic"],
+                bounds=(0, 0, *self.calibration["flat_field_pic"].shape),
+            ).opts(
+                xlabel="wavelength index",
+                ylabel="cross-track",
+                cmap="gray",
+                title="flat field picture",
+            )
 
-    def retake_HgAr(self, show:bool = False, numframes:int=10):
+    def retake_HgAr(self, show: bool = False, numframes: int = 10):
 
-        self.calibration["HgAr_pic"] = np.mean(self.getNimgs(numframes),2)
+        self.calibration["HgAr_pic"] = np.mean(self.getNimgs(numframes), 2)
 
         if show:
-            return hv.Image(self.calibration["HgAr_pic"], bounds=(0,0,*self.calibration["HgAr_pic"].shape)).opts(
-                    xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="HgAr spectra picture")
-
+            return hv.Image(
+                self.crop(self.calibration["HgAr_pic"]),
+                bounds=(0, 0, *self.calibration["HgAr_pic"].shape),
+            ).opts(
+                xlabel="wavelength index",
+                ylabel="cross-track",
+                cmap="gray",
+                title="HgAr spectra picture",
+            )
 
     def update_resolution(self) -> None:
         self.settings["resolution"] = np.shape(self.calibration["flat_field_pic"])
 
-    def update_row_minmax(self, edgezone:int=4) -> "figure object":
+    def update_row_minmax(self, edgezone: int = 4) -> "figure object":
         """"""
-        col_summed = np.sum(self.calibration["flat_field_pic"],axis=1)
-        edges      = np.abs(np.gradient(col_summed))
-        locs       = find_peaks(edges, height=5000, width=1.5, prominence=0.01)[0]
-        print("Locs row_min: {} and row_max: {}".format(locs[0],locs[1]))
-        row_min  = int(locs[0]+edgezone) # shift away from the edges a little to make sure we are in well lit region
-        row_max = int(locs[-1]-edgezone)
-        num   = len(col_summed)
-        big   = np.max(col_summed)
-        self.settings["row_slice"] = (row_min,row_max)
+        col_summed = np.sum(self.calibration["flat_field_pic"], axis=1)
+        edges = np.abs(np.gradient(col_summed))
+        locs = find_peaks(edges, height=5000, width=1.5, prominence=0.01)[0]
+        print("Locs row_min: {} and row_max: {}".format(locs[0], locs[1]))
+        row_min = int(
+            locs[0] + edgezone
+        )  # shift away from the edges a little to make sure we are in well lit region
+        row_max = int(locs[-1] - edgezone)
+        num = len(col_summed)
+        big = np.max(col_summed)
+        self.settings["row_slice"] = (row_min, row_max)
 
-        return (hv.Curve(zip(np.arange(num),col_summed)).opts(xlabel="row index",ylabel="count",width=500) * \
-                hv.Curve(zip((row_min,row_min),(0,big)),label=f"{row_min}").opts(color="r") * \
-                hv.Curve(zip((row_max,row_max),(0,big)),label=f"{row_max}").opts(color="r") ).opts(
-                xlim=(0,num),ylim=(0,big),legend_position='top_left')
+        return (
+            hv.Curve(zip(np.arange(num), col_summed)).opts(
+                xlabel="row index", ylabel="count", width=500
+            )
+            * hv.Curve(zip((row_min, row_min), (0, big)), label=f"{row_min}").opts(
+                color="r"
+            )
+            * hv.Curve(zip((row_max, row_max), (0, big)), label=f"{row_max}").opts(
+                color="r"
+            )
+        ).opts(xlim=(0, num), ylim=(0, big), legend_position="top_left")
 
     def update_smile_shifts(self) -> "figure object":
         """"""
-        cropped = self.calibration["HgAr_pic"][slice(*self.settings["row_slice"]),:]
+        cropped = self.crop(self.calibration["HgAr_pic"])
         rows, cols = cropped.shape
 
-        window = np.int32(np.flip(cropped[rows//2,:].copy()))
+        window = np.int32(np.flip(cropped[rows // 2, :].copy()))
 
-        shifts = np.zeros((rows,),dtype=np.int16)
+        shifts = np.zeros((rows,), dtype=np.int16)
 
         for i in range(rows):
-            pattern_match = np.convolve(cropped[i,:],window,"same")
+            pattern_match = np.convolve(cropped[i, :], window, "same")
             shifts[i] = np.argmax(pattern_match)
 
-        shifts -= cols//2
-        shifts -= np.min(shifts) # make all entries positive
-        shifts = medfilt(shifts,5).astype(np.int16) # use some median smoothing
+        shifts -= cols // 2
+        shifts -= np.min(shifts)  # make all entries positive
+        shifts = medfilt(shifts, 5).astype(np.int16)  # use some median smoothing
         self.calibration["smile_shifts"] = shifts
 
-        return hv.Curve(zip(np.arange(rows),shifts)).opts(
-                        invert_axes=True,invert_yaxis=True,xlabel="row index",ylabel="pixel shift")
+        return hv.Curve(zip(np.arange(rows), shifts)).opts(
+            invert_axes=True,
+            invert_yaxis=True,
+            xlabel="row index",
+            ylabel="pixel shift",
+        )
 
-    def fit_HgAr_lines(self, top_k:int = 10,
-                       brightest_peaks:list = [435.833,546.074,763.511],
-                       interactive_peak_id:bool = False,
-                       find_peaks_height:int = 10,
-                       prominence=0.2,
-                       width=1.5) -> "figure object":
+    def fit_HgAr_lines(
+        self,
+        top_k: int = 10,
+        brightest_peaks: list = [435.833, 546.074, 763.511],
+        interactive_peak_id: bool = False,
+        find_peaks_height: int = 10,
+        prominence=0.2,
+        width=1.5,
+        distance=10,
+        max_match_error=1.5,
+    ) -> "figure object":
         """finds the index to wavelength map given a spectra and a list of emission lines."""
 
-        cropped      = self.calibration["HgAr_pic"][slice(*self.settings["row_slice"]),:]
-        rows, cols   = cropped.shape
-        spectra      = cropped[rows//2,self.calibration["smile_shifts"][rows//2]:].copy()
-        _start_idx   = self.calibration["smile_shifts"][rows//2] # get smile shifted indexes
-        _num_idx     = self.settings["resolution"][1]-np.max(self.calibration["smile_shifts"]) # how many pixels kept per row
-        shifted_idxs = np.arange(len(spectra))[_start_idx:_start_idx+_num_idx]
+        cropped = self.crop(self.calibration["HgAr_pic"])
+        rows, cols = cropped.shape
+        spectra = cropped[
+            rows // 2, self.calibration["smile_shifts"][rows // 2] :
+        ].copy()
+        _start_idx = self.calibration["smile_shifts"][
+            rows // 2
+        ]  # get smile shifted indexes
+        _num_idx = self.settings["resolution"][1] - np.max(
+            self.calibration["smile_shifts"]
+        )  # how many pixels kept per row
+        shifted_idxs = np.arange(len(spectra))[_start_idx : _start_idx + _num_idx]
 
-        filtered_spec = spectra #savgol_filter(spectra, 9, 3)
-        μ, props      = find_peaks(filtered_spec, height = find_peaks_height, width = 1.5, prominence = 0.1)
-        A = props["peak_heights"] # amplitude
-        σ = 0.5 * props["widths"] # standard deviation
-        c = 0                    # constant
-        params0 = [*A,*μ,*σ,c]   # flatten to 1D array
+        filtered_spec = spectra  # savgol_filter(spectra, 9, 3)
+        μ, props = find_peaks(
+            filtered_spec,
+            height=find_peaks_height,
+            width=width,
+            prominence=prominence,
+            distance=distance,
+        )
+        A = props["peak_heights"]  # amplitude
+        σ = 0.5 * props["widths"]  # standard deviation
+        c = 0  # constant
+        params0 = [*A, *μ, *σ, c]  # flatten to 1D array
 
         # refine the estimates from find_peaks by curve fitting Gaussians
-        coeffs, _ = curve_fit(sum_gaussians, np.arange(len(spectra)), spectra, p0=params0)
-        split = len(params0)//3
+        coeffs, _ = curve_fit(
+            sum_gaussians, np.arange(len(spectra)), spectra, p0=params0
+        )
+        split = len(params0) // 3
         A = coeffs[:split]
-        μ = coeffs[split:2*split]
-        σ = coeffs[2*split:-1]
+        μ = coeffs[split : 2 * split]
+        σ = coeffs[2 * split : -1]
 
-        plt.plot(filtered_spec)
-        plt.pause(1)
-
-        # interpolate with top 3 spectral lines
-        top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
+        # interactivly confirm  peak wavelenght
+        top_A_idx = np.flip(np.argsort(A))[: len(brightest_peaks)]
         if interactive_peak_id:
+            plt.plot(np.arange(len(spectra)), spectra)
+            plt.plot(μ[top_A_idx], A[top_A_idx], "rx")
+            plt.show()
             for i, pk in enumerate(top_A_idx.tolist()):
-                print("Peak {} at col {} - default wavelength {}:".format(i,μ[pk],brightest_peaks[i]))
+                print(
+                    "Peak {} at col {} - default wavelength {}:".format(
+                        i, μ[pk], brightest_peaks[i]
+                    )
+                )
                 res = input()
                 if res:
-                    brightest_peaks[i]=float(res)
+                    brightest_peaks[i] = float(res)
 
-        print(top_A_idx)
-        print(A[top_A_idx])
-        print(μ[top_A_idx])
-        print(σ[top_A_idx])
-        print(brightest_peaks)
-
-        # top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
-        first_fit = np.poly1d( np.polyfit(np.sort(μ[top_A_idx]),brightest_peaks,1) )
+        # interpolate with top spectral lines
+        first_fit = np.poly1d(np.polyfit(μ[top_A_idx], brightest_peaks, 1))
         predicted_λ = first_fit(μ)
+        print("predicted_λ {} for {} ".format(predicted_λ, μ))
 
-        plt.plot(first_fit(np.arange(len(spectra))))
-        plt.pause(1)
+        plt.plot(μ[top_A_idx], brightest_peaks, "xr")
+        plt.plot(np.arange(len(spectra)), first_fit(np.arange(len(spectra))))
+        plt.show()
 
-        #predict wavelengths for the rest of the peaks and get the nearest indicies
-#         closest_λ=np.empty(0)
-#         it = np.nditer(predicted_λ,flags=['f_index'])
-#         for λ in it:
-#             diff = np.min(np.abs(HgAr_lines-λ))
-#             if diff>5:
-#                 np.delete(predicted_λ, it.index)
-#                 np.delete(A, it.index)
-#                 np.delete(μ, it.index)
-#                 np.delete(σ, it.index)
+        closest_HgAr_line = np.empty(0)
+        matching_centroid = np.empty(0)
+        matching_A = np.empty(0)
+        for λ, mu, A in zip(predicted_λ, μ, A):
+            diff = np.min(np.abs(HgAr_lines - λ))
+            print(diff)
+            if diff < max_match_error:  # nm
+                closest_HgAr_line = np.append(
+                    closest_HgAr_line, HgAr_lines[np.argmin(np.abs(HgAr_lines - λ))]
+                )
+                matching_centroid = np.append(matching_centroid, mu)
+                matching_A = np.append(matching_A, A)
 
-#             else:
-#                 np.append(closest_λ,HgAr_lines[np.argmin(np.abs(HgAr_lines-λ))])
+        # closest_λ = np.array([ HgAr_lines[np.argmin(np.abs(HgAr_lines-λ))] for λ in predicted_λ])
+        top_A_idx = np.flip(np.argsort(matching_A))[
+            : max(min(top_k, len(closest_HgAr_line)), 4)
+        ]
+        final_fit = np.poly1d(
+            np.polyfit(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx], 3)
+        )
+        spec_wavelengths = final_fit(matching_centroid[top_A_idx])
 
-        closest_λ = np.array([ HgAr_lines[np.argmin(np.abs(HgAr_lines-λ))] for λ in predicted_λ])
-        top_A_idx = np.flip(np.argsort(A))[:max(min(top_k,len(HgAr_lines)),4)]
-        final_fit = np.poly1d( np.polyfit(μ[top_A_idx],closest_λ[top_A_idx] ,3) )
-        spec_wavelengths = final_fit(μ[top_A_idx])
+        plt.plot(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx], "xr")
+        plt.plot(np.arange(len(spectra)), final_fit(np.arange(len(spectra))))
+        plt.show()
 
         # update the calibration files
         self.calibration["wavelengths"] = final_fit(shifted_idxs)
-        linear_fit = np.poly1d( np.polyfit(μ[top_A_idx],closest_λ[top_A_idx] ,1) )
+        linear_fit = np.poly1d(
+            np.polyfit(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx], 1)
+        )
         self.calibration["wavelengths_linear"] = linear_fit(shifted_idxs)
 
         # create plot of fitted spectral lines
-        plots_list = [hv.Curve( zip(final_fit(np.arange(len(spectra))),spectra) )]
+        plots_list = [hv.Curve(zip(final_fit(np.arange(len(spectra))), spectra))]
         for λ in spec_wavelengths:
-            plots_list.append( hv.Curve(zip((λ,λ),(0,np.max(spectra))),).opts(color="r",alpha=0.5) )
+            plots_list.append(
+                hv.Curve(zip((λ, λ), (0, np.max(spectra)))).opts(color="r", alpha=0.5)
+            )
 
         return reduce((lambda x, y: x * y), plots_list).opts(
-                    xlim=(final_fit(0),final_fit(len(spectra))),ylim=(0,np.max(spectra)),
-                    xlabel="wavelength (nm)",ylabel="digital number",width=700,height=200,toolbar="below")
+            xlim=(final_fit(0), final_fit(len(spectra))),
+            ylim=(0, np.max(spectra)),
+            xlabel="wavelength (nm)",
+            ylabel="digital number",
+            width=700,
+            height=200,
+            toolbar="below",
+        )
 
-    def update_intsphere_fit(self, spec_rad_ref_data="../assets/112704-1-1_1nm_data.csv", spec_rad_ref_luminance:int=52_020) -> "figure object":
+    def update_intsphere_fit(
+        self,
+        spec_rad_ref_data="../assets/112704-1-1_1nm_data.csv",
+        spec_rad_ref_luminance: int = 52_020,
+        showplot=True
+    ) -> "figure object or nothing":
 
-        cal_data=np.genfromtxt(spec_rad_ref_data, delimiter=',', skip_header=1)
-        wavelen=cal_data[:,0]
-        spec_rad=cal_data[:,1]
+        cal_data = np.genfromtxt(spec_rad_ref_data, delimiter=",", skip_header=1)
+        wavelen = cal_data[:, 0]
+        spec_rad = cal_data[:, 1]
 
-        self.calibration['spec_rad_ref_luminance'] = spec_rad_ref_luminance
+        self.calibration["spec_rad_ref_luminance"] = spec_rad_ref_luminance
 
-        self.calibration["sfit"] = interp1d(wavelen, spec_rad, kind='cubic')
+        self.calibration["sfit"] = interp1d(wavelen, spec_rad, kind="cubic")
+        if showplot:
+            # plot
+            wavelen_arr = np.linspace(np.min(wavelen), np.max(wavelen), num=200)
+            spec_rad_ref = np.float64(
+                self.calibration["sfit"](self.calibration["wavelengths"])
+            )
 
-        # plot
-        wavelen_arr = np.linspace(np.min(wavelen),np.max(wavelen),num=200)
-        spec_rad_ref = np.float64(self.calibration["sfit"](self.calibration["wavelengths"]))
-
-        fig, ax = plt.subplots(figsize=(12,4))
-        ax.plot(wavelen,spec_rad,"r.",label="Manufacturer Calibration Points")
-        ax.plot(wavelen_arr,self.calibration["sfit"](wavelen_arr),label="Spline Fit")
-        ax.grid("on")
-        #plt.axis([393,827,0,200])
-        ax.set_xlabel("wavelength (nm)")
-        ax.set_ylabel("spectral radiance ($\mu$W/cm$^2$/sr/nm)")
-        ax.legend()
-        ax.axvspan(np.min(self.calibration["wavelengths"]), np.max(self.calibration["wavelengths"]), alpha=0.3, color="gray")
-        ax.axis([np.min(self.calibration["wavelengths"])-50,2500,0,200])
-        ax.text(410, 190, "OpenHSI Wavelengths", fontsize=11)
-        ax.minorticks_on()
-        return fig
-
+            fig, ax = plt.subplots(figsize=(12, 4))
+            ax.plot(wavelen, spec_rad, "r.", label="Manufacturer Calibration Points")
+            ax.plot(wavelen_arr, self.calibration["sfit"](wavelen_arr), label="Spline Fit")
+            ax.grid("on")
+            # plt.axis([393,827,0,200])
+            ax.set_xlabel("wavelength (nm)")
+            ax.set_ylabel("spectral radiance ($\mu$W/cm$^2$/sr/nm)")
+            ax.legend()
+            ax.axvspan(
+                np.min(self.calibration["wavelengths"]),
+                np.max(self.calibration["wavelengths"]),
+                alpha=0.3,
+                color="gray",
+            )
+            ax.axis([np.min(self.calibration["wavelengths"]) - 50, 2500, 0, 200])
+            ax.text(410, 190, "OpenHSI Wavelengths", fontsize=11)
+            ax.minorticks_on()
+            return fig
 
     def update_window_across_track(self, crop_buffer) -> "figure object":
         pass
@@ -236,44 +308,67 @@ class SettingsBuilderMixin():
     def update_window_along_track(self, crop_buffer) -> "figure object":
         pass
 
-    def update_intsphere_cube(self,exposures:np.array,
-                              luminances:np.array,
-                              noframe:int=10,
-                              lum_chg_func:Callable=print,
-                              interactive:bool=False,
-                              ):
-        shape = (np.ptp(self.settings["row_slice"]),self.settings["resolution"][1],len(exposures),len(luminances))
+    def update_intsphere_cube(
+        self,
+        exposures: np.array,
+        luminances: np.array,
+        noframe: int = 10,
+        lum_chg_func: Callable = print,
+        interactive: bool = False,
+    ):
+        shape = (
+            np.ptp(self.settings["row_slice"]),
+            self.settings["resolution"][1],
+            len(exposures),
+            len(luminances),
+        )
 
-        lum_buff = CircArrayBuffer(shape[:3],axis=2,dtype=np.int32)
-        rad_ref  = CircArrayBuffer(shape,axis=3,dtype=np.int32)
+        lum_buff = CircArrayBuffer(shape[:3], axis=2, dtype=np.float32)
+        rad_ref = CircArrayBuffer(shape, axis=3, dtype=np.float32)
 
         mb = master_bar(range(len(luminances)))
         for i in mb:
             mb.main_bar.comment = f"Luminance = {luminances[i]} Cd/m^2"
-            if interactive: input(f"\rLuminance = {luminances[i]} Cd/m^2. Press enter key when ready...")
+            if interactive:
+                input(
+                    f"\rLuminance = {luminances[i]} Cd/m^2. Press enter key when ready..."
+                )
 
             if luminances[i] == 0:
-                input(f"\rLuminance = 0 Cd/m^2. Place lens cap on and press enter to continue.")
+                input(
+                    f"\rLuminance = 0 Cd/m^2. Place lens cap on and press enter to continue."
+                )
             else:
                 lum_chg_func(luminances[i])
 
             for j in progress_bar(range(len(exposures)), parent=mb):
                 mb.child.comment = f"exposure = {exposures[j]} ms"
                 self.set_exposure(exposures[j])
+                exposures[j] = self.settings["exposure_ms"]  # store real exposure time
+                lum_buff.put(self.crop(np.mean(self.getNimgs(noframe), 2, dtype=np.float32)))
 
-                lum_buff.put( self.crop(np.mean(self.getNimgs(noframe),2)) )
-
-            rad_ref.put( lum_buff.data )
+            rad_ref.put(lum_buff.data)
             mb.write(f"Finished collecting at luminance {luminances[i]} Cd/m^2.")
             if luminances[i] == 0:
-                input(f"\rLuminance = 0 Cd/m^2. Remove lens cap and place on int sphere and press enter to continue.")
+                input(
+                    f"\rLuminance = 0 Cd/m^2. Remove lens cap and place on int sphere and press enter to continue."
+                )
 
-        return xr.Dataset(data_vars=dict(datacube=(["cross_track","wavelength_index","exposure","luminance"],rad_ref.data)),
-                                                 coords=dict(cross_track=(["cross_track"],np.arange(shape[0])),
-                                                          wavelength_index=(["wavelength_index"],np.arange(shape[1])),
-                                                          exposure=(["exposure"],exposures),
-                                                          luminance=(["luminance"],luminances)), attrs={}).to_array()
-
+        return xr.Dataset(
+            data_vars=dict(
+                datacube=(
+                    ["cross_track", "wavelength_index", "exposure", "luminance"],
+                    rad_ref.data,
+                )
+            ),
+            coords=dict(
+                cross_track=(["cross_track"], np.arange(shape[0])),
+                wavelength_index=(["wavelength_index"], np.arange(shape[1])),
+                exposure=(["exposure"], exposures),
+                luminance=(["luminance"], luminances),
+            ),
+            attrs={},
+        ).to_array()
 
 # Cell
 
@@ -288,13 +383,12 @@ def create_settings_builder(clsname:str, cam_class:"Camera Class") -> "SettingsB
     return type(clsname, (cam_class,SettingsBuilderMixin), {})
 
 
-
 # Cell
 
-import socket
 import collections
-import time
 import math
+import socket
+import time
 
 try:
     import winsound
@@ -305,16 +399,34 @@ else:
     def playAlert():
         winsound.MessageBeep(type=winsound.MB_ICONHAND)
 
+
 class specta_pt_contoller:
-    def __init__(self,
-                 lum_preset_dict={0:1, 1000:2, 2000:3, 3000:4, 4000:5, 5000:6,
-                                  6000:7, 7000:8, 8000:9, 9000:10, 10000:11,
-                                  20000:12, 25000:13, 30000:14, 35000:15, 40000:16},
-                 host="localhost",
-                 port=3434):
-        self.lum_preset_dict=lum_preset_dict
-        self.host=host
-        self.port=port
+    def __init__(
+        self,
+        lum_preset_dict={
+            0: 1,
+            1000: 2,
+            2000: 3,
+            3000: 4,
+            4000: 5,
+            5000: 6,
+            6000: 7,
+            7000: 8,
+            8000: 9,
+            9000: 10,
+            10000: 11,
+            20000: 12,
+            25000: 13,
+            30000: 14,
+            35000: 15,
+            40000: 16,
+        },
+        host="localhost",
+        port=3434,
+    ):
+        self.lum_preset_dict = lum_preset_dict
+        self.host = host
+        self.port = port
 
     # address and port of the SPECTRA PT-1000 S
     def client(self, msg):
@@ -323,34 +435,34 @@ class specta_pt_contoller:
 
             data = bytes.fromhex(hex(len(msg))[2:].zfill(8)) + msg.encode()
             sock.sendall(data)
-    #         print("[+] Sending {} to {}:{}".format(data, host, port))
+            #         print("[+] Sending {} to {}:{}".format(data, host, port))
 
             response1 = sock.recv(4096)
             response2 = sock.recv(4096)
 
-    #         print("[+] Received", repr(response2.decode('utf-8')))
+            #         print("[+] Received", repr(response2.decode('utf-8')))
 
-            return response2.split(b';')[2]
+            return response2.split(b";")[2]
 
     def selectPreset(self, lumtarget):
         self.client("main:1:pre {}".format(self.lum_preset_dict[lumtarget]))
         time.sleep(2)
-        lum=collections.deque(maxlen=100)
+        lum = collections.deque(maxlen=100)
 
         for i in range(100):
             lum.append(float(self.client("det:1:sca?")))
             time.sleep(0.01)
 
-        while np.abs((np.mean(lum)-lumtarget)) > lumtarget*0.0025:
+        while np.abs((np.mean(lum) - lumtarget)) > lumtarget * 0.0025:
             lum.append(float(self.client("det:1:sca?")))
             time.sleep(0.1)
 
         playAlert()
 
-        return np.abs((np.mean(lum)-lumtarget))
+        return np.abs((np.mean(lum) - lumtarget))
 
     def turnOnLamp(self):
-        response=self.client("ps:1:out 1")
+        response = self.client("ps:1:out 1")
 
     def turnOffLamp(self):
-        response=self.client("ps:1:out 0")
+        response = self.client("ps:1:out 0")
