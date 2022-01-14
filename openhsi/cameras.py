@@ -361,9 +361,9 @@ class FlirCamera(OpenHSI):
         self.flircam.GammaEnabled = False
 
         self.flircam.Width, self.flircam.Height = self.settings["win_resolution"]
-        if self.settings["win_resolution"][0] = 0:
+        if self.settings["win_resolution"][0] == 0:
             self.flircam.Width = self.flircam.SensorWidth
-        if self.settings["win_resolution"][1] = 0:
+        if self.settings["win_resolution"][1] == 0:
             self.flircam.Width = self.flircam.SensorHeight
         self.flircam.OffsetX, self.flircam.OffsetY = self.settings["win_offset"]
 
