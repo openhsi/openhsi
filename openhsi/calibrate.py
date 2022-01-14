@@ -35,6 +35,7 @@ from .data import *
 from .capture import *
 from .cameras import *
 
+
 # Cell
 
 HgAr_lines = np.array([404.656,407.783,435.833,546.074,576.960,579.066,696.543,706.722,727.294,738.393,
@@ -115,12 +116,14 @@ class SettingsBuilderMixin():
                         invert_axes=True,invert_yaxis=True,xlabel="row index",ylabel="pixel shift")
 
     def fit_HgAr_lines(self, top_k:int = 10,
-                           brightest_peaks:list = [435.833,546.074,763.511],
-                           interactive_peak_id:bool = False,
-                           find_peaks_height:int = 10,
-                           prominence=0.2,
-                           width=1.5) -> "figure object":
-        """finds the index to wavelength map given a spectra and a list of emission lines."""
+                       brightest_peaks:list = [435.833,546.074,763.511],
+                       filter_window:int = 1,
+                       interactive_peak_id:bool = False,
+                       find_peaks_height:int = 10,
+                       prominence=0.2,
+                       width=1.5) -> "figure object":
+        """Finds the index to wavelength map given a spectra and a list of emission lines.
+        To filter the spectra, set `filter_window` to an odd number > 1."""
 
         cropped      = self.calibration["HgAr_pic"][slice(*self.settings["row_slice"]),:]
         rows, cols   = cropped.shape
@@ -129,7 +132,7 @@ class SettingsBuilderMixin():
         _num_idx     = self.settings["resolution"][1]-np.max(self.calibration["smile_shifts"]) # how many pixels kept per row
         shifted_idxs = np.arange(len(spectra))[_start_idx:_start_idx+_num_idx]
 
-        filtered_spec = savgol_filter(spectra, 5, 3)
+        filtered_spec = savgol_filter(spectra, filter_window, min(3,filter_window-1))
         μ, props      = find_peaks(filtered_spec, height = find_peaks_height, width = width, prominence = prominence)
         A = props["peak_heights"] # amplitude
         σ = 0.5 * props["widths"] # standard deviation

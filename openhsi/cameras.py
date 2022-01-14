@@ -340,7 +340,7 @@ from typing import Tuple
 class FlirCamera(OpenHSI):
     """Interface for FLIR camera"""
 
-    def __init__(self, win_resolution:Tuple[int,int] = None, win_offset:Tuple[int,int] = None, exposure_us:float = 4_000, **kwargs):
+    def __init__(self, win_resolution:Tuple[int,int] = None, win_offset:Tuple[int,int] = None, exposure_us:float = 10_000, **kwargs):
         """Initialise FLIR camera"""
         super().__init__(**kwargs)
 
@@ -352,6 +352,10 @@ class FlirCamera(OpenHSI):
         self.flircam = Camera()
         self.flircam.GainAuto = 'Off'
         self.flircam.Gain = 0
+        self.flircam.AcquisitionFrameRateAuto = 'Off'
+        self.flircam.AcquisitionFrameRateEnabled = True
+        self.flircam.AcquisitionFrameRate = int(1e6/exposure_us)
+
         self.flircam.ExposureAuto = 'Off'
         self.flircam.ExposureTime = exposure_us
         self.flircam.GammaEnabled = False
@@ -376,5 +380,5 @@ class FlirCamera(OpenHSI):
         return self.flircam.get_array()
 
     def get_temp(self) -> float:
-        return 20.0
+        return self.flircam.DeviceTemperature
 
