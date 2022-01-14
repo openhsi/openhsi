@@ -340,7 +340,7 @@ from typing import Tuple
 class FlirCamera(OpenHSI):
     """Interface for FLIR camera"""
 
-    def __init__(self, win_resolution:Tuple[int,int] = None, win_offset:Tuple[int,int] = None, exposure_us:float = 10_000, **kwargs):
+    def __init__(self, **kwargs):
         """Initialise FLIR camera"""
         super().__init__(**kwargs)
 
@@ -354,16 +354,18 @@ class FlirCamera(OpenHSI):
         self.flircam.Gain = 0
         self.flircam.AcquisitionFrameRateAuto = 'Off'
         self.flircam.AcquisitionFrameRateEnabled = True
-        self.flircam.AcquisitionFrameRate = int(1e6/exposure_us)
+        self.flircam.AcquisitionFrameRate = int( 1_000/self.settings["exposure_ms"] )
 
         self.flircam.ExposureAuto = 'Off'
-        self.flircam.ExposureTime = exposure_us
+        self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
         self.flircam.GammaEnabled = False
 
-        if win_resolution:
-            self.flircam.Width, self.flircam.Height = win_resolution
-        if win_offset:
-            self.flircam.OffsetX, self.flircam.OffsetY = win_offset
+        self.flircam.Width, self.flircam.Height = self.settings["win_resolution"]
+        if self.settings["win_resolution"][0] = 0:
+            self.flircam.Width = self.flircam.SensorWidth
+        if self.settings["win_resolution"][1] = 0:
+            self.flircam.Width = self.flircam.SensorHeight
+        self.flircam.OffsetX, self.flircam.OffsetY = self.settings["win_offset"]
 
 
     def start_cam(self):
