@@ -43,7 +43,7 @@ If OpenHSI has been useful for your research, please acknowledge the project in 
 
 The example shown here uses a simulated camera for testing purposes. Replace `SimulatedCamera` with the appropriate Python class for your own camera to work with real hardware. For example, use `XimeaCamera` inplace of `SimulatedCamera`. 
 
-```python
+```
 #hide_output
 from openhsi.capture import *
 
