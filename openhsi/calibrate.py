@@ -25,7 +25,7 @@ from scipy.optimize import curve_fit
 from scipy import interpolate
 from functools import reduce
 
-from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Optional
+from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Optional, Dict
 import datetime
 import json
 import pickle
