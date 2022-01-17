@@ -3,8 +3,8 @@
     "Overview": "/",
   "": {
     	"Tutorials": {
-    		"How to use the OpenHSI Camera":"tutorial_camera.html",
-    		"How to calibrate the OpenHSI camera":"tutorial_calibrate.html"
+    		"Quick Start Guide":"tutorial_camera.html",
+    		"Making Calibration Files":"tutorial_calibrate.html"
     	}
     },
     "Data Transforms for Hyperspectral Datacubes": "data.html",

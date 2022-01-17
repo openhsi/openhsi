@@ -13,10 +13,10 @@ entries:
       - output: web
         subfolderitems:
         - output: web,pdf
-          title: How to use the OpenHSI Camera
+          title: Quick Start Guide
           url: tutorial_camera.html
         - output: web,pdf
-          title: How to calibrate the OpenHSI camera
+          title: Making Calibration Files
           url: tutorial_calibrate.html
         title: Tutorials
     - output: web,pdf
