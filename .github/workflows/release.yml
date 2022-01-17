@@ -1,0 +1,46 @@
+name: publish_conda
+
+on:
+  release:
+    types: [published]
+    
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.7]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Cache conda
+      uses: actions/cache@v2
+      env:
+        # Increase this value to reset cache if environment.yml has not changed
+        CACHE_NUMBER: 0
+      with:
+        path: ~/conda_pkgs_dir
+        key:
+          ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{
+          hashFiles('environment.yml') }}
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+          python-version:  ${{ matrix.python-version }}
+          activate-environment: openhsi_tests
+          environment-file: environment.yml
+          auto-activate-base: false
+          use-only-tar-bz2: true # IMPORTANT: This needs to be set for caching to work properly!
+
+    - name: Install the build dependacies
+      shell: bash -l {0}
+      run: |
+        export ANACONDA_API_TOKEN = ${{ secrets.ANACONDA_TOKEN }}
+        conda install conda-build anaconda-client
+
+
+    - name: publish-to-conda
+      env:
+      
