@@ -334,7 +334,7 @@ class LucidCamera(OpenHSI):
                          in zip(*[iter('{:012x}'.format(cam.deviceSettings['GevMACAddress'].value))]*2)])
 
 # Cell
-from typing import Tuple
+
 
 @delegates()
 class FlirCamera(OpenHSI):
@@ -383,4 +383,15 @@ class FlirCamera(OpenHSI):
 
     def get_temp(self) -> float:
         return self.flircam.DeviceTemperature
+
+    def set_exposure(self, exposure_ms:float):
+        """sets the FLIR camera exposure time to `exposure_ms`."""
+        self.settings["exposure_ms"] = exposure_ms
+
+        self.flircam.AcquisitionFrameRateAuto = 'Off'
+        self.flircam.AcquisitionFrameRateEnabled = True
+        self.flircam.AcquisitionFrameRate = int( 1_000/self.settings["exposure_ms"] )
+        self.flircam.ExposureAuto = 'Off'
+        self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
+
 

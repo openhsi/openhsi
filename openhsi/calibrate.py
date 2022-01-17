@@ -31,7 +31,6 @@ import json
 import pickle
 
 # Cell
-#hide_output
 
 from .data import *
 from .capture import *
@@ -67,9 +66,9 @@ class SettingsBuilderMixin():
             return hv.Image(self.calibration["flat_field_pic"], bounds=(0,0,*self.calibration["flat_field_pic"].shape)).opts(
                     xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="flat field picture")
 
-    def retake_HgAr(self, show:bool = False, numframes:int=10):
+    def retake_HgAr(self, show:bool = False, nframes:int=10):
 
-        self.calibration["HgAr_pic"] = np.mean(self.getNimgs(numframes),2)
+        self.calibration["HgAr_pic"] = self.avgNimgs(nframes)
 
         if show:
             return hv.Image(self.calibration["HgAr_pic"], bounds=(0,0,*self.calibration["HgAr_pic"].shape)).opts(
@@ -230,7 +229,7 @@ class SettingsBuilderMixin():
 
     def update_intsphere_cube(self,exposures:np.array,
                               luminances:np.array,
-                              noframe:int=10,
+                              nframes:int=10,
                               lum_chg_func:Callable=print,
                               interactive:bool=False,
                               ):
@@ -253,7 +252,7 @@ class SettingsBuilderMixin():
                 mb.child.comment = f"exposure = {exposures[j]} ms"
                 self.set_exposure(exposures[j])
 
-                lum_buff.put( self.crop(np.mean(self.getNimgs(noframe),2)) )
+                lum_buff.put( self.crop( self.avgNimgs(nframes) ) )
 
             rad_ref.put( lum_buff.data )
             mb.write(f"Finished collecting at luminance {luminances[i]} Cd/m^2.")
