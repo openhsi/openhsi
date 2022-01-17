@@ -3,6 +3,7 @@
 __all__ = ['Model6SV', 'SpectralMatcher', 'remap', 'ELC']
 
 # Cell
+#hide_output
 
 from fastcore.foundation import patch
 from fastcore.meta import delegates
@@ -42,6 +43,9 @@ class Model6SV():
                  aero_profile:AeroProfile = AeroProfile.Maritime,
                  wavelength_array:"array [nm]" = np.arange(400, 800, 4),
                  sixs_path=None):
+        """Calculates the at sensor radiance using 6SV for location at latitude `lat` and longitude `lon` at time `z_time` and altitude `alt`.
+        The `station_num` and `region` refers to the radiosonde data. You can also specify the viewing zenith `zen` and azimuth `azi`.
+        The radiance is calculated for wavelengths in `wavelength_array`. The 6SV executable path can be specified in `sixs_path`."""
 
         self.wavelength_array = wavelength_array/1e3 # convert to μm for Py6S
         s = SixS(sixs_path)
@@ -87,7 +91,7 @@ class Model6SV():
         self.rad2photons()
 
     def show(self):
-        plt.plot(self.wavelength_array,self.radiance/10,label="computed radiance")
+        plt.plot(self.wavelength_array*1e3,self.radiance/10,label="computed radiance")
         plt.xlabel("wavelength (nm)")
         plt.ylabel("radiance (μW/cm$^2$/sr/nm)")
         plt.legend()
@@ -266,7 +270,7 @@ class ELC(SpectralMatcher):
     def __init__(self,nc_path:str,old_style:bool=False,**kwargs):
         """Apply ELC for radiance datacubes"""
 
-        self.dc = DataCube()
+        self.dc = DataCube(processing_lvl=-1)
         self.dc.load_nc(nc_path,old_style)
         self.RGB = self.dc.show("bokeh",robust=True).opts(height=250, width=1000, invert_yaxis=True,tools=["tap"],toolbar="below")
         self.a_ELC = np.ones((self.dc.dc.data.shape[-1],))

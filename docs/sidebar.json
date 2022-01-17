@@ -1,6 +1,12 @@
 {
   "openhsi": {
     "Overview": "/",
+  "": {
+    	"Tutorials": {
+    		"How to use the OpenHSI Camera":"tutorial_camera.html",
+    		"How to calibrate the OpenHSI camera":"tutorial_calibrate.html"
+    	}
+    },
     "Data Transforms for Hyperspectral Datacubes": "data.html",
     "Capture": "capture.html",
     "OpenHSI Camera Implementations": "cameras.html",
@@ -8,8 +14,6 @@
     "Signal To Noise Ratio for the OpenHSI Camera": "snr.html",
     "Calibration Procedure": "calibrate.html",
     "Metadata Editor": "metadata.html",
-    "Sensors": "sensors.html",
-    "Tutorial: How to use the OpenHSI Camera": "tutorial_camera.html",
-    "Tutorial: How to calibrate the OpenHSI camera": "tutorial_calibrate.html"
+    "Sensors": "sensors.html"
   }
 }

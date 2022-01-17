@@ -3,6 +3,7 @@
 __all__ = ['OpenHSI', 'SimulatedCamera', 'ProcessDatacube']
 
 # Cell
+#hide_output
 
 from fastcore.foundation import patch
 from fastcore.meta import delegates
@@ -20,9 +21,7 @@ import json
 import pickle
 
 # Cell
-
 from .data import *
-
 
 # Cell
 
@@ -54,21 +53,22 @@ class OpenHSI(DataCube):
                 self.cam_temperatures.put( self.get_temp() )
         self.stop_cam()
 
-    def getNimgs(self, numframes):
-        data = np.zeros(tuple(self.settings['resolution'])+(numframes,),np.int32)
+    def avgNimgs(self, n) -> np.ndarray:
+        """Take `n` images and find the average"""
+        data = np.zeros(tuple(self.settings['resolution'])+(n,),np.int32)
 
         self.start_cam()
-        for f in range(numframes):
+        for f in range(n):
             data[:,:,f]=self.get_img()
         self.stop_cam()
-        return data
+        return np.mean(data,axis=2)
 
 
 # Cell
 
 @delegates()
 class SimulatedCamera(OpenHSI):
-    """Add """
+    """Simulated camera using an RGB image as an input. Hyperspectral data is produced using CIE XYZ matching functions."""
     def __init__(self, img_path:str = None, **kwargs):
         """Initialise Simulated Camera"""
         super().__init__(**kwargs)
