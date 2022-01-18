@@ -1,5 +1,5 @@
-# Open Source DIY Hyperspectral Imager Library
-> Library to calibrate, trigger and capture data cubes for the open source DIY hyperspectral camera. 
+# Welcome to the Open Source DIY Hyperspectral Imager Library
+> Library to calibrate, capture and process data cubes for the open source DIY hyperspectral camera. 
 
 
 ![](https://github.com/openhsi/openhsi/actions/workflows/main.yml/badge.svg)

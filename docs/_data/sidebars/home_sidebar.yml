@@ -9,41 +9,61 @@ entries:
     - output: web,pdf
       title: Overview
       url: /
-      subfolders:
-      - output: web
-        subfolderitems:
-        - output: web,pdf
-          title: Quick Start Guide
-          url: tutorial_camera.html
-        - output: web,pdf
-          title: Making Calibration Files
-          url: tutorial_calibrate.html
-        title: Tutorials
     - output: web,pdf
-      title: Data Transforms for Hyperspectral Datacubes
-      url: data.html
+      title: Quick Start Guide
+      url: /tutorial_camera.html
+    output: web
+    title: Getting started
+  - folderitems:
     - output: web,pdf
-      title: Capture
-      url: capture.html
+      title: Data Transforms
+      url: /data.html
     - output: web,pdf
-      title: OpenHSI Camera Implementations
-      url: cameras.html
+      title: Base OpenHSI class
+      url: /capture.html
+    output: web
+    title: Utils
+  - folderitems:
+    - output: web,pdf
+      title: Cameras
+      url: /cameras.html
+    output: web
+    title: Camera Implementations
+  - folderitems:
     - output: web,pdf
       title: Atmospheric Correction
-      url: atmos.html
+      url: /atmos.html
     - output: web,pdf
-      title: Signal To Noise Ratio for the OpenHSI Camera
-      url: snr.html
+      title: Signal to Noise Ratio
+      url: /snr.html
+    output: web
+    title: Atmospheric Correction
+  - folderitems:
     - output: web,pdf
-      title: Calibration Procedure
-      url: calibrate.html
+      title: Calibration Procedures
+      url: /calibrate.html
+    - output: web,pdf
+      title: Generating Calibration Files
+      url: /tutorial_calibrate.html
+    output: web
+    title: Calibration
+  - folderitems:
     - output: web,pdf
       title: Metadata Editor
-      url: metadata.html
-    - output: web,pdf
-      title: Sensors
-      url: sensors.html
+      url: /metadata.html
     output: web
-    title: openhsi
+    title: Metadata
+  - folderitems:
+    - output: web,pdf
+      title: Ancillary Sensors
+      url: /sensors.html
+    output: web
+    title: Ancillary Sensors
+  - folderitems:
+    - output: web,pdf
+      title: Geometric Correction
+      url: /geometry.html
+    output: web
+    title: Geometric Correction
   output: web
   title: Sidebar

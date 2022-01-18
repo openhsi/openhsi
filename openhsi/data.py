@@ -360,10 +360,10 @@ class DateTimeBuffer():
 
 @delegates()
 class DataCube(CameraProperties):
-    """docstring."""
+    """Facilitates the collection, viewing, and saving of hyperspectral datacubes."""
 
     def __init__(self, n_lines:int = 16, processing_lvl:int = 2, preserve_raw:bool=False, **kwargs):
-        """docstring"""
+        """Preallocate array buffers"""
         self.n_lines = n_lines
         self.proc_lvl = processing_lvl
         super().__init__(**kwargs)

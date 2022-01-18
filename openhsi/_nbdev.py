@@ -62,7 +62,8 @@ modules = ["data.py",
            "snr.py",
            "calibrate.py",
            "metadata.py",
-           "sensors.py"]
+           "sensors.py",
+           "geometry.py"]
 
 doc_url = "https://openhsi.github.io/openhsi/"
 

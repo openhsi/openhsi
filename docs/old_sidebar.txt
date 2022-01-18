@@ -1,0 +1,19 @@
+{
+  "openhsi": {
+    "Overview": "/",
+  "": {
+    	"Tutorials": {
+    		"Quick Start Guide":"tutorial_camera.html",
+    		"Making Calibration Files":"tutorial_calibrate.html"
+    	}
+    },
+    "Data Transforms for Hyperspectral Datacubes": "data.html",
+    "Capture": "capture.html",
+    "OpenHSI Camera Implementations": "cameras.html",
+    "Atmospheric Correction": "atmos.html",
+    "Signal To Noise Ratio for the OpenHSI Camera": "snr.html",
+    "Calibration Procedure": "calibrate.html",
+    "Metadata Editor": "metadata.html",
+    "Sensors": "sensors.html"
+  }
+}

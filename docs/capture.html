@@ -246,10 +246,10 @@ nb_path: "nbs/01_capture.ipynb"
 
 
 
-<div id="f895ecd3-626f-43b8-97f5-03e2359e3761"></div>
+<div id="6564b9d3-978f-4471-b4c0-8c0ce2e33390"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#f895ecd3-626f-43b8-97f5-03e2359e3761');
+var element = $('#6564b9d3-978f-4471-b4c0-8c0ce2e33390');
 
 (function(root) {
   function now() {
@@ -1472,10 +1472,10 @@ var element = $('#f895ecd3-626f-43b8-97f5-03e2359e3761');
 
 
 
-<div id="312ca27f-25bb-4e32-8918-609cc702187c"></div>
+<div id="2e604bfd-12e0-4874-955b-73c600653b5e"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#312ca27f-25bb-4e32-8918-609cc702187c');
+var element = $('#2e604bfd-12e0-4874-955b-73c600653b5e');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -1846,85 +1846,6 @@ if (window.Jupyter !== undefined) {
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">ProcessDatacube</span><span class="p">(</span><span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;../load_multiple/2021-05-26 03_26_26.011211.nc&quot;</span><span class="p">,</span><span class="n">n_lines</span><span class="o">=</span><span class="mi">3072</span><span class="p">,</span><span class="n">processing_lvl</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
-    <span class="n">cam</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    
-<span class="n">fig</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">KeyError</span>                                  Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-20-4290ff1c128d&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
-<span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg">#external</span>
-<span class="ansi-green-intense-fg ansi-bold">      2</span> 
-<span class="ansi-green-fg">----&gt; 3</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">with</span> ProcessDatacube<span class="ansi-blue-fg">(</span>fname <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">&#34;../load_multiple/2021-05-26 03_26_26.011211.nc&#34;</span><span class="ansi-blue-fg">,</span>n_lines<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">3072</span><span class="ansi-blue-fg">,</span>processing_lvl<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">as</span> cam<span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">      4</span>     cam<span class="ansi-blue-fg">.</span>collect<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">      5</span>     fig <span class="ansi-blue-fg">=</span> cam<span class="ansi-blue-fg">.</span>show<span class="ansi-blue-fg">(</span>robust<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">True</span><span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">&lt;ipython-input-16-51b6b9583159&gt;</span> in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, fname, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">      6</span>     <span class="ansi-green-fg">def</span> __init__<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> fname<span class="ansi-blue-fg">:</span>str<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">      7</span>         <span class="ansi-blue-fg">&#34;&#34;&#34;Process Datacube&#34;&#34;&#34;</span>
-<span class="ansi-green-fg">----&gt; 8</span><span class="ansi-red-fg">         </span>super<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>__init__<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">      9</span> 
-<span class="ansi-green-intense-fg ansi-bold">     10</span>         self<span class="ansi-blue-fg">.</span>fname <span class="ansi-blue-fg">=</span> fname
-
-<span class="ansi-green-fg">&lt;ipython-input-6-6a351629eb05&gt;</span> in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">      5</span>     <span class="ansi-blue-fg">&#34;&#34;&#34;Base Class for the OpenHSI Camera.&#34;&#34;&#34;</span>
-<span class="ansi-green-intense-fg ansi-bold">      6</span>     <span class="ansi-green-fg">def</span> __init__<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span> <span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-fg">----&gt; 7</span><span class="ansi-red-fg">         </span>super<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>__init__<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">      8</span>         super<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>set_processing_lvl<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>proc_lvl<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">      9</span>         <span class="ansi-green-fg">if</span> callable<span class="ansi-blue-fg">(</span>getattr<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">,</span><span class="ansi-blue-fg">&#34;get_temp&#34;</span><span class="ansi-blue-fg">,</span><span class="ansi-green-fg">None</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">:</span>
-
-<span class="ansi-green-fg">~/Desktop/openhsi/openhsi/data.py</span> in <span class="ansi-cyan-fg">__init__</span><span class="ansi-blue-fg">(self, n_lines, processing_lvl, preserve_raw, **kwargs)</span>
-<span class="ansi-green-intense-fg ansi-bold">    368</span>         self<span class="ansi-blue-fg">.</span>proc_lvl <span class="ansi-blue-fg">=</span> processing_lvl
-<span class="ansi-green-intense-fg ansi-bold">    369</span>         super<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>__init__<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">**</span>kwargs<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-fg">--&gt; 370</span><span class="ansi-red-fg">         </span>self<span class="ansi-blue-fg">.</span>set_processing_lvl<span class="ansi-blue-fg">(</span>processing_lvl<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    371</span> 
-<span class="ansi-green-intense-fg ansi-bold">    372</span>         self<span class="ansi-blue-fg">.</span>timestamps <span class="ansi-blue-fg">=</span> DateTimeBuffer<span class="ansi-blue-fg">(</span>n_lines<span class="ansi-blue-fg">)</span>
-
-<span class="ansi-green-fg">~/Desktop/openhsi/openhsi/data.py</span> in <span class="ansi-cyan-fg">set_processing_lvl</span><span class="ansi-blue-fg">(self, lvl, custom_tfms)</span>
-<span class="ansi-green-intense-fg ansi-bold">    316</span>     self<span class="ansi-blue-fg">.</span>dtype_out <span class="ansi-blue-fg">=</span> np<span class="ansi-blue-fg">.</span>float32 <span class="ansi-green-fg">if</span> lvl <span class="ansi-green-fg">in</span> <span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">3</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">4</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">5</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">6</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">7</span><span class="ansi-blue-fg">,</span><span class="ansi-blue-fg">)</span> <span class="ansi-green-fg">else</span> np<span class="ansi-blue-fg">.</span>int32
-<span class="ansi-green-intense-fg ansi-bold">    317</span>     <span class="ansi-green-fg">if</span> len<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>tfm_list<span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">&gt;</span> <span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-fg">--&gt; 318</span><span class="ansi-red-fg">         </span>self<span class="ansi-blue-fg">.</span>tfm_setup<span class="ansi-blue-fg">(</span>dtype<span class="ansi-blue-fg">=</span>self<span class="ansi-blue-fg">.</span>dtype_in<span class="ansi-blue-fg">,</span> lvl<span class="ansi-blue-fg">=</span>lvl<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    319</span>         self<span class="ansi-blue-fg">.</span>dc_shape <span class="ansi-blue-fg">=</span> self<span class="ansi-blue-fg">.</span>pipeline<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>calibration<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;flat_field_pic&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">.</span>shape
-<span class="ansi-green-intense-fg ansi-bold">    320</span>     <span class="ansi-green-fg">elif</span> lvl <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">-</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">:</span>
-
-<span class="ansi-green-fg">~/Desktop/openhsi/openhsi/data.py</span> in <span class="ansi-cyan-fg">tfm_setup</span><span class="ansi-blue-fg">(self, more_setup, dtype, lvl)</span>
-<span class="ansi-green-intense-fg ansi-bold">    163</span>     <span class="ansi-green-fg">if</span> lvl <span class="ansi-green-fg">in</span> <span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">3</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">4</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">5</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">6</span><span class="ansi-blue-fg">,</span><span class="ansi-cyan-fg">7</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">:</span>
-<span class="ansi-green-intense-fg ansi-bold">    164</span>         <span class="ansi-red-fg"># for fast smile correction</span>
-<span class="ansi-green-fg">--&gt; 165</span><span class="ansi-red-fg">         </span>self<span class="ansi-blue-fg">.</span>smiled_size <span class="ansi-blue-fg">=</span> <span class="ansi-blue-fg">(</span>np<span class="ansi-blue-fg">.</span>ptp<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>settings<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;row_slice&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span><span class="ansi-blue-fg">,</span> self<span class="ansi-blue-fg">.</span>settings<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;resolution&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">]</span> <span class="ansi-blue-fg">-</span> np<span class="ansi-blue-fg">.</span>max<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>calibration<span class="ansi-blue-fg">[</span><span class="ansi-blue-fg">&#34;smile_shifts&#34;</span><span class="ansi-blue-fg">]</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    166</span>         self<span class="ansi-blue-fg">.</span>line_buff <span class="ansi-blue-fg">=</span> CircArrayBuffer<span class="ansi-blue-fg">(</span>self<span class="ansi-blue-fg">.</span>smiled_size<span class="ansi-blue-fg">,</span> axis<span class="ansi-blue-fg">=</span><span class="ansi-cyan-fg">0</span><span class="ansi-blue-fg">,</span> dtype<span class="ansi-blue-fg">=</span>dtype<span class="ansi-blue-fg">)</span>
-<span class="ansi-green-intense-fg ansi-bold">    167</span> 
-
-<span class="ansi-red-fg">KeyError</span>: &#39;row_slice&#39;</pre>
-</div>
-</div>
-
-</div>
-</div>
 
 </div>
     {% endraw %}
