@@ -350,26 +350,23 @@ class FlirCamera(OpenHSI):
             warnings.warn("ModuleNotFoundError: No module named 'PySpin'.",stacklevel=2)
 
         self.flircam = Camera()
+        self.flircam.init()
         self.flircam.GainAuto = 'Off'
         self.flircam.Gain = 0
         self.flircam.AcquisitionFrameRateAuto = 'Off'
         self.flircam.AcquisitionFrameRateEnabled = True
-        self.flircam.AcquisitionFrameRate = int( 1_000/self.settings["exposure_ms"] )
+        self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
 
         self.flircam.ExposureAuto = 'Off'
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
         self.flircam.GammaEnabled = False
 
-        self.flircam.Width, self.flircam.Height = self.settings["win_resolution"]
-        if self.settings["win_resolution"][0] == 0:
-            self.flircam.Width = self.flircam.SensorWidth
-        if self.settings["win_resolution"][1] == 0:
-            self.flircam.Width = self.flircam.SensorHeight
+        self.flircam.Width = self.flircam.SensorWidth if self.settings["win_resolution"][0] == 0 else self.settings["win_resolution"][0]
+        self.flircam.Height = self.flircam.SensorHeight if self.settings["win_resolution"][1] == 0 else self.settings["win_resolution"][1]
         self.flircam.OffsetX, self.flircam.OffsetY = self.settings["win_offset"]
 
 
     def start_cam(self):
-        self.flircam.init()
         self.flircam.start()
 
     def stop_cam(self):
@@ -390,7 +387,7 @@ class FlirCamera(OpenHSI):
 
         self.flircam.AcquisitionFrameRateAuto = 'Off'
         self.flircam.AcquisitionFrameRateEnabled = True
-        self.flircam.AcquisitionFrameRate = int( 1_000/self.settings["exposure_ms"] )
+        self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
         self.flircam.ExposureAuto = 'Off'
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
 

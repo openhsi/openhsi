@@ -93,7 +93,7 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </tr>
 <tr>
 <td style="text-align:right">5</td>
-<td>case 4 except radiance conversion moved to 2nd step</td>
+<td>case 1 -&gt; radiance then fast binned</td>
 </tr>
 <tr>
 <td style="text-align:right">6</td>
@@ -101,11 +101,11 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </tr>
 <tr>
 <td style="text-align:right">7</td>
-<td>smile corrected and binned -&gt; radiance</td>
+<td>case 1 -&gt; radiance then slow binned</td>
 </tr>
 <tr>
 <td style="text-align:right">8</td>
-<td>case 7 + converted to reflectance</td>
+<td>case 7 -&gt; reflectance</td>
 </tr>
 </tbody>
 </table>
@@ -157,15 +157,15 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <span class="kn">from</span> <span class="nn">Py6S</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">Model6SV</span><span class="p">(</span><span class="n">wavelength_array</span> <span class="o">=</span> <span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model6SV</span><span class="p">(</span><span class="n">lat</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">],</span>
                  <span class="n">z_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;datetime_str&quot;</span><span class="p">],</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M&quot;</span><span class="p">),</span>
                  <span class="n">station_num</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;radiosonde_station_num&quot;</span><span class="p">],</span> <span class="n">region</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;radiosonde_region&quot;</span><span class="p">],</span>
                  <span class="n">alt</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;altitude&quot;</span><span class="p">],</span> <span class="n">zen</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">azi</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="c1"># viewing zenith and azimuth angles</span>
                  <span class="n">aero_profile</span> <span class="o">=</span> <span class="n">AeroProfile</span><span class="o">.</span><span class="n">Maritime</span><span class="p">,</span>
-                 <span class="n">wavelength_array</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">calibration</span><span class="p">[</span><span class="s2">&quot;wavelengths&quot;</span><span class="p">],</span>
+                 <span class="n">wavelength_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">350</span><span class="p">,</span><span class="mi">900</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">2000</span><span class="p">),</span> <span class="c1"># choose larger range than sensor range</span>
                  <span class="n">sixs_path</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sixs_path&quot;</span><span class="p">])</span>
 
-<span class="n">cam</span><span class="o">.</span><span class="n">calibration</span><span class="p">[</span><span class="s2">&quot;rad_fit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">cam</span><span class="o">.</span><span class="n">calibration</span><span class="p">[</span><span class="s2">&quot;wavelengths&quot;</span><span class="p">],</span> <span class="n">model</span><span class="o">.</span><span class="n">radiance</span><span class="o">/</span><span class="mi">10</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">)</span>
+<span class="n">cam</span><span class="o">.</span><span class="n">calibration</span><span class="p">[</span><span class="s2">&quot;rad_fit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">350</span><span class="p">,</span><span class="mi">900</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">2000</span><span class="p">),</span> <span class="n">model</span><span class="o">.</span><span class="n">radiance</span><span class="o">/</span><span class="mi">10</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;cubic&#39;</span><span class="p">)</span>
 
 <span class="c1">#cam.dump(json_path,pkl_path) # update the settings and calibration files</span>
 </pre></div>

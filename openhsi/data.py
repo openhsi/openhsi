@@ -160,8 +160,7 @@ def tfm_setup(self:CameraProperties,
               lvl:int = 0):
 
     """Setup for transforms"""
-    if lvl in [1,2,3,4,5,6,7]:
-        # for fast smile correction
+    if hasattr(self,"need_fast_smile"):
         self.smiled_size = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"]) )
         self.line_buff = CircArrayBuffer(self.smiled_size, axis=0, dtype=dtype)
 
@@ -172,26 +171,24 @@ def tfm_setup(self:CameraProperties,
         self.bin_cols = self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"])
         self.reduced_shape = (self.bin_rows,self.bin_cols//self.width,self.width)
 
-    if lvl in [2,3,4,5,6,7]:
-        # update the wavelengths for fast binning
+    if hasattr(self,"need_fast_bin"):
         self.binned_wavelengths = self.calibration["wavelengths_linear"].astype(np.float32)
         self.binned_wavelengths = np.lib.stride_tricks.as_strided(self.binned_wavelengths,
                                             strides=(self.width*4,4), # assumed np.float32
                                             shape=(len(self.binned_wavelengths)//self.width,self.width))
         self.binned_wavelengths = np.around(self.binned_wavelengths.mean(axis=1),decimals=1)
 
-    if lvl in [3]:
-        # update the wavelengths for slow binning
+    if hasattr(self,"need_slow_bin"):
         n_bands = int(np.ptp(self.calibration["wavelengths"])//self.settings["fwhm_nm"])
         # jump by `fwhm_nm` and find closest array index, then let the wavelengths be in the middle between jumps
         self.λs = np.around(np.array([np.min(self.calibration["wavelengths"]) + i*self.settings["fwhm_nm"] for i in range(n_bands+1)]),decimals=1)
         self.bin_idxs = [np.argmin(np.abs(self.calibration["wavelengths"]-λ)) for λ in self.λs]
-        self.λs += self.settings["fwhm_nm"]//2 #
-        self.bin_buff = CircArrayBuffer((np.ptp(self.settings["row_slice"]),n_bands), axis=1, dtype=dtype)
+        self.binned_wavelengths = self.λs[:-1] + self.settings["fwhm_nm"]//2 #
+        binned_type = np.float32 if hasattr(self,"need_rad") else dtype
+        self.bin_buff = CircArrayBuffer((np.ptp(self.settings["row_slice"]),n_bands), axis=1, dtype=binned_type)
 
-    if lvl in [4,5,6,7,8]:
+    if hasattr(self,"need_rad") or hasattr(self,"need_rad_after_fast_bin") or hasattr(self,"need_rad_after_slow_bin"):
         # precompute some reference data for converting digital number to radiance
-
         try:
             dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0).isel(luminance=0)
         except (KeyError, ValueError):
@@ -205,18 +202,21 @@ def tfm_setup(self:CameraProperties,
                              self.dark_current ) )
         self.spec_rad_ref = np.float32(self.calibration["sfit"](self.calibration["wavelengths"]))
 
-    # prep for converting radiance to reflectance
-    if lvl in [6, 8]:
-        self.rad_6SV = np.float32(self.calibration["rad_fit"](self.calibration["wavelengths"]))
+        self.dark_current = np.float32(self.fast_smile(self.dark_current))
+        self.ref_luminance = np.float32(self.fast_smile(self.ref_luminance))
 
-    if lvl in [4, 6]:
-        self.dark_current = self.fast_bin(self.fast_smile(self.dark_current))
-        self.ref_luminance = self.fast_bin(self.fast_smile(self.ref_luminance))
+    if hasattr(self,"need_rad_after_fast_bin"):
+        self.dark_current = self.fast_bin(self.dark_current)
+        self.ref_luminance = self.fast_bin(self.ref_luminance)
         self.spec_rad_ref = np.float32(self.calibration["sfit"]( self.binned_wavelengths ))
 
-    if lvl in [5]:
-        self.dark_current = (self.fast_smile(self.dark_current))
-        self.ref_luminance = (self.fast_smile(self.ref_luminance))
+    if hasattr(self,"need_rad_after_slow_bin"):
+        self.dark_current = self.slow_bin(self.dark_current)
+        self.ref_luminance = self.slow_bin(self.ref_luminance)
+        self.spec_rad_ref = np.float32(self.calibration["sfit"]( self.binned_wavelengths ))
+
+    if hasattr(self,"need_ref"):
+        self.rad_6SV = np.float32(self.calibration["rad_fit"]( self.binned_wavelengths ))
 
     if more_setup is not None:
         more_setup(self)
@@ -259,7 +259,7 @@ def slow_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
 def dn2rad(self:CameraProperties, x:Array['λ,x',np.int32]) -> Array['λ,x',np.float32]:
     """Converts digital numbers to radiance (uW/cm^2/sr/nm). Use after cropping to useable area."""
 
-    return (x - self.dark_current) * self.settings["luminance"]/self.ref_luminance  *  self.spec_rad_ref/self.calibration['spec_rad_ref_luminance']
+    return np.float32( (x - self.dark_current) * self.settings["luminance"]/self.ref_luminance  *  self.spec_rad_ref/self.calibration['spec_rad_ref_luminance'] )
 
 @patch
 def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,x',np.float32]:
@@ -285,34 +285,45 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
     4 : case 2 + conversion to radiance in units of uW/cm^2/sr/nm,
     5 : case 4 except radiance conversion moved to 2nd step,
     6 : case 4 + conversion to reflectance,
-    7 : smile corrected and binned -> radiance,
+    7 : case 5 except slow binning is used,
     8 : case 7 + converted to reflectance.
     """
-    if   lvl == 0:
+    if   lvl == -1:
+        self.tfm_list = []
+    elif lvl == 0:
         self.tfm_list = [self.crop]
     elif lvl == 1:
         self.tfm_list = [self.crop,self.fast_smile]
+        self.need_fast_smile = True
     elif lvl == 2:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin]
+        self.need_fast_smile = True; self.need_fast_bin = True
     elif lvl == 3:
         self.tfm_list = [self.crop,self.fast_smile,self.slow_bin]
+        self.need_fast_smile = True; self.need_slow_bin = True
     elif lvl == 4:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad]
+        self.need_fast_smile = True; self.need_fast_bin = True; self.need_rad_after_fast_bin = True
     elif lvl == 5:
         self.tfm_list = [self.crop,self.fast_smile,self.dn2rad,self.fast_bin]
+        self.need_fast_smile = True; self.need_fast_bin = True; self.need_rad = True
     elif lvl == 6:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad,self.rad2ref_6SV]
+        self.need_fast_smile = True; self.need_fast_bin = True; self.need_rad_after_fast_bin = True; self.need_ref = True
     elif lvl == 7:
-        self.tfm_list = [self.dn2rad]
+        self.tfm_list = [self.crop,self.fast_smile,self.dn2rad,self.slow_bin]
+        self.need_fast_smile = True; self.need_slow_bin = True; self.need_rad = True
     elif lvl == 8:
-        self.tfm_list = [self.dn2rad,self.rad2ref_6SV]
+        self.tfm_list = [self.crop,self.fast_smile,self.dn2rad,self.slow_bin,self.rad2ref_6SV]
+        self.need_fast_smile = True; self.need_slow_bin = True; self.need_rad = True; self.need_ref = True
     else:
         self.tfm_list = []
 
     if custom_tfms is not None:
         self.tfm_list = listify(custom_tfms)
 
-    self.dtype_in = np.float32 if lvl in (4,) else np.int32 # we need floats if we convert to radiance from the beginning
+    # binning input/output types
+    self.dtype_in = np.int32
     self.dtype_out = np.float32 if lvl in (3,4,5,6,7,) else np.int32
     if len(self.tfm_list) > 0:
         self.tfm_setup(dtype=self.dtype_in, lvl=lvl)
@@ -439,7 +450,8 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
         self.nc.temperature.attrs["description"] = "temperature of sensor at time of image capture"
 
     self.nc.datacube.attrs["long_name"]   = "hyperspectral datacube"
-    self.nc.datacube.attrs["units"]       = "uW/cm^2/sr/nm" if self.proc_lvl in (3,4,6) else "digital number"
+    self.nc.datacube.attrs["units"]       = "uW/cm^2/sr/nm" if self.proc_lvl in (3,4,7) else "digital number"
+    if self.proc_lvl in (6,8): self.nc.datacube.attrs["units"] = "percentage reflectance"
     self.nc.datacube.attrs["description"] = "hyperspectral datacube"
 
     self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
