@@ -2,8 +2,8 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"Array": "00_data.ipynb",
-         "Shape": "00_data.ipynb",
+index = {"Array": "01_capture.ipynb",
+         "Shape": "01_capture.ipynb",
          "CircArrayBuffer": "00_data.ipynb",
          "CameraProperties": "00_data.ipynb",
          "CameraProperties.tfm_setup": "00_data.ipynb",
@@ -22,6 +22,7 @@ index = {"Array": "00_data.ipynb",
          "DataCube.show": "00_data.ipynb",
          "OpenHSI": "01_capture.ipynb",
          "SimulatedCamera": "01_capture.ipynb",
+         "ProcessRawDatacube": "01_capture.ipynb",
          "ProcessDatacube": "01_capture.ipynb",
          "WebCamera": "02_cameras.ipynb",
          "XimeaCamera": "02_cameras.ipynb",
@@ -39,7 +40,7 @@ index = {"Array": "00_data.ipynb",
          "SettingsBuilderMixin": "05_calibrate.ipynb",
          "SettingsBuilderMetaclass": "05_calibrate.ipynb",
          "create_settings_builder": "05_calibrate.ipynb",
-         "SpectraController": "05_calibrate.ipynb",
+         "SpectraPTController": "05_calibrate.ipynb",
          "identity_fields": "06_metadata.ipynb",
          "text_search_fields": "06_metadata.ipynb",
          "extent_search_fields": "06_metadata.ipynb",
@@ -62,7 +63,8 @@ modules = ["data.py",
            "snr.py",
            "calibrate.py",
            "metadata.py",
-           "sensors.py"]
+           "sensors.py",
+           "geometry.py"]
 
 doc_url = "https://openhsi.github.io/openhsi/"
 
