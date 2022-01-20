@@ -131,14 +131,14 @@ class SettingsBuilderMixin():
         spectra      = cropped[rows//2,self.calibration["smile_shifts"][rows//2]:].copy()
         _start_idx   = self.calibration["smile_shifts"][rows//2] # get smile shifted indexes
         _num_idx     = self.settings["resolution"][1]-np.max(self.calibration["smile_shifts"]) # how many pixels kept per row
-        shifted_idxs = np.arange(len(spectra))[_start_idx:_start_idx+_num_idx]
+        shifted_idxs = np.arange(self.settings["resolution"][1])[_start_idx:_start_idx+_num_idx]
 
         filtered_spec = savgol_filter(spectra, filter_window, min(3,filter_window-1))
         μ, props      = find_peaks(filtered_spec, height = find_peaks_height, width = width, prominence = prominence)
         A = props["peak_heights"] # amplitude
         σ = 0.5 * props["widths"] # standard deviation
-        c = 0                    # constant
-        params0 = [*A,*μ,*σ,c]   # flatten to 1D array
+        c = 0                     # constant
+        params0 = [*A,*μ,*σ,c]    # flatten to 1D array
 
         # refine the estimates from find_peaks by curve fitting Gaussians
         coeffs, _ = curve_fit(sum_gaussians, np.arange(len(spectra)), spectra, p0=params0)
@@ -192,7 +192,7 @@ class SettingsBuilderMixin():
                     xlabel="wavelength (nm)",ylabel="digital number",width=700,height=200,toolbar="below")
 
 
-    def update_intsphere_fit(self, spec_rad_ref_data="../assets/112704-1-1_1nm_data.csv", spec_rad_ref_luminance:int=52_020) -> "figure object":
+    def update_intsphere_fit(self, spec_rad_ref_data="assets/112704-1-1_1nm_data.csv", spec_rad_ref_luminance:int=52_020) -> "figure object":
 
         cal_data=np.genfromtxt(spec_rad_ref_data, delimiter=',', skip_header=1)
         wavelen=cal_data[:,0]

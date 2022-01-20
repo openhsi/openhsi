@@ -6,8 +6,8 @@ title: Tutorial: Quick Start Guide
 keywords: fastai
 sidebar: home_sidebar
 
-summary: "Basic usage tips"
-description: "Basic usage tips"
+summary: "Basic usage guide"
+description: "Basic usage guide"
 nb_path: "nbs/09_tutorial_camera.ipynb"
 ---
 <!--
@@ -36,13 +36,13 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <span class="n">json_path</span> <span class="o">=</span> <span class="s2">&quot;path_to_settings_file.json&quot;</span>
 <span class="n">pkl_path</span>  <span class="o">=</span> <span class="s2">&quot;path_to_calibration_file.pkl&quot;</span>
 
-<span class="k">with</span> <span class="n">LucidCamera</span><span class="p">(</span><span class="n">n_lines</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> 
+<span class="k">with</span> <span class="n">LucidCamera</span><span class="p">(</span><span class="n">n_lines</span>        <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span> 
                  <span class="n">processing_lvl</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> 
-                 <span class="n">pkl_path</span><span class="o">=</span><span class="n">pkl_path</span><span class="p">,</span><span class="n">json_path</span><span class="o">=</span><span class="n">json_path</span><span class="p">,</span>
-                 <span class="n">exposure_ms</span><span class="o">=</span><span class="mi">10</span>
+                 <span class="n">pkl_path</span>       <span class="o">=</span> <span class="n">pkl_path</span><span class="p">,</span><span class="n">json_path</span><span class="o">=</span><span class="n">json_path</span><span class="p">,</span>
+                 <span class="n">exposure_ms</span>    <span class="o">=</span> <span class="mi">10</span>
                 <span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
     <span class="n">cam</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-    <span class="n">fig</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">plot_lib</span><span class="o">=</span><span class="s2">&quot;matplotlib&quot;</span><span class="p">,</span><span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">plot_lib</span><span class="o">=</span><span class="s2">&quot;matplotlib&quot;</span><span class="p">,</span> <span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">fig</span>
 </pre></div>
@@ -69,7 +69,7 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <tbody>
 <tr>
 <td style="text-align:right">-1</td>
-<td>do not apply any transforms</td>
+<td>do not apply any transforms (<strong>default</strong>)</td>
 </tr>
 <tr>
 <td style="text-align:right">0</td>
@@ -81,7 +81,7 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </tr>
 <tr>
 <td style="text-align:right">2</td>
-<td>case 1 + fast binning (<strong>default</strong>)</td>
+<td>case 1 + fast binning</td>
 </tr>
 <tr>
 <td style="text-align:right">3</td>
@@ -101,11 +101,57 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </tr>
 <tr>
 <td style="text-align:right">7</td>
-<td>case 1 -&gt; radiance then slow binned</td>
+<td>case 5 except slow binning is used</td>
 </tr>
 <tr>
 <td style="text-align:right">8</td>
 <td>case 7 -&gt; reflectance</td>
+</tr>
+</tbody>
+</table>
+<p>Main difference between these is the order the transforms are used in the pipeline. This summaries the binning procedure and output:</p>
+<table>
+<thead><tr>
+<th style="text-align:right"><code>processing_lvl</code></th>
+<th>Binning</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">-1,0,1</td>
+<td>None</td>
+<td>Digital Numbers</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td>Fast</td>
+<td>Digital Numbers</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td>Slow</td>
+<td>Digital Numbers</td>
+</tr>
+<tr>
+<td style="text-align:right">4,5</td>
+<td>Fast</td>
+<td>Radiance (uW/cm^2/sr/nm)</td>
+</tr>
+<tr>
+<td style="text-align:right">6</td>
+<td>Fast</td>
+<td>Reflectance</td>
+</tr>
+<tr>
+<td style="text-align:right">7</td>
+<td>Slow</td>
+<td>Radiance (uW/cm^2/sr/nm)</td>
+</tr>
+<tr>
+<td style="text-align:right">8</td>
+<td>Slow</td>
+<td>Reflectance</td>
 </tr>
 </tbody>
 </table>
@@ -125,6 +171,12 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <li><code>hist_eq</code>: apply histogram equalisation
 {% include note.html content='Default behaviour is no contrast adjustments.' %}</li>
 </ul>
+<p>If you just want to view a datacube without any cameras attached. You can do so using:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.data</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">dc</span> <span class="o">=</span> <span class="n">DataCube</span><span class="p">()</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">load_nc</span><span class="p">(</span><span class="s2">&quot;path_to_datacube_file.nc&quot;</span><span class="p">)</span>
+<span class="n">dc</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
 
 </div>
 </div>
@@ -134,7 +186,7 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <h2 id="Saving-datacubes">Saving datacubes<a class="anchor-link" href="#Saving-datacubes"> </a></h2><p>To save the datacube to NetCDF format (alongside an RGB picture), use <a href="/openhsi/cameras.html#LucidCamera.save"><code>LucidCamera.save</code></a>. For example:</p>
 <div class="highlight"><pre><span></span><span class="n">cam</span><span class="o">.</span><span class="n">save</span><span class="p">(</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;beach_data&quot;</span> <span class="p">)</span>
 </pre></div>
-<p>will save a NetCDF file as f"beach_data/{current_date}/{current_datetime}.nc" and also an RGB image alongside. The save function also allows you to customise the file prefix and suffix. Preconfigured metadata can also be indicated to be saved into the NetCDF file. The camera temperature (in Celcius) and datatime for each camera frame is automatically included.</p>
+<p>will save a NetCDF file as f"beach_data/{current_date}/{current_datetime}.nc" <em>and also an RGB image</em> alongside. The save function also allows you to customise the file prefix and suffix. Preconfigured metadata can also be indicated to be saved into the NetCDF file. The camera temperature (in Celcius) and datatime for each camera frame is automatically included.</p>
 
 </div>
 </div>
@@ -170,6 +222,16 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <span class="c1">#cam.dump(json_path,pkl_path) # update the settings and calibration files</span>
 </pre></div>
 <p>{% include important.html content='You will need the 6SV excutable somewhere on your system. You can specify the path to the executable with <code>sixs_path</code>.' %}{% include important.html content='The 6SV model calculates radiance in units of (W/m^2/sr/μm), whereas the integrating sphere calibration is in (μW/cm^2/sr/nm) hence the extra divide by 10 in <code>model.radiance/10</code>. ' %}</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Usage-Tips">Usage Tips<a class="anchor-link" href="#Usage-Tips"> </a></h2><p>Here are some tips from those who have used this library and camera in the field.</p>
+<ul>
+<li>Running the camera collect software from Jupyter Notebooks will impose some delays and slow down the frame rate. For best performance, run the camera collect from a script. </li>
+</ul>
 
 </div>
 </div>

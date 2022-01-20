@@ -137,7 +137,6 @@ class CameraProperties():
                     print("Setting File Override: {0} = {1}".format(key, value))
         if print_settings:
             pprint.pprint(self.settings)
-        #self.wavelengths = np.arange(*self.settings["index2wavelength_range"])
 
     def __repr__(self):
         return "settings = \n" + self.settings.__repr__() + \
@@ -158,9 +157,8 @@ def tfm_setup(self:CameraProperties,
               more_setup:Callable[[CameraProperties],None] = None,
               dtype:Union[np.int32,np.float32] = np.int32,
               lvl:int = 0):
-
     """Setup for transforms"""
-    if hasattr(self,"need_fast_smile"):
+    if self.fast_smile in self.tfm_list:
         self.smiled_size = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"]) )
         self.line_buff = CircArrayBuffer(self.smiled_size, axis=0, dtype=dtype)
 
@@ -171,14 +169,14 @@ def tfm_setup(self:CameraProperties,
         self.bin_cols = self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"])
         self.reduced_shape = (self.bin_rows,self.bin_cols//self.width,self.width)
 
-    if hasattr(self,"need_fast_bin"):
+    if self.fast_bin in self.tfm_list:
         self.binned_wavelengths = self.calibration["wavelengths_linear"].astype(np.float32)
         self.binned_wavelengths = np.lib.stride_tricks.as_strided(self.binned_wavelengths,
                                             strides=(self.width*4,4), # assumed np.float32
                                             shape=(len(self.binned_wavelengths)//self.width,self.width))
         self.binned_wavelengths = np.around(self.binned_wavelengths.mean(axis=1),decimals=1)
 
-    if hasattr(self,"need_slow_bin"):
+    if self.slow_bin in self.tfm_list:
         n_bands = int(np.ptp(self.calibration["wavelengths"])//self.settings["fwhm_nm"])
         # jump by `fwhm_nm` and find closest array index, then let the wavelengths be in the middle between jumps
         self.λs = np.around(np.array([np.min(self.calibration["wavelengths"]) + i*self.settings["fwhm_nm"] for i in range(n_bands+1)]),decimals=1)
@@ -187,12 +185,12 @@ def tfm_setup(self:CameraProperties,
         binned_type = np.float32 if hasattr(self,"need_rad") else dtype
         self.bin_buff = CircArrayBuffer((np.ptp(self.settings["row_slice"]),n_bands), axis=1, dtype=binned_type)
 
-    if hasattr(self,"need_rad") or hasattr(self,"need_rad_after_fast_bin") or hasattr(self,"need_rad_after_slow_bin"):
+    if self.dn2rad in self.tfm_list:
         # precompute some reference data for converting digital number to radiance
         try:
-            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0).isel(luminance=0)
+            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0,method="nearest").isel(luminance=0)
         except (KeyError, ValueError):
-            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0)
+            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0,method="nearest")
 
         self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
 
@@ -215,7 +213,7 @@ def tfm_setup(self:CameraProperties,
         self.ref_luminance = self.slow_bin(self.ref_luminance)
         self.spec_rad_ref = np.float32(self.calibration["sfit"]( self.binned_wavelengths ))
 
-    if hasattr(self,"need_ref"):
+    if self.rad2ref_6SV in self.tfm_list:
         self.rad_6SV = np.float32(self.calibration["rad_fit"]( self.binned_wavelengths ))
 
     if more_setup is not None:
@@ -277,10 +275,10 @@ def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,
 @patch
 def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Callable[[np.ndarray],np.ndarray]] = None):
     """Define the output `lvl` of the transform pipeline.
-    -1: do not apply any transforms,
+    -1: do not apply any transforms (default),
     0 : raw digital numbers cropped to useable sensor area,
     1 : case 0 + fast smile correction,
-    2 : case 1 + fast binning (default),
+    2 : case 1 + fast binning,
     3 : case 1 + slow binning,
     4 : case 2 + conversion to radiance in units of uW/cm^2/sr/nm,
     5 : case 4 except radiance conversion moved to 2nd step,
@@ -294,28 +292,22 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
         self.tfm_list = [self.crop]
     elif lvl == 1:
         self.tfm_list = [self.crop,self.fast_smile]
-        self.need_fast_smile = True
     elif lvl == 2:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin]
-        self.need_fast_smile = True; self.need_fast_bin = True
     elif lvl == 3:
         self.tfm_list = [self.crop,self.fast_smile,self.slow_bin]
-        self.need_fast_smile = True; self.need_slow_bin = True
     elif lvl == 4:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad]
-        self.need_fast_smile = True; self.need_fast_bin = True; self.need_rad_after_fast_bin = True
+        self.need_rad_after_fast_bin = True
     elif lvl == 5:
         self.tfm_list = [self.crop,self.fast_smile,self.dn2rad,self.fast_bin]
-        self.need_fast_smile = True; self.need_fast_bin = True; self.need_rad = True
     elif lvl == 6:
         self.tfm_list = [self.crop,self.fast_smile,self.fast_bin,self.dn2rad,self.rad2ref_6SV]
-        self.need_fast_smile = True; self.need_fast_bin = True; self.need_rad_after_fast_bin = True; self.need_ref = True
+        self.need_rad_after_fast_bin = True
     elif lvl == 7:
         self.tfm_list = [self.crop,self.fast_smile,self.dn2rad,self.slow_bin]
-        self.need_fast_smile = True; self.need_slow_bin = True; self.need_rad = True
     elif lvl == 8:
         self.tfm_list = [self.crop,self.fast_smile,self.dn2rad,self.slow_bin,self.rad2ref_6SV]
-        self.need_fast_smile = True; self.need_slow_bin = True; self.need_rad = True; self.need_ref = True
     else:
         self.tfm_list = []
 
@@ -373,7 +365,7 @@ class DateTimeBuffer():
 class DataCube(CameraProperties):
     """Facilitates the collection, viewing, and saving of hyperspectral datacubes."""
 
-    def __init__(self, n_lines:int = 16, processing_lvl:int = 2, preserve_raw:bool=False, **kwargs):
+    def __init__(self, n_lines:int = 16, processing_lvl:int = -1, preserve_raw:bool=False, **kwargs):
         """Preallocate array buffers"""
         self.n_lines = n_lines
         self.proc_lvl = processing_lvl
@@ -464,9 +456,15 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
 def load_nc(self:DataCube, nc_path:str, old_style:bool = False):
     """Lazy load a NetCDF datacube into the DataCube buffer."""
     with xr.open_dataset(nc_path) as ds:
-        self.dc = CircArrayBuffer(size=ds.datacube.shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
-        self.dc.data = np.array(ds.datacube) if old_style else np.moveaxis(np.array(ds.datacube), 0, -1)
+        if old_style: # cross-track, along-track, wavelength
+            self.dc      = CircArrayBuffer(size=ds.datacube.shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
+            self.dc.data = np.array(ds.datacube)
+        else: # wavelength, cross-track, along-track -> convert to old_style (datacube inserts do not need transpose)
+            shape = (*ds.datacube.shape[1:],ds.datacube.shape[0])
+            self.dc      = CircArrayBuffer(size=shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
+            self.dc.data = np.moveaxis(np.array(ds.datacube), 0, -1)
         self.binned_wavelengths = np.array(ds.wavelength)
+        self.dc.slots_left      = 0 # indicate that the data buffer is full
 
 # Cell
 

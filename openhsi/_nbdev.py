@@ -2,8 +2,8 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"Array": "00_data.ipynb",
-         "Shape": "00_data.ipynb",
+index = {"Array": "01_capture.ipynb",
+         "Shape": "01_capture.ipynb",
          "CircArrayBuffer": "00_data.ipynb",
          "CameraProperties": "00_data.ipynb",
          "CameraProperties.tfm_setup": "00_data.ipynb",
@@ -22,7 +22,7 @@ index = {"Array": "00_data.ipynb",
          "DataCube.show": "00_data.ipynb",
          "OpenHSI": "01_capture.ipynb",
          "SimulatedCamera": "01_capture.ipynb",
-         "ProcessDatacube": "01_capture.ipynb",
+         "ProcessRawDatacube": "01_capture.ipynb",
          "WebCamera": "02_cameras.ipynb",
          "XimeaCamera": "02_cameras.ipynb",
          "LucidCamera": "02_cameras.ipynb",
