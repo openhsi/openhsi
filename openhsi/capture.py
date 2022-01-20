@@ -157,7 +157,7 @@ class ProcessRawDatacube(OpenHSI):
         self.buff = DataCube()
         self.buff.load_nc(fname, old_style=old_style)
         if hasattr(self.buff,"ds_temperatures"):
-            self.get_temp = lambda: -999 # placeholder so the world continues to run
+            self.get_temp = lambda: -999 # this function needs to exist to create temperature buffer
         super().__init__(n_lines=self.buff.dc.data.shape[1], processing_lvl=processing_lvl, json_path=json_path, pkl_path=pkl_path)
 
     def start_cam(self):
@@ -172,23 +172,25 @@ class ProcessRawDatacube(OpenHSI):
     def set_exposure(self):
         pass
 
-    def save(self,save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str=""):
+    @delegates(OpenHSI.save)
+    def save(self,save_dir:str, **kwargs):
         """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time.
         Override the processing buffer timestamps with the timestamps in original file, also for camera temperatures."""
         self.timestamps.data = self.buff.ds_timestamps
         if hasattr(self.buff,"ds_temperatures"):
             self.cam_temperatures.data = self.buff.ds_temperatures
-        super().save(save_dir=save_dir, preconfig_meta_path=preconfig_meta_path, prefix=prefix, suffix=suffix)
+        super().save(save_dir=save_dir, **kwargs)
 
 
 
 # Cell
 
+@delegates()
 class ProcessDatacube(ProcessRawDatacube):
     """Post-process datacubes"""
-    def __init__(self, fname:str, processing_lvl:int, json_path:str, pkl_path:str, old_style:bool=False):
-        """Post-process datacubes"""
-        super().__init__(fname, processing_lvl=processing_lvl, json_path=json_path, pkl_path=pkl_path,old_style=old_style)
+    def __init__(self, **kwargs):
+        """Post-process datacubes further!"""
+        super().__init__(**kwargs)
 
     def load_next_tfms(self, next_tfms:List[Callable[[np.ndarray],np.ndarray]] = []):
         """provide the transforms you want to apply to this dataset"""
