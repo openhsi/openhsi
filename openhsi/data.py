@@ -187,12 +187,11 @@ def tfm_setup(self:CameraProperties,
 
     if self.dn2rad in self.tfm_list:
         # precompute some reference data for converting digital number to radiance
-        try:
-            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0,method="nearest").isel(luminance=0)
-        except (KeyError, ValueError):
-            dark_radref = self.calibration["rad_ref"].sel(exposure=10,luminance=0,method="nearest")
-
         self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
+        try:
+            dark_radref = self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0).isel(luminance=0)
+        except (KeyError, ValueError):
+            dark_radref = self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0)
 
         self.dark_current = np.squeeze( np.array( self.settings["exposure_ms"]/self.nearest_exposure * dark_radref ) )
         self.ref_luminance = np.squeeze( np.array( self.settings["exposure_ms"]/self.nearest_exposure * \
@@ -273,7 +272,7 @@ def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,
 # Cell
 
 @patch
-def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Callable[[np.ndarray],np.ndarray]] = None):
+def set_processing_lvl(self:CameraProperties, lvl:int = -1, custom_tfms:List[Callable[[np.ndarray],np.ndarray]] = None):
     """Define the output `lvl` of the transform pipeline.
     -1: do not apply any transforms (default),
     0 : raw digital numbers cropped to useable sensor area,
@@ -316,7 +315,7 @@ def set_processing_lvl(self:CameraProperties, lvl:int = 2, custom_tfms:List[Call
 
     # binning input/output types
     self.dtype_in = np.int32
-    self.dtype_out = np.float32 if lvl in (3,4,5,6,7,) else np.int32
+    self.dtype_out = np.float32 if lvl in (4,5,6,7,8) else np.int32
     if len(self.tfm_list) > 0:
         self.tfm_setup(dtype=self.dtype_in, lvl=lvl)
         self.dc_shape = self.pipeline(self.calibration["flat_field_pic"]).shape
@@ -377,7 +376,7 @@ class DataCube(CameraProperties):
         self.dc = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
         self.preserve_raw=preserve_raw
         if self.preserve_raw:
-            self.dc_raw = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
+            self.dc_raw = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_in)
 
     def __repr__(self):
         return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
@@ -404,7 +403,7 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
     if hasattr(self, "binned_wavelengths"):
-        wavelengths = self.binned_wavelengths if self.proc_lvl != 3 else self.λs
+        wavelengths = self.binned_wavelengths if self.proc_lvl not in (3,7,8) else self.λs
     else:
         wavelengths = np.arange(self.dc.data.shape[2])
 
@@ -436,14 +435,15 @@ def save(self:DataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="
     self.nc.wavelength.attrs["long_name"]   = "wavelength_nm"
     self.nc.wavelength.attrs["units"]       = "nanometers"
     self.nc.wavelength.attrs["description"] = "wavelength in nanometers."
-    if getattr(self,"cam_temperatures",None):
+    if hasattr(self,"cam_temperatures"):
         self.nc.temperature.attrs["long_name"] = "camera temperature"
         self.nc.temperature.attrs["units"] = "degrees Celsius"
         self.nc.temperature.attrs["description"] = "temperature of sensor at time of image capture"
 
     self.nc.datacube.attrs["long_name"]   = "hyperspectral datacube"
-    self.nc.datacube.attrs["units"]       = "uW/cm^2/sr/nm" if self.proc_lvl in (3,4,7) else "digital number"
-    if self.proc_lvl in (6,8): self.nc.datacube.attrs["units"] = "percentage reflectance"
+    self.nc.datacube.attrs["units"]       = "digital number"
+    if self.proc_lvl in (4,5,7): self.nc.datacube.attrs["units"] = "uW/cm^2/sr/nm"
+    elif self.proc_lvl in (6,8): self.nc.datacube.attrs["units"] = "percentage reflectance"
     self.nc.datacube.attrs["description"] = "hyperspectral datacube"
 
     self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
@@ -463,6 +463,15 @@ def load_nc(self:DataCube, nc_path:str, old_style:bool = False):
             shape = (*ds.datacube.shape[1:],ds.datacube.shape[0])
             self.dc      = CircArrayBuffer(size=shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
             self.dc.data = np.moveaxis(np.array(ds.datacube), 0, -1)
+
+        self.ds_timestamps = ds.time.to_numpy() # type is np.datetime64. convert to datetime.datetime
+        unix_epoch = np.datetime64(0, 's')
+        one_second = np.timedelta64(1, 's')
+        seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
+        self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
+
+        if hasattr(ds,"temperature"):
+            self.ds_temperatures = ds.temperature.to_numpy()
         self.binned_wavelengths = np.array(ds.wavelength)
         self.dc.slots_left      = 0 # indicate that the data buffer is full
 
