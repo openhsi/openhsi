@@ -57,7 +57,13 @@ def sum_gaussians(x:"indices np.array",
 
 class SettingsBuilderMixin():
 
-    def retake_flat_field(self, show:bool = False):
+    def retake_flat_field(self, show:bool = True) -> "figure object or None":
+        """Take and store an image of with the OpenHSI slit illuminated but a uniform light source.
+
+        Keyword arguments:
+
+            show -- flag to show holowview plot of image.
+        """
         self.start_cam()
         self.calibration["flat_field_pic"] = self.get_img()
         self.stop_cam()
@@ -66,8 +72,14 @@ class SettingsBuilderMixin():
             return hv.Image(self.calibration["flat_field_pic"], bounds=(0,0,*self.calibration["flat_field_pic"].shape)).opts(
                     xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="flat field picture")
 
-    def retake_HgAr(self, show:bool = False, nframes:int = 10):
+    def retake_HgAr(self, show:bool = True, nframes:int = 10) -> "figure object or None":
+        """Take and store an image with OpenHSI illuminated but HgAr calibration source.
 
+        Keyword arguments:
+
+            show -- flag to show holowview plot of image.
+            nframes -- number of frames to average for image (default 10).
+        """
         self.calibration["HgAr_pic"] = self.avgNimgs(nframes)
 
         if show:
@@ -76,10 +88,16 @@ class SettingsBuilderMixin():
 
 
     def update_resolution(self) -> None:
+        """Set settings resolution to match flat field image"""
         self.settings["resolution"] = np.shape(self.calibration["flat_field_pic"])
 
-    def update_row_minmax(self, edgezone:int = 4) -> "figure object":
-        """"""
+    def update_row_minmax(self, edgezone:int = 4, show=True) -> "figure object or None":
+        """Find edges of slit in flat field images and determine region to crop
+
+        Keyword arguments:
+            edgezone -- number of pixel buffer to add to crop region (default 4).
+            show -- flag to show holowview plot of slice and edges identified.
+        """
         col_summed = np.sum(self.calibration["flat_field_pic"],axis=1)
         edges      = np.abs(np.gradient(col_summed))
         locs       = find_peaks(edges, height=5000, width=1.5, prominence=0.01)[0]
@@ -89,14 +107,18 @@ class SettingsBuilderMixin():
         num   = len(col_summed)
         big   = np.max(col_summed)
         self.settings["row_slice"] = (row_min,row_max)
+        if show:
+            return (hv.Curve(zip(np.arange(num),col_summed)).opts(xlabel="row index",ylabel="count",width=500) * \
+                    hv.Curve(zip((row_min,row_min),(0,big)),label=f"{row_min}").opts(color="r") * \
+                    hv.Curve(zip((row_max,row_max),(0,big)),label=f"{row_max}").opts(color="r") ).opts(
+                    xlim=(0,num),ylim=(0,big),legend_position='top_left')
 
-        return (hv.Curve(zip(np.arange(num),col_summed)).opts(xlabel="row index",ylabel="count",width=500) * \
-                hv.Curve(zip((row_min,row_min),(0,big)),label=f"{row_min}").opts(color="r") * \
-                hv.Curve(zip((row_max,row_max),(0,big)),label=f"{row_max}").opts(color="r") ).opts(
-                xlim=(0,num),ylim=(0,big),legend_position='top_left')
+    def update_smile_shifts(self, show=True) -> "figure object or None":
+        """Determine Smile and shifts to correct from HgAr image.
 
-    def update_smile_shifts(self) -> "figure object":
-        """"""
+        Keyword arguments:
+            show -- flag to show holowview plot of slice and edges identified.
+        """
         cropped = self.crop(self.calibration["HgAr_pic"])
         rows, cols = cropped.shape
 
@@ -112,9 +134,9 @@ class SettingsBuilderMixin():
         shifts -= np.min(shifts) # make all entries positive
         shifts = medfilt(shifts,5).astype(np.int16) # use some median smoothing
         self.calibration["smile_shifts"] = shifts
-
-        return hv.Curve(zip(np.arange(rows),shifts)).opts(
-                        invert_axes=True,invert_yaxis=True,xlabel="row index",ylabel="pixel shift")
+        if show:
+            return hv.Curve(zip(np.arange(rows),shifts)).opts(
+                            invert_axes=True,invert_yaxis=True,xlabel="row index",ylabel="pixel shift")
 
     def fit_HgAr_lines(self, top_k:int = 10,
                        brightest_peaks:list = [435.833,546.074,763.511],
@@ -127,7 +149,16 @@ class SettingsBuilderMixin():
                        max_match_error:float = 2.0,
                        verbose:bool = False) -> "figure object":
         """Finds the index to wavelength map given a spectra and a list of emission lines.
-        To filter the spectra, set `filter_window` to an odd number > 1."""
+        To filter the spectra, set `filter_window` to an odd number > 1.
+
+        Keyword arguments:
+        brightest_peaks -- list of wavelength for the brightest peaks in HgAr image.
+        filter_window -- filter window for scipy.signal.savgol_filter
+        interactive_peak_id -- flag to interactively confirm wavelength of peaks
+        find_peaks_height, prominence, width, distance -- inputs for scipy.signal.find_peaks
+        max_match_error -- maximum diffeence between peak estimate wavelength and wavelength of HgAr linelist.
+        verbose -- more detailed diagnostic printing.
+        """
 
         cropped      = self.crop(self.calibration["HgAr_pic"])
         rows, cols   = cropped.shape
@@ -199,7 +230,6 @@ class SettingsBuilderMixin():
         closest_HgAr_line = np.asarray(closest_HgAr_line)
         matching_centroid = np.asarray(matching_centroid)
         matching_A        = np.asarray(matching_A)
-
 
         # preform final fit of wavelength with paired lines and peaks.
         top_A_idx = np.flip(np.argsort(matching_A))[:max(min(top_k, len(closest_HgAr_line)),4)]
