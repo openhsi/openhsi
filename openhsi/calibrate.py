@@ -121,9 +121,11 @@ class SettingsBuilderMixin():
                        filter_window:int = 1,
                        interactive_peak_id:bool = False,
                        find_peaks_height:int = 10,
-                       prominence = 0.2,
-                       width = 1.5,
-                       distance = 10) -> "figure object":
+                       prominence:float = 0.2,
+                       width:float = 1.5,
+                       distance:int = 10,
+                       max_match_error:float = 2.0,
+                       verbose:bool = False) -> "figure object":
         """Finds the index to wavelength map given a spectra and a list of emission lines.
         To filter the spectra, set `filter_window` to an odd number > 1."""
 
@@ -159,7 +161,7 @@ class SettingsBuilderMixin():
         plt.legend(); plt.xlabel("array index"); plt.ylabel("digital number")
         plt.show()
 
-        # interactivly confirm peak wavelenght
+        # interactivly confirm peak wavelengths
         top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
         if interactive_peak_id:
             plt.plot(np.arange(len(spectra)), spectra)
@@ -171,33 +173,37 @@ class SettingsBuilderMixin():
                 if res:
                     brightest_peaks[i]=float(res)
 
-            print(f"top_A_idx={top_A_idx}\nA[top_A_idx]={A[top_A_idx]}\nμ[top_A_idx]={μ[top_A_idx]}\nσ[top_A_idx]={σ[top_A_idx]}\nbrightest_peaks={brightest_peaks}")
+            if verbose: print(f"top_A_idx={top_A_idx}\nA[top_A_idx]={A[top_A_idx]}\nμ[top_A_idx]={μ[top_A_idx]}\nσ[top_A_idx]={σ[top_A_idx]}\nbrightest_peaks={brightest_peaks}")
 
         # interpolate with brightest spectral lines
-        first_fit = np.poly1d( np.polyfit(np.sort(μ[top_A_idx]),brightest_peaks,1) )
+        first_fit = np.poly1d( np.polyfit(μ[top_A_idx],brightest_peaks,1) )
         predicted_λ = first_fit(μ)
-        print(f"Predicted λ {predicted_λ} for column {μ}")
+        if verbose: print(f"Predicted λ {predicted_λ} for column {μ}")
 
         plt.plot(μ[top_A_idx], brightest_peaks, "xr")
         plt.plot(np.arange(len(spectra)), first_fit(np.arange(len(spectra))))
         plt.legend(['Identified Peaks', 'Spectra']); plt.xlabel("array index"); plt.ylabel("digital number")
         plt.show()
 
-        closest_HgAr_line = np.empty(0)
-        matching_centroid = np.empty(0)
-        matching_A = np.empty(0)
-        for λ, mu, A in zip(predicted_λ, μ, A):
-            diff = np.min(np.abs(HgAr_lines - λ))
-            print(diff)
-            if diff < max_match_error:  # nm
-                closest_HgAr_line = np.append(
-                    closest_HgAr_line, HgAr_lines[np.argmin(np.abs(HgAr_lines - λ))]
-                )
-                matching_centroid = np.append(matching_centroid, mu)
-                matching_A = np.append(matching_A, A)
+        # match estimated peak wavelength with real line for final fit, verify match is better than max_match_error.
+        closest_HgAr_line, matching_centroid, matching_A  = [], [], []
+        diffs = [np.min(np.abs(HgAr_lines-λ)) for λ in predicted_λ]
+        for i in range(len(diffs)):
+            if verbose: print(f"difference HgAr_lines - λ = {diffs[i]}")
+            if diffs[i] < max_match_error: # nm
+                closest_HgAr_line.append( HgAr_lines[np.argmin(np.abs(HgAr_lines - predicted_λ[i]))] )
+                matching_centroid.append( μ[i] )
+                matching_A.append( A[i] )
 
-        top_A_idx = np.flip(np.argsort(matching_A))[:max(min(top_k,len(closest_HgAr_line)),4)]
-        final_fit = np.poly1d( np.polyfit(matching_centroid[top_A_idx],closest_HgAr_line[top_A_idx] ,3) )
+        # convert to numpy array
+        closest_HgAr_line = np.asarray(closest_HgAr_line)
+        matching_centroid = np.asarray(matching_centroid)
+        matching_A        = np.asarray(matching_A)
+
+
+        # preform final fit of wavelength with paired lines and peaks.
+        top_A_idx = np.flip(np.argsort(matching_A))[:max(min(top_k, len(closest_HgAr_line)),4)]
+        final_fit = np.poly1d(np.polyfit(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx] ,3) )
         spec_wavelengths = final_fit(matching_centroid[top_A_idx])
 
         plt.plot(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx], "xr")
@@ -207,7 +213,7 @@ class SettingsBuilderMixin():
 
         # update the calibration files
         self.calibration["wavelengths"] = final_fit(shifted_idxs)
-        linear_fit = np.poly1d( np.polyfit(matching_centroid[top_A_idx],closest_HgAr_line[top_A_idx] ,1) )
+        linear_fit = np.poly1d( np.polyfit(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx] ,1) )
         self.calibration["wavelengths_linear"] = linear_fit(shifted_idxs)
 
         # create plot of fitted spectral lines
