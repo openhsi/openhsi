@@ -142,6 +142,12 @@ class CameraProperties():
         return "settings = \n" + self.settings.__repr__() + \
                "\n\ncalibration = \n" + self.calibration.__repr__()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
     def dump(self, json_path:str = None, pkl_path:str = None):
         """Save the settings and calibration files"""
         with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
@@ -188,6 +194,19 @@ def tfm_setup(self:CameraProperties,
     if self.dn2rad in self.tfm_list:
         # precompute some reference data for converting digital number to radiance
         self.nearest_exposure = self.calibration["rad_ref"].sel(exposure=self.settings["exposure_ms"],method="nearest").exposure
+
+        # use max valid rad_ref luminance if none given.
+        if "luminance" not in self.settings.keys():
+            self.settings["luminance"] = int(np.max(
+                self.calibration["rad_ref"].luminance.where(
+                    np.isfinite(
+                        self.calibration["rad_ref"]
+                        .sel(exposure=self.nearest_exposure)
+                        .any(axis=(1, 2))
+                    )
+                )
+            ).data.tolist())
+
         try:
             dark_radref = self.calibration["rad_ref"].sel(exposure=self.nearest_exposure,luminance=0).isel(luminance=0)
         except (KeyError, ValueError):

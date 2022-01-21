@@ -66,19 +66,19 @@ class SettingsBuilderMixin():
             return hv.Image(self.calibration["flat_field_pic"], bounds=(0,0,*self.calibration["flat_field_pic"].shape)).opts(
                     xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="flat field picture")
 
-    def retake_HgAr(self, show:bool = False, nframes:int=10):
+    def retake_HgAr(self, show:bool = False, nframes:int = 10):
 
         self.calibration["HgAr_pic"] = self.avgNimgs(nframes)
 
         if show:
-            return hv.Image(self.calibration["HgAr_pic"], bounds=(0,0,*self.calibration["HgAr_pic"].shape)).opts(
+            return hv.Image(self.crop(self.calibration["HgAr_pic"]), bounds=(0,0,*self.calibration["HgAr_pic"].shape)).opts(
                     xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="HgAr spectra picture")
 
 
     def update_resolution(self) -> None:
         self.settings["resolution"] = np.shape(self.calibration["flat_field_pic"])
 
-    def update_row_minmax(self, edgezone:int=4) -> "figure object":
+    def update_row_minmax(self, edgezone:int = 4) -> "figure object":
         """"""
         col_summed = np.sum(self.calibration["flat_field_pic"],axis=1)
         edges      = np.abs(np.gradient(col_summed))
@@ -97,7 +97,7 @@ class SettingsBuilderMixin():
 
     def update_smile_shifts(self) -> "figure object":
         """"""
-        cropped = self.calibration["HgAr_pic"][slice(*self.settings["row_slice"]),:]
+        cropped = self.crop(self.calibration["HgAr_pic"])
         rows, cols = cropped.shape
 
         window = np.int32(np.flip(cropped[rows//2,:].copy()))
@@ -121,12 +121,13 @@ class SettingsBuilderMixin():
                        filter_window:int = 1,
                        interactive_peak_id:bool = False,
                        find_peaks_height:int = 10,
-                       prominence=0.2,
-                       width=1.5) -> "figure object":
+                       prominence = 0.2,
+                       width = 1.5,
+                       distance = 10) -> "figure object":
         """Finds the index to wavelength map given a spectra and a list of emission lines.
         To filter the spectra, set `filter_window` to an odd number > 1."""
 
-        cropped      = self.calibration["HgAr_pic"][slice(*self.settings["row_slice"]),:]
+        cropped      = self.crop(self.calibration["HgAr_pic"])
         rows, cols   = cropped.shape
         spectra      = cropped[rows//2,self.calibration["smile_shifts"][rows//2]:].copy()
         _start_idx   = self.calibration["smile_shifts"][rows//2] # get smile shifted indexes
@@ -134,7 +135,12 @@ class SettingsBuilderMixin():
         shifted_idxs = np.arange(self.settings["resolution"][1])[_start_idx:_start_idx+_num_idx]
 
         filtered_spec = savgol_filter(spectra, filter_window, min(3,filter_window-1))
-        μ, props      = find_peaks(filtered_spec, height = find_peaks_height, width = width, prominence = prominence)
+        μ, props      = find_peaks(filtered_spec,
+                                   height = find_peaks_height,
+                                   width = width,
+                                   prominence = prominence,
+                                   distance=distance)
+
         A = props["peak_heights"] # amplitude
         σ = 0.5 * props["widths"] # standard deviation
         c = 0                     # constant
@@ -153,9 +159,12 @@ class SettingsBuilderMixin():
         plt.legend(); plt.xlabel("array index"); plt.ylabel("digital number")
         plt.show()
 
-        # interpolate with top 3 spectral lines
+        # interactivly confirm peak wavelenght
         top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
         if interactive_peak_id:
+            plt.plot(np.arange(len(spectra)), spectra)
+            plt.plot(μ[top_A_idx], A[top_A_idx], "rx")
+            plt.show()
             for i, pk in enumerate(top_A_idx.tolist()):
                 print(f"Peak {i} at col {μ[pk]} - default wavelength {brightest_peaks[i]}:")
                 res = input()
@@ -164,22 +173,41 @@ class SettingsBuilderMixin():
 
             print(f"top_A_idx={top_A_idx}\nA[top_A_idx]={A[top_A_idx]}\nμ[top_A_idx]={μ[top_A_idx]}\nσ[top_A_idx]={σ[top_A_idx]}\nbrightest_peaks={brightest_peaks}")
 
-        #top_A_idx = np.flip(np.argsort(A))[:len(brightest_peaks)]
+        # interpolate with brightest spectral lines
         first_fit = np.poly1d( np.polyfit(np.sort(μ[top_A_idx]),brightest_peaks,1) )
         predicted_λ = first_fit(μ)
+        print(f"Predicted λ {predicted_λ} for column {μ}")
 
-        plt.plot(first_fit(np.arange(len(spectra))))
-        plt.xlabel("array index"); plt.ylabel("fitted wavelength")
+        plt.plot(μ[top_A_idx], brightest_peaks, "xr")
+        plt.plot(np.arange(len(spectra)), first_fit(np.arange(len(spectra))))
+        plt.legend(['Identified Peaks', 'Spectra']); plt.xlabel("array index"); plt.ylabel("digital number")
         plt.show()
 
-        closest_λ = np.array([ HgAr_lines[np.argmin(np.abs(HgAr_lines-λ))] for λ in predicted_λ])
-        top_A_idx = np.flip(np.argsort(A))[:max(min(top_k,len(HgAr_lines)),4)]
-        final_fit = np.poly1d( np.polyfit(μ[top_A_idx],closest_λ[top_A_idx] ,3) )
-        spec_wavelengths = final_fit(μ[top_A_idx])
+        closest_HgAr_line = np.empty(0)
+        matching_centroid = np.empty(0)
+        matching_A = np.empty(0)
+        for λ, mu, A in zip(predicted_λ, μ, A):
+            diff = np.min(np.abs(HgAr_lines - λ))
+            print(diff)
+            if diff < max_match_error:  # nm
+                closest_HgAr_line = np.append(
+                    closest_HgAr_line, HgAr_lines[np.argmin(np.abs(HgAr_lines - λ))]
+                )
+                matching_centroid = np.append(matching_centroid, mu)
+                matching_A = np.append(matching_A, A)
+
+        top_A_idx = np.flip(np.argsort(matching_A))[:max(min(top_k,len(closest_HgAr_line)),4)]
+        final_fit = np.poly1d( np.polyfit(matching_centroid[top_A_idx],closest_HgAr_line[top_A_idx] ,3) )
+        spec_wavelengths = final_fit(matching_centroid[top_A_idx])
+
+        plt.plot(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx], "xr")
+        plt.plot(np.arange(len(spectra)), final_fit(np.arange(len(spectra))))
+        plt.legend(['Identified Peaks', 'Spectra']); plt.xlabel("array index"); plt.ylabel("digital number")
+        plt.show()
 
         # update the calibration files
         self.calibration["wavelengths"] = final_fit(shifted_idxs)
-        linear_fit = np.poly1d( np.polyfit(μ[top_A_idx],closest_λ[top_A_idx] ,1) )
+        linear_fit = np.poly1d( np.polyfit(matching_centroid[top_A_idx],closest_HgAr_line[top_A_idx] ,1) )
         self.calibration["wavelengths_linear"] = linear_fit(shifted_idxs)
 
         # create plot of fitted spectral lines
@@ -192,7 +220,10 @@ class SettingsBuilderMixin():
                     xlabel="wavelength (nm)",ylabel="digital number",width=700,height=200,toolbar="below")
 
 
-    def update_intsphere_fit(self, spec_rad_ref_data="assets/112704-1-1_1nm_data.csv", spec_rad_ref_luminance:int=52_020) -> "figure object":
+    def update_intsphere_fit(self,
+                             spec_rad_ref_data = "assets/112704-1-1_1nm_data.csv",
+                             spec_rad_ref_luminance:int = 52_020,
+                             showplot = True) -> "figure object  or nothing":
 
         cal_data=np.genfromtxt(spec_rad_ref_data, delimiter=',', skip_header=1)
         wavelen=cal_data[:,0]
@@ -202,23 +233,24 @@ class SettingsBuilderMixin():
 
         self.calibration["sfit"] = interp1d(wavelen, spec_rad, kind='cubic')
 
-        # plot
-        wavelen_arr = np.linspace(np.min(wavelen),np.max(wavelen),num=200)
-        spec_rad_ref = np.float64(self.calibration["sfit"](self.calibration["wavelengths"]))
+        if showplot:
+            # plot
+            wavelen_arr = np.linspace(np.min(wavelen),np.max(wavelen),num=200)
+            spec_rad_ref = np.float64(self.calibration["sfit"](self.calibration["wavelengths"]))
 
-        fig, ax = plt.subplots(figsize=(12,4))
-        ax.plot(wavelen,spec_rad,"r.",label="Manufacturer Calibration Points")
-        ax.plot(wavelen_arr,self.calibration["sfit"](wavelen_arr),label="Spline Fit")
-        ax.grid("on")
-        #plt.axis([393,827,0,200])
-        ax.set_xlabel("wavelength (nm)")
-        ax.set_ylabel("spectral radiance ($\mu$W/cm$^2$/sr/nm)")
-        ax.legend()
-        ax.axvspan(np.min(self.calibration["wavelengths"]), np.max(self.calibration["wavelengths"]), alpha=0.3, color="gray")
-        ax.axis([np.min(self.calibration["wavelengths"])-50,2500,0,200])
-        ax.text(410, 190, "OpenHSI Wavelengths", fontsize=11)
-        ax.minorticks_on()
-        return fig
+            fig, ax = plt.subplots(figsize=(12,4))
+            ax.plot(wavelen,spec_rad,"r.",label="Manufacturer Calibration Points")
+            ax.plot(wavelen_arr,self.calibration["sfit"](wavelen_arr),label="Spline Fit")
+            ax.grid("on")
+            #plt.axis([393,827,0,200])
+            ax.set_xlabel("wavelength (nm)")
+            ax.set_ylabel("spectral radiance ($\mu$W/cm$^2$/sr/nm)")
+            ax.legend()
+            ax.axvspan(np.min(self.calibration["wavelengths"]), np.max(self.calibration["wavelengths"]), alpha=0.3, color="gray")
+            ax.axis([np.min(self.calibration["wavelengths"])-50,2500,0,200])
+            ax.text(410, 190, "OpenHSI Wavelengths", fontsize=11)
+            ax.minorticks_on()
+            return fig
 
 
     def update_window_across_track(self, crop_buffer) -> "figure object":
@@ -227,16 +259,17 @@ class SettingsBuilderMixin():
     def update_window_along_track(self, crop_buffer) -> "figure object":
         pass
 
-    def update_intsphere_cube(self,exposures:List,
+    def update_intsphere_cube(self,
+                              exposures:List,
                               luminances:List,
-                              nframes:int=10,
-                              lum_chg_func:Callable=print,
-                              interactive:bool=False,
+                              nframes:int = 10,
+                              lum_chg_func:Callable = print,
+                              interactive:bool = False,
                               ):
-        shape = (np.ptp(self.settings["row_slice"]),self.settings["resolution"][1],len(exposures),len(luminances))
+        shape = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1], len(exposures), len(luminances))
 
-        lum_buff = CircArrayBuffer(shape[:3],axis=2,dtype=np.int32)
-        rad_ref  = CircArrayBuffer(shape,axis=3,dtype=np.int32)
+        lum_buff = CircArrayBuffer(shape[:3], axis=2, dtype=np.int32)
+        rad_ref  = CircArrayBuffer(shape, axis=3, dtype=np.int32)
 
         mb = master_bar(range(len(luminances)))
         for i in mb:
@@ -251,7 +284,7 @@ class SettingsBuilderMixin():
             for j in progress_bar(range(len(exposures)), parent=mb):
                 mb.child.comment = f"exposure = {exposures[j]} ms"
                 self.set_exposure(exposures[j])
-
+                exposures[j] = self.settings["exposure_ms"]  # store real exposure time
                 lum_buff.put( self.crop( self.avgNimgs(nframes) ) )
 
             rad_ref.put( lum_buff.data )
@@ -282,10 +315,10 @@ def create_settings_builder(clsname:str, cam_class:"Camera Class") -> "SettingsB
 
 # Cell
 
-import socket
 import collections
-import time
 import math
+import socket
+import time
 
 try:
     import winsound
@@ -298,9 +331,14 @@ else:
 
 class SpectraPTController():
     def __init__(self,
-                 lum_preset_dict:Dict[int,int]={0:1, 1_000:2, 2_000:3, 3_000:4, 4_000:5, 5_000:6,
-                                  6_000:7, 7_000:8, 8_000:9, 9_000:10, 10_000:11,
-                                  20_000:12, 25_000:13, 30_000:14, 35_000:15, 40_000:16},
+                 lum_preset_dict:Dict[int,int]={0:1, 1_000:2,
+                                                2_000:3, 3_000:4,
+                                                4_000:5, 5_000:6,
+                                                6_000:7, 7_000:8,
+                                                8_000:9, 9_000:10,
+                                                10_000:11, 20_000:12,
+                                                25_000:13, 30_000:14,
+                                                35_000:15, 40_000:16},
                  host:str="localhost",
                  port:int=3434):
         self.lum_preset_dict=lum_preset_dict
@@ -314,14 +352,14 @@ class SpectraPTController():
 
             data = bytes.fromhex(hex(len(msg))[2:].zfill(8)) + msg.encode()
             sock.sendall(data)
-    #         print("[+] Sending {} to {}:{}".format(data, host, port))
+            # print("[+] Sending {} to {}:{}".format(data, host, port))
 
             response1 = sock.recv(4096)
             response2 = sock.recv(4096)
 
-    #         print("[+] Received", repr(response2.decode('utf-8')))
+            # print("[+] Received", repr(response2.decode('utf-8')))
 
-            return response2.split(b';')[2]
+            return response2.split(b";")[2]
 
     def selectPreset(self, lumtarget) -> float:
         self.client(f"main:1:pre {self.lum_preset_dict[lumtarget]}")
