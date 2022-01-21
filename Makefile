@@ -6,9 +6,9 @@ help:
 	cat Makefile
 
 openhsi: $(SRC)
-		nbdev_clean_nbs
-		nbdev_build_lib
-		touch openhsi
+	nbdev_clean_nbs
+	nbdev_build_lib
+	touch openhsi
 
 docs_serve: docs
 	cd docs && bundle exec jekyll serve
@@ -22,17 +22,21 @@ docs: $(SRC)
 test:
 	nbdev_test_nbs --verbose True --flags test
 
-release: pypi
-		sleep 3
-		fastrelease_conda_package --mambabuild --upload_user fastai
-		fastrelease_bump_version
-		nbdev_build_lib | tail
+release: pypi conda_release
+	fastrelease_bump_version
+
+changelog:
+	fastrelease_changelog
 
 conda_release:
-	fastrelease_conda_package --upload_user openhsi
+	fastrelease_conda_package --do_build false && \
+	cd conda && \
+	conda build --no-anaconda-upload --output-folder build openhsi && \
+	anaconda upload build/noarch/{name}-{ver}-*.tar.bz2
+	cd ..
 
 pypi: dist
-	twine upload --repository pypi dist/*
+	echo "twine upload --repository pypi dist/*"
 
 dist: clean
 	python setup.py sdist bdist_wheel

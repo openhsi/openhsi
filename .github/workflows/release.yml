@@ -1,4 +1,4 @@
-name: publish_conda
+name: publish
 
 on:
   release:
@@ -38,9 +38,9 @@ jobs:
       shell: bash -l {0}
       run: |
         export ANACONDA_API_TOKEN = ${{ secrets.ANACONDA_TOKEN }}
-        conda install conda-build anaconda-client
+        conda install conda-build anaconda-client twine
 
 
     - name: publish-to-conda
-      env:
+      run: make release
       
