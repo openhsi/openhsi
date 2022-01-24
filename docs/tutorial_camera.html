@@ -1,6 +1,6 @@
 ---
 
-title: Tutorial: Quick Start Guide
+title: Quick Start Guide
 
 
 keywords: fastai
@@ -29,6 +29,21 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </div>
     {% endraw %}
 
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    {% endraw %}
+
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>To use an OpenHSI camera, you will need a settings <code>.json</code> file that describes how the camera is initialised and other details you can edit to suit your use case. You will also need a <code>.pkl</code> file that includes some arrays produced during calibration that allow the OpenHSI camera to do smile corrections, and conversions to radiance and reflectance.</p>
+<p>For example, this is how you would use an OpenHSI camera (packaged with a Lucid sensor) and collect a hyperspectral datacube. The context manager automatically handles the initialisation and closing of the camera.</p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.cameras</span> <span class="kn">import</span> <span class="o">*</span>
@@ -77,35 +92,35 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </tr>
 <tr>
 <td style="text-align:right">1</td>
-<td>case 0 + fast smile correction</td>
+<td>crop + fast smile</td>
 </tr>
 <tr>
 <td style="text-align:right">2</td>
-<td>case 1 + fast binning</td>
+<td>crop + fast smile + fast binning</td>
 </tr>
 <tr>
 <td style="text-align:right">3</td>
-<td>case 1 + slow binning</td>
+<td>crop + fast smile + slow binning</td>
 </tr>
 <tr>
 <td style="text-align:right">4</td>
-<td>case 2 + conversion to radiance in units of uW/cm^2/sr/nm</td>
+<td>crop + fast smile + fast binning + conversion to radiance in units of uW/cm^2/sr/nm</td>
 </tr>
 <tr>
 <td style="text-align:right">5</td>
-<td>case 1 -&gt; radiance then fast binned</td>
+<td>crop + fast smile + radiance + fast binning</td>
 </tr>
 <tr>
 <td style="text-align:right">6</td>
-<td>case 4 + conversion to reflectance</td>
+<td>crop + fast smile + fast binning + radiance + reflectance</td>
 </tr>
 <tr>
 <td style="text-align:right">7</td>
-<td>case 5 except slow binning is used</td>
+<td>crop + fast smile + radiance + slow binning</td>
 </tr>
 <tr>
 <td style="text-align:right">8</td>
-<td>case 7 -&gt; reflectance</td>
+<td>crop + fast smile + radiance + slow binning + reflectance</td>
 </tr>
 </tbody>
 </table>
@@ -222,6 +237,24 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <span class="c1">#cam.dump(json_path,pkl_path) # update the settings and calibration files</span>
 </pre></div>
 <p>{% include important.html content='You will need the 6SV excutable somewhere on your system. You can specify the path to the executable with <code>sixs_path</code>.' %}{% include important.html content='The 6SV model calculates radiance in units of (W/m^2/sr/μm), whereas the integrating sphere calibration is in (μW/cm^2/sr/nm) hence the extra divide by 10 in <code>model.radiance/10</code>. ' %}</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Empirical-Line-Calibration">Empirical Line Calibration<a class="anchor-link" href="#Empirical-Line-Calibration"> </a></h3><p>The ELC widget is defined in the <code>openhsi.atmos</code> module (<a href="https://openhsi.github.io/openhsi/atmos.html#ELC">link to documentation</a>). This method basically uses known spectral targets (typically one dark and one light) to extrapolate the reflectance for the other pixels. Users can draw several bounding boxes telling the ELC algorithm to use those pixels as the reference targets. Part of automatically identifying the spectral target, and thus an interactive widget, is to use a spectral matching technique. I use Spectral Angle Mapper. It's not called that in the code because I came up with it without knowing it already existed.
+{% include warning.html content='This is still a work in progress.' %}</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="n">elc</span> <span class="o">=</span> <span class="n">ELC</span><span class="p">(</span><span class="n">nc_path</span><span class="o">=</span><span class="s2">&quot;path_to_file.nc&quot;</span><span class="p">,</span> <span class="n">speclib_path</span><span class="o">=</span><span class="s2">&quot;assets/speclib.pkl&quot;</span><span class="p">,</span> <span class="n">model_6SV</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="n">elc</span><span class="p">()</span>
+</pre></div>
+<p>The <code>speclib_path</code> parameter identifies the lab measured spectra of a few calibration tarps. This method also requires a radiance estimate <code>model_6SV</code> so we can spectrally match radiance from lab based reflectance - close enough is good enough.</p>
 
 </div>
 </div>

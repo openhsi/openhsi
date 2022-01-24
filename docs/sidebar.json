@@ -4,11 +4,12 @@
     "Quick Start Guide": "/tutorial_camera.html"
   },
   "Utils": {
-    "Data Transforms": "/data.html",
-    "Base OpenHSI class": "/capture.html"
+    "Datacubes and Transforms": "/data.html",
+    "Capture Support and Simulated Cameras": "/capture.html",
+    "Shared Arrays for Continuous Collection": "shared.html"
   },
   "Camera Implementations": {
-    "Cameras": "/cameras.html"
+    "Hardware Cameras": "/cameras.html"
   },
   "Atmospheric Correction": {
     "Atmospheric Correction": "/atmos.html",
@@ -22,9 +23,9 @@
     "Metadata Editor": "/metadata.html"
   },
   "Ancillary Sensors": {
-    "Ancillary Sensors": "/sensors.html"
+    "Sensor Data Parsing": "/sensors.html"
   },
   "Geometric Correction": {
-    "Geometric Correction": "/geometry.html"
+    "Georectification": "/geometry.html"
   }
 }

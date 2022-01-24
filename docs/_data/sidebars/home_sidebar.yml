@@ -16,16 +16,19 @@ entries:
     title: Getting started
   - folderitems:
     - output: web,pdf
-      title: Data Transforms
+      title: Datacubes and Transforms
       url: /data.html
     - output: web,pdf
-      title: Base OpenHSI class
+      title: Capture Support and Simulated Cameras
       url: /capture.html
+    - output: web,pdf
+      title: Shared Arrays for Continuous Collection
+      url: shared.html
     output: web
     title: Utils
   - folderitems:
     - output: web,pdf
-      title: Cameras
+      title: Hardware Cameras
       url: /cameras.html
     output: web
     title: Camera Implementations
@@ -55,13 +58,13 @@ entries:
     title: Metadata
   - folderitems:
     - output: web,pdf
-      title: Ancillary Sensors
+      title: Sensor Data Parsing
       url: /sensors.html
     output: web
     title: Ancillary Sensors
   - folderitems:
     - output: web,pdf
-      title: Geometric Correction
+      title: Georectification
       url: /geometry.html
     output: web
     title: Geometric Correction

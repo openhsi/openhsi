@@ -397,7 +397,7 @@ class SpectraPTController():
 
             return response2.split(b";")[2]
 
-    def selectPreset(self, lumtarget) -> float:
+    def selectPreset(self, lumtarget:float) -> float:
         self.client(f"main:1:pre {self.lum_preset_dict[lumtarget]}")
         time.sleep(2)
         lum=collections.deque(maxlen=100)

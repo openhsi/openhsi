@@ -17,13 +17,11 @@ index = {"Array": "01_capture.ipynb",
          "CameraProperties.pipeline": "00_data.ipynb",
          "DateTimeBuffer": "00_data.ipynb",
          "DataCube": "00_data.ipynb",
-         "DataCube.save": "00_data.ipynb",
-         "DataCube.load_nc": "00_data.ipynb",
-         "DataCube.show": "00_data.ipynb",
          "OpenHSI": "01_capture.ipynb",
          "SimulatedCamera": "01_capture.ipynb",
          "ProcessRawDatacube": "01_capture.ipynb",
          "ProcessDatacube": "01_capture.ipynb",
+         "SharedSimulatedCamera": "01_capture.ipynb",
          "WebCamera": "02_cameras.ipynb",
          "XimeaCamera": "02_cameras.ipynb",
          "LucidCamera": "02_cameras.ipynb",
@@ -54,7 +52,14 @@ index = {"Array": "01_capture.ipynb",
          "build_variables_widgets": "06_metadata.ipynb",
          "MetadataEditor": "06_metadata.ipynb",
          "fields_dict": "07_sensors.ipynb",
-         "SensorStream": "07_sensors.ipynb"}
+         "SensorStream": "07_sensors.ipynb",
+         "QUICK_START_GUIDE": "09_tutorial_camera.ipynb",
+         "GEN_CAL_FILES": "10_tutorial_calibrate.ipynb",
+         "SharedCircArrayBuffer": "11_shared.ipynb",
+         "SharedDataCube": "11_shared.ipynb",
+         "SharedDataCube.save": "11_shared.ipynb",
+         "save_shared_datacube": "11_shared.ipynb",
+         "SharedOpenHSI": "11_shared.ipynb"}
 
 modules = ["data.py",
            "capture.py",
@@ -64,7 +69,9 @@ modules = ["data.py",
            "calibrate.py",
            "metadata.py",
            "sensors.py",
-           "geometry.py"]
+           "geometry.py",
+           "tutorial.py",
+           "shared.py"]
 
 doc_url = "https://openhsi.github.io/openhsi/"
 
