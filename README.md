@@ -47,8 +47,7 @@ If OpenHSI has been useful for your research, please acknowledge the project in 
 
 
 ## How to use
-
-For more detailed instructions, please see the tutorials in the sidebar of the documentation site. 
+{% include tip.html content='For more detailed instructions, please see the tutorials in the sidebar of the documentation site. ' %}
 
 ### Taking a single hyperspectral datacube
 
@@ -87,4 +86,17 @@ fig.opts(fig_inches=7,title="simulated hyperspectral datacube")
 
 
 
-For more information on how to use this library, check out our [Quick Start Guide](https://openhsi.github.io/openhsi/tutorial_camera.html).
+{% include tip.html content='For more information on how to use this library, check out our [Quick Start Guide](https://openhsi.github.io/openhsi/tutorial_camera.html).' %}
+
+## Hardware cameras
+
+![image.png](nbs/attachment:f7dff4b0-0b1f-4ff6-a5c8-890133442d0e.png)
+The hardware consists of a collimator tube with a slit (1) mounted in a 3D printed housing (2). A diffraction grating (3) is used to split the incoming light into its component colours to be detected on the camera sensor (4).  
+
+We have the following implementations in [`cameras` module](https://openhsi.github.io/openhsi/cameras.html):
+- `WebCamera`
+- `XimeaCamera`
+- `LucidCamera`
+- `FlirCamera`
+
+These all have the same interface so in principle, these OpenHSI cameras can be used interchangeably as long as you have the right calibration files. 

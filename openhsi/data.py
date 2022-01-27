@@ -393,7 +393,7 @@ class DataCube(CameraProperties):
         self.timestamps = DateTimeBuffer(n_lines)
         self.dc_shape = (self.dc_shape[0],self.n_lines,self.dc_shape[1])
         self.dc = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
-        print(f"Allocated {4*reduce(lambda x,y: x*y, self.dc_shape)/2**20:.02f} MB of RAM.")
+        if self.dc_shape[0] > 1: print(f"Allocated {4*reduce(lambda x,y: x*y, self.dc_shape)/2**20:.02f} MB of RAM.")
 
         self.preserve_raw=preserve_raw
         if self.preserve_raw:
@@ -413,6 +413,7 @@ class DataCube(CameraProperties):
             with open(preconfig_meta_path) as json_file:
                 attrs = json.load(json_file)
         else: attrs = {}
+        if hasattr(self, "ds_metadata"): attrs = self.ds_metadata
 
         import holoviews as hv
 
@@ -476,15 +477,20 @@ class DataCube(CameraProperties):
                 shape = (*ds.datacube.shape[1:],ds.datacube.shape[0])
                 self.dc      = CircArrayBuffer(size=shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
                 self.dc.data = np.moveaxis(np.array(ds.datacube), 0, -1)
+            print(f"Allocated {4*reduce(lambda x,y: x*y, ds.datacube.shape)/2**20:.02f} MB of RAM.")
 
             self.ds_timestamps = ds.time.to_numpy() # type is np.datetime64. convert to datetime.datetime
             unix_epoch = np.datetime64(0, 's')
             one_second = np.timedelta64(1, 's')
             seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
             self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
+            self.timestamps.data = self.ds_timestamps
+            self.ds_metadata = ds.attrs
 
             if hasattr(ds,"temperature"):
                 self.ds_temperatures = ds.temperature.to_numpy()
+                self.cam_temperatures = CircArrayBuffer(size=self.ds_temperatures.shape,dtype=np.float32)
+                self.cam_temperatures.data = self.ds_temperatures
             self.binned_wavelengths = np.array(ds.wavelength)
             self.dc.slots_left      = 0 # indicate that the data buffer is full
 

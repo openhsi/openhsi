@@ -16,8 +16,6 @@ from scipy.interpolate import interp1d
 from PIL import Image
 from tqdm import tqdm
 import warnings
-import panel as pn
-pn.extension()
 
 from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Optional
 import json

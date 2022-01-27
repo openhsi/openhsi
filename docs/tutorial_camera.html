@@ -29,13 +29,6 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </div>
     {% endraw %}
 
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-
-</div>
-    {% endraw %}
-
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>To use an OpenHSI camera, you will need a settings <code>.json</code> file that describes how the camera is initialised and other details you can edit to suit your use case. You will also need a <code>.pkl</code> file that includes some arrays produced during calibration that allow the OpenHSI camera to do smile corrections, and conversions to radiance and reflectance.</p>
@@ -53,7 +46,8 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 
 <span class="k">with</span> <span class="n">LucidCamera</span><span class="p">(</span><span class="n">n_lines</span>        <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span> 
                  <span class="n">processing_lvl</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> 
-                 <span class="n">pkl_path</span>       <span class="o">=</span> <span class="n">pkl_path</span><span class="p">,</span><span class="n">json_path</span><span class="o">=</span><span class="n">json_path</span><span class="p">,</span>
+                 <span class="n">pkl_path</span>       <span class="o">=</span> <span class="n">pkl_path</span><span class="p">,</span>
+                 <span class="n">json_path</span>      <span class="o">=</span> <span class="n">json_path</span><span class="p">,</span>
                  <span class="n">exposure_ms</span>    <span class="o">=</span> <span class="mi">10</span>
                 <span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
     <span class="n">cam</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
@@ -236,7 +230,7 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 
 <span class="c1">#cam.dump(json_path,pkl_path) # update the settings and calibration files</span>
 </pre></div>
-<p>{% include important.html content='You will need the 6SV excutable somewhere on your system. You can specify the path to the executable with <code>sixs_path</code>.' %}{% include important.html content='The 6SV model calculates radiance in units of (W/m^2/sr/μm), whereas the integrating sphere calibration is in (μW/cm^2/sr/nm) hence the extra divide by 10 in <code>model.radiance/10</code>. ' %}</p>
+<p>{% include important.html content='You will need the 6SV excutable somewhere on your system. You can specify the path to the executable with <code>sixs_path</code>. If you installed via <code>conda</code> you should be fine without specifying the path.' %}{% include important.html content='The 6SV model calculates radiance in units of (W/m^2/sr/μm), whereas the integrating sphere calibration is in (μW/cm^2/sr/nm) hence the extra divide by 10 in <code>model.radiance/10</code>. Use a <code>wavelength_array</code> that extends beyond the sensor range on both sides. ' %}</p>
 
 </div>
 </div>
