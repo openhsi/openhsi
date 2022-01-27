@@ -122,6 +122,7 @@ def build_section_widgets(section_name:str = "", fields:List[dict] = [{}], cols:
 # Cell
 
 def build_variables_widgets(ds:xr.Dataset, cols:int=3):
+    """search inside NetCDF coordinates for metadata. Layout widgets with specified `cols`."""
     wgts_layout = [pn.pane.Markdown(f"*Highly Recommended:*")]
     wgts = []
 
@@ -146,9 +147,9 @@ def build_variables_widgets(ds:xr.Dataset, cols:int=3):
 # Cell
 
 class MetadataEditor():
-    """"""
+    """Interactive ISO 19115-2 Metadata Editor"""
     def __init__(self):
-        """"""
+        """initialise all the widgets and button callbacks"""
         self.event_msg = pnw.StaticText(name="", value="")
         self.title_txt = pn.pane.Markdown("**Interactive Metadata Editor**: ISO 19115-2",)
         self.file_path_box = pnw.input.TextAreaInput(name="File path:",placeholder="Enter path string here...",value="")
@@ -163,13 +164,14 @@ class MetadataEditor():
 
         self.make_widgets()
 
-    def __call__(self):
+    def __call__(self) -> "dashboard":
+        """provide the dashboard"""
         return pn.Column( self.title_txt, pn.Row( self.file_path_box,
                                pn.Column(self.extract_button,self.update_button,self.export_button),self.event_msg ),
                                          self.metadata_tool )
 
     def update_export(self):
-
+        """setup the json export button callback"""
         def click_func(event):
             try:
                 self.attrs = {}
@@ -180,7 +182,7 @@ class MetadataEditor():
                             self.attrs[w.name] = w.value
                 self.attrs = dict(sorted(self.attrs.items()))
 
-                with open(self.file_path_box.value.split(".")[0]+".json", 'w') as outfile:
+                with open(".".join(self.file_path_box.value.split(".")[:-1])+".json", 'w') as outfile:
                     json.dump(self.attrs, outfile, indent=4,)
 
                 self.event_msg.value = f"Metadata exported {self.export_button.clicks} time(s)"
@@ -191,7 +193,7 @@ class MetadataEditor():
         self.export_button.on_click(click_func)
 
     def update_extract(self):
-
+        """setup the load file button callback"""
         def click_func(event):
             try:
                 with xr.open_dataset(self.file_path_box.value) as ds:
@@ -218,7 +220,7 @@ class MetadataEditor():
         self.extract_button.on_click(click_func)
 
     def update_save(self):
-
+        """setup the in-place file update button callback"""
         def click_func(event):
             try:
                 self.attrs = {}
@@ -229,28 +231,28 @@ class MetadataEditor():
                             self.attrs[w.name] = w.value
                 self.attrs = dict(sorted(self.attrs.items()))
 
-                # make new NetCDF file
+                # update attrs
+                self.ds.attrs.update(self.attrs)
+
                 coord_names = [ s.split("(")[0].strip() for s in str(self.ds.coords).split("*")[1:] ]
                 coord_dict = dict([(c,self.ds[c]) for c in coord_names])
                 coord_names.append("datacube")
-                self.nc = xr.Dataset(data_vars=dict(datacube=([*coord_names[:3]],self.ds.datacube)),
-                                     coords=coord_dict, attrs=self.attrs)
 
                 w_count = 0
                 for n in coord_names:
                     if "time" not in n:
                         if self.variables_values[w_count].value is not None:
-                            self.nc[n].attrs[self.variables_values[w_count].name] = self.variables_values[w_count].value
+                            self.ds[n].attrs.update({self.variables_values[w_count].name:self.variables_values[w_count].value})
                         if self.variables_values[w_count+1].value is not None:
-                            self.nc[n].attrs[self.variables_values[w_count+1].name] = self.variables_values[w_count+1].value
+                            self.ds[n].attrs.update({self.variables_values[w_count+1].name:self.variables_values[w_count+1].value})
                         w_count += 2
                     if self.variables_values[w_count].value is not None:
-                        self.nc[n].attrs[self.variables_values[w_count].name] = self.variables_values[w_count].value
+                        self.ds[n].attrs.update({self.variables_values[w_count].name:self.variables_values[w_count].value})
                     if self.variables_values[w_count+1].value is not None:
-                        self.nc[n].attrs[self.variables_values[w_count+1].name] = self.variables_values[w_count+1].value
+                        self.ds[n].attrs.update({self.variables_values[w_count+1].name:self.variables_values[w_count+1].value})
                     w_count += 2
 
-                self.nc.to_netcdf(self.file_path_box.value)
+                self.ds.to_netcdf(self.file_path_box.value)
                 self.event_msg.value = f"Metadata saved to file. Update button clicked {self.update_button.clicks} time(s)"
 
             except AttributeError:
@@ -259,7 +261,7 @@ class MetadataEditor():
         self.update_button.on_click(click_func)
 
     def make_widgets(self):
-        """widgets!"""
+        """init widgets!"""
         self.identity_wgts, self.identity_values              = build_section_widgets("Identification / Metadata Reference",identity_fields)
         self.text_search_wgts, self.text_search_values        = build_section_widgets("Text Search",text_search_fields)
         self.extent_search_wgts, self.extent_search_values    = build_section_widgets("Extent Search",extent_search_fields)
