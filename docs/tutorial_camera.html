@@ -186,6 +186,11 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <span class="n">dc</span><span class="o">.</span><span class="n">load_nc</span><span class="p">(</span><span class="s2">&quot;path_to_datacube_file.nc&quot;</span><span class="p">)</span>
 <span class="n">dc</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">robust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
+<p>If you want to interactively view your datacubes (tap and see spectra), you can do so using:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.atmos</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">dcv</span> <span class="o">=</span> <span class="n">DataCubeViewer</span><span class="p">(</span><span class="s2">&quot;path_to_datacube_file.nc&quot;</span><span class="p">)</span>
+<span class="n">dcv</span><span class="p">()</span>
+</pre></div>
 
 </div>
 </div>
@@ -237,15 +242,17 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Empirical-Line-Calibration">Empirical Line Calibration<a class="anchor-link" href="#Empirical-Line-Calibration"> </a></h3><p>The ELC widget is defined in the <code>openhsi.atmos</code> module (<a href="https://openhsi.github.io/openhsi/atmos.html#ELC">link to documentation</a>). This method basically uses known spectral targets (typically one dark and one light) to extrapolate the reflectance for the other pixels. Users can draw several bounding boxes telling the ELC algorithm to use those pixels as the reference targets. Part of automatically identifying the spectral target, and thus an interactive widget, is to use a spectral matching technique. I use Spectral Angle Mapper. It's not called that in the code because I came up with it without knowing it already existed.
-{% include warning.html content='This is still a work in progress.' %}</p>
+<h3 id="Empirical-Line-Calibration">Empirical Line Calibration<a class="anchor-link" href="#Empirical-Line-Calibration"> </a></h3><p>The ELC widget is defined in the <code>openhsi.atmos</code> module (<a href="https://openhsi.github.io/openhsi/atmos.html#ELC">link to documentation</a>). This method basically uses known spectral targets (typically one dark and one light) to extrapolate the reflectance for the other pixels. Users can draw several bounding boxes telling the ELC algorithm to use those pixels as the reference targets. Part of automatically identifying the spectral target, and thus an interactive widget, is to use a spectral matching technique. I use Spectral Angle Mapper and implemented it efficiently enough to be used interactively. 
+{% include important.html content='Only ingests radiance datacubes. To view a digital number or reflectance datacube interactively, use <a href="/openhsi/atmos.html#DataCubeViewer"><code>DataCubeViewer</code></a> in the <code>openhsi.atmos</code> module.' %}</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<div class="highlight"><pre><span></span><span class="n">elc</span> <span class="o">=</span> <span class="n">ELC</span><span class="p">(</span><span class="n">nc_path</span><span class="o">=</span><span class="s2">&quot;path_to_file.nc&quot;</span><span class="p">,</span> <span class="n">speclib_path</span><span class="o">=</span><span class="s2">&quot;assets/speclib.pkl&quot;</span><span class="p">,</span> <span class="n">model_6SV</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.atmos</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">elc</span> <span class="o">=</span> <span class="n">ELC</span><span class="p">(</span><span class="n">nc_path</span><span class="o">=</span><span class="s2">&quot;path_to_radiance_datacube.nc&quot;</span><span class="p">,</span>
+          <span class="n">speclib_path</span><span class="o">=</span><span class="s2">&quot;path_to_spectral_library.pkl&quot;</span><span class="p">,</span><span class="n">pkl_path</span><span class="o">=</span><span class="s2">&quot;path_to_camera_calibration_file.pkl&quot;</span><span class="p">)</span>
 <span class="n">elc</span><span class="p">()</span>
 </pre></div>
 <p>The <code>speclib_path</code> parameter identifies the lab measured spectra of a few calibration tarps. This method also requires a radiance estimate <code>model_6SV</code> so we can spectrally match radiance from lab based reflectance - close enough is good enough.</p>
