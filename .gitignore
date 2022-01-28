@@ -1,3 +1,6 @@
+token
+conda/
+
 *.bak
 .gitattributes
 .last_checked
