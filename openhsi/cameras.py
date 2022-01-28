@@ -13,8 +13,7 @@ import matplotlib.pyplot as plt
 import warnings
 from tqdm import tqdm
 
-import holoviews as hv
-hv.extension('bokeh',logo=False)
+
 
 # Cell
 from .capture import OpenHSI
@@ -27,9 +26,6 @@ class WebCamera(OpenHSI):
     def __init__(self, mode:str = None, **kwargs):
         """Initialise Webcam"""
         super().__init__(**kwargs)
-        self.mode = mode
-        if self.mode == "HgAr":
-            self.gen = self.gen_sim_spectra()
 
         # Check if the webcam is opened correctly
         self.vid = cv2.VideoCapture(0)
@@ -44,30 +40,12 @@ class WebCamera(OpenHSI):
         cv2.destroyAllWindows()
 
     def get_img(self) -> np.ndarray:
-        if self.mode == "HgAr":
-            return next(self.gen)
-        else:
-            ret, frame = self.vid.read()
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-            frame = cv2.resize(frame, tuple(np.flip(self.settings["resolution"])), interpolation = cv2.INTER_AREA)
-            if self.mode == "crop":
-                frame[:self.settings["row_slice"][0],...] = 0
-                frame[self.settings["row_slice"][1]:,...] = 0
-            return frame
+        ret, frame = self.vid.read()
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        frame = cv2.resize(frame, tuple(np.flip(self.settings["resolution"])), interpolation = cv2.INTER_AREA)
+        return frame
 
-    def gen_sim_spectra(self):
-        lines_nm = [254,436,546,764,405,365,578,750,738,697,812,772,912,801,842,795,706,826,852,727] # approx sorted by emission strength
-        img = np.zeros(tuple(self.settings["resolution"]),dtype=np.uint8)
-        wavelengths = np.linspace(self.settings["index2wavelength_range"][0],self.settings["index2wavelength_range"][1],num=self.settings["resolution"][1])
 
-        strength = 255
-        for line in lines_nm:
-            indx = np.sum(wavelengths<line)
-            if indx > 0 and indx < self.settings["resolution"][1]:
-                img[:,indx-2:indx+2] = strength
-                strength -= 5
-        while True:
-            yield img
 
     def get_temp(self) -> float:
         return 20.0

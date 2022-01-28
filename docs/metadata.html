@@ -34,10 +34,10 @@ nb_path: "nbs/06_metadata.ipynb"
 
 
 
-<div id="4f5d4b55-8b3f-4109-be1f-6aaea16bebc0"></div>
+<div id="9ef39e98-0596-488b-a57b-19dd0db09a54"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#4f5d4b55-8b3f-4109-be1f-6aaea16bebc0');
+var element = $('#9ef39e98-0596-488b-a57b-19dd0db09a54');
 
 (function(root) {
   function now() {
@@ -205,435 +205,10 @@ var element = $('#4f5d4b55-8b3f-4109-be1f-6aaea16bebc0');
 
 
 
-<div id="9ea7119a-2628-489f-8bed-c26a9aa93d01"></div>
+<div id="ef162440-765e-492c-afd9-9e3e224a89e1"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#9ea7119a-2628-489f-8bed-c26a9aa93d01');
-
-if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
-  window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
-}
-
-
-    function JupyterCommManager() {
-    }
-
-    JupyterCommManager.prototype.register_target = function(plot_id, comm_id, msg_handler) {
-      if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        comm_manager.register_target(comm_id, function(comm) {
-          comm.on_msg(msg_handler);
-        });
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        window.PyViz.kernels[plot_id].registerCommTarget(comm_id, function(comm) {
-          comm.onMsg = msg_handler;
-        });
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        google.colab.kernel.comms.registerTarget(comm_id, (comm) => {
-          var messages = comm.messages[Symbol.asyncIterator]();
-          function processIteratorResult(result) {
-            var message = result.value;
-            console.log(message)
-            var content = {data: message.data, comm_id};
-            var buffers = []
-            for (var buffer of message.buffers || []) {
-              buffers.push(new DataView(buffer))
-            }
-            var metadata = message.metadata || {};
-            var msg = {content, buffers, metadata}
-            msg_handler(msg);
-            return messages.next().then(processIteratorResult);
-          }
-          return messages.next().then(processIteratorResult);
-        })
-      }
-    }
-
-    JupyterCommManager.prototype.get_client_comm = function(plot_id, comm_id, msg_handler) {
-      if (comm_id in window.PyViz.comms) {
-        return window.PyViz.comms[comm_id];
-      } else if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        var comm = comm_manager.new_comm(comm_id, {}, {}, {}, comm_id);
-        if (msg_handler) {
-          comm.on_msg(msg_handler);
-        }
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        var comm = window.PyViz.kernels[plot_id].connectToComm(comm_id);
-        comm.open();
-        if (msg_handler) {
-          comm.onMsg = msg_handler;
-        }
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        var comm_promise = google.colab.kernel.comms.open(comm_id)
-        comm_promise.then((comm) => {
-          window.PyViz.comms[comm_id] = comm;
-          if (msg_handler) {
-            var messages = comm.messages[Symbol.asyncIterator]();
-            function processIteratorResult(result) {
-              var message = result.value;
-              var content = {data: message.data};
-              var metadata = message.metadata || {comm_id};
-              var msg = {content, metadata}
-              msg_handler(msg);
-              return messages.next().then(processIteratorResult);
-            }
-            return messages.next().then(processIteratorResult);
-          }
-        }) 
-        var sendClosure = (data, metadata, buffers, disposeOnDone) => {
-          return comm_promise.then((comm) => {
-            comm.send(data, metadata, buffers, disposeOnDone);
-          });
-        };
-        var comm = {
-          send: sendClosure
-        };
-      }
-      window.PyViz.comms[comm_id] = comm;
-      return comm;
-    }
-    window.PyViz.comm_manager = new JupyterCommManager();
-    
-
-
-var JS_MIME_TYPE = 'application/javascript';
-var HTML_MIME_TYPE = 'text/html';
-var EXEC_MIME_TYPE = 'application/vnd.holoviews_exec.v0+json';
-var CLASS_NAME = 'output';
-
-/**
- * Render data to the DOM node
- */
-function render(props, node) {
-  var div = document.createElement("div");
-  var script = document.createElement("script");
-  node.appendChild(div);
-  node.appendChild(script);
-}
-
-/**
- * Handle when a new output is added
- */
-function handle_add_output(event, handle) {
-  var output_area = handle.output_area;
-  var output = handle.output;
-  if ((output.data == undefined) || (!output.data.hasOwnProperty(EXEC_MIME_TYPE))) {
-    return
-  }
-  var id = output.metadata[EXEC_MIME_TYPE]["id"];
-  var toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
-  if (id !== undefined) {
-    var nchildren = toinsert.length;
-    var html_node = toinsert[nchildren-1].children[0];
-    html_node.innerHTML = output.data[HTML_MIME_TYPE];
-    var scripts = [];
-    var nodelist = html_node.querySelectorAll("script");
-    for (var i in nodelist) {
-      if (nodelist.hasOwnProperty(i)) {
-        scripts.push(nodelist[i])
-      }
-    }
-
-    scripts.forEach( function (oldScript) {
-      var newScript = document.createElement("script");
-      var attrs = [];
-      var nodemap = oldScript.attributes;
-      for (var j in nodemap) {
-        if (nodemap.hasOwnProperty(j)) {
-          attrs.push(nodemap[j])
-        }
-      }
-      attrs.forEach(function(attr) { newScript.setAttribute(attr.name, attr.value) });
-      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-    if (JS_MIME_TYPE in output.data) {
-      toinsert[nchildren-1].children[1].textContent = output.data[JS_MIME_TYPE];
-    }
-    output_area._hv_plot_id = id;
-    if ((window.Bokeh !== undefined) && (id in Bokeh.index)) {
-      window.PyViz.plot_index[id] = Bokeh.index[id];
-    } else {
-      window.PyViz.plot_index[id] = null;
-    }
-  } else if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
-    var bk_div = document.createElement("div");
-    bk_div.innerHTML = output.data[HTML_MIME_TYPE];
-    var script_attrs = bk_div.children[0].attributes;
-    for (var i = 0; i < script_attrs.length; i++) {
-      toinsert[toinsert.length - 1].childNodes[1].setAttribute(script_attrs[i].name, script_attrs[i].value);
-    }
-    // store reference to server id on output_area
-    output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
-  }
-}
-
-/**
- * Handle when an output is cleared or removed
- */
-function handle_clear_output(event, handle) {
-  var id = handle.cell.output_area._hv_plot_id;
-  var server_id = handle.cell.output_area._bokeh_server_id;
-  if (((id === undefined) || !(id in PyViz.plot_index)) && (server_id !== undefined)) { return; }
-  var comm = window.PyViz.comm_manager.get_client_comm("hv-extension-comm", "hv-extension-comm", function () {});
-  if (server_id !== null) {
-    comm.send({event_type: 'server_delete', 'id': server_id});
-    return;
-  } else if (comm !== null) {
-    comm.send({event_type: 'delete', 'id': id});
-  }
-  delete PyViz.plot_index[id];
-  if ((window.Bokeh !== undefined) & (id in window.Bokeh.index)) {
-    var doc = window.Bokeh.index[id].model.document
-    doc.clear();
-    const i = window.Bokeh.documents.indexOf(doc);
-    if (i > -1) {
-      window.Bokeh.documents.splice(i, 1);
-    }
-  }
-}
-
-/**
- * Handle kernel restart event
- */
-function handle_kernel_cleanup(event, handle) {
-  delete PyViz.comms["hv-extension-comm"];
-  window.PyViz.plot_index = {}
-}
-
-/**
- * Handle update_display_data messages
- */
-function handle_update_output(event, handle) {
-  handle_clear_output(event, {cell: {output_area: handle.output_area}})
-  handle_add_output(event, handle)
-}
-
-function register_renderer(events, OutputArea) {
-  function append_mime(data, metadata, element) {
-    // create a DOM node to render to
-    var toinsert = this.create_output_subarea(
-    metadata,
-    CLASS_NAME,
-    EXEC_MIME_TYPE
-    );
-    this.keyboard_manager.register_events(toinsert);
-    // Render to node
-    var props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
-    render(props, toinsert[0]);
-    element.append(toinsert);
-    return toinsert
-  }
-
-  events.on('output_added.OutputArea', handle_add_output);
-  events.on('output_updated.OutputArea', handle_update_output);
-  events.on('clear_output.CodeCell', handle_clear_output);
-  events.on('delete.Cell', handle_clear_output);
-  events.on('kernel_ready.Kernel', handle_kernel_cleanup);
-
-  OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
-    safe: true,
-    index: 0
-  });
-}
-
-if (window.Jupyter !== undefined) {
-  try {
-    var events = require('base/js/events');
-    var OutputArea = require('notebook/js/outputarea').OutputArea;
-    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
-      register_renderer(events, OutputArea);
-    }
-  } catch(err) {
-  }
-}
-
-</script>
-</div>
-
-</div>
-
-<div class="output_area">
-
-
-
-
-<div id="0c0b3293-482c-4cd3-9e5d-617667c413f0"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#0c0b3293-482c-4cd3-9e5d-617667c413f0');
-
-(function(root) {
-  function now() {
-    return new Date();
-  }
-
-  var force = true;
-
-  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
-    root._bokeh_onload_callbacks = [];
-    root._bokeh_is_loading = undefined;
-  }
-
-  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
-    root._bokeh_timeout = Date.now() + 5000;
-    root._bokeh_failed_load = false;
-  }
-
-  function run_callbacks() {
-    try {
-      root._bokeh_onload_callbacks.forEach(function(callback) {
-        if (callback != null)
-          callback();
-      });
-    } finally {
-      delete root._bokeh_onload_callbacks
-    }
-    console.debug("Bokeh: all callbacks have finished");
-  }
-
-  function load_libs(css_urls, js_urls, js_modules, callback) {
-    if (css_urls == null) css_urls = [];
-    if (js_urls == null) js_urls = [];
-    if (js_modules == null) js_modules = [];
-
-    root._bokeh_onload_callbacks.push(callback);
-    if (root._bokeh_is_loading > 0) {
-      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
-      return null;
-    }
-    if (js_urls.length === 0 && js_modules.length === 0) {
-      run_callbacks();
-      return null;
-    }
-    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
-
-    function on_load() {
-      root._bokeh_is_loading--;
-      if (root._bokeh_is_loading === 0) {
-        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
-        run_callbacks()
-      }
-    }
-
-    function on_error() {
-      console.error("failed to load " + url);
-    }
-
-    for (var i = 0; i < css_urls.length; i++) {
-      var url = css_urls[i];
-      const element = document.createElement("link");
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.rel = "stylesheet";
-      element.type = "text/css";
-      element.href = url;
-      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
-      document.body.appendChild(element);
-    }
-
-    var skip = [];
-    if (window.requirejs) {
-      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
-      
-      root._bokeh_is_loading = css_urls.length + 0;
-    } else {
-      root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
-    }
-    for (var i = 0; i < js_urls.length; i++) {
-      var url = js_urls[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    for (var i = 0; i < js_modules.length; i++) {
-      var url = js_modules[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      element.type = "module";
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    if (!js_urls.length && !js_modules.length) {
-      on_load()
-    }
-  };
-
-  function inject_raw_css(css) {
-    const element = document.createElement("style");
-    element.appendChild(document.createTextNode(css));
-    document.body.appendChild(element);
-  }
-
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js", "https://unpkg.com/@holoviz/panel@0.12.6/dist/panel.min.js"];
-  var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.6/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/dataframe.css"];
-  var inline_js = [
-    function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\");\n      max-height: 400px;\n    }\n    ");
-    },
-    function(Bokeh) {
-      Bokeh.set_log_level("info");
-    },
-    function(Bokeh) {} // ensure no trailing comma for IE
-  ];
-
-  function run_inline_js() {
-    if ((root.Bokeh !== undefined) || (force === true)) {
-      for (var i = 0; i < inline_js.length; i++) {
-        inline_js[i].call(root, root.Bokeh);
-      }} else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(run_inline_js, 100);
-    } else if (!root._bokeh_failed_load) {
-      console.log("Bokeh: BokehJS failed to load within specified timeout.");
-      root._bokeh_failed_load = true;
-    }
-  }
-
-  if (root._bokeh_is_loading === 0) {
-    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
-    run_inline_js();
-  } else {
-    load_libs(css_urls, js_urls, js_modules, function() {
-      console.debug("Bokeh: BokehJS plotting callback run at", now());
-      run_inline_js();
-    });
-  }
-}(window));
-</script>
-</div>
-
-</div>
-
-<div class="output_area">
-
-
-
-
-<div id="9aa1febc-55ea-4469-8f36-715e0d1c7eff"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#9aa1febc-55ea-4469-8f36-715e0d1c7eff');
+var element = $('#ef162440-765e-492c-afd9-9e3e224a89e1');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -885,440 +460,18 @@ if (window.Jupyter !== undefined) {
 </div>
     {% endraw %}
 
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>{% include tip.html content='This module can be imported using <code>from openhsi.metadata import *</code>' %}</p>
+<p>"As metadata are shared between National and International repositories, it is becoming increasing important to be able to unambiguously identify and refer to specific records. This is facilitated by including an identifier in the metadata. Some mechanism must exist for ensuring that these identifiers are unique. This is accomplished by specifying the naming authority or namespace for the identifier. It is the responsibility of the manager of the namespace to ensure that the identifiers in that namespace are unique. Identifying the Metadata Convention being used in the file and providing a link to more complete metadata, possibly using a different convention, are also important."</p>
+<p><a href="https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3">https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3</a></p>
+
+</div>
+</div>
+</div>
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-
-
-
-<div id="752fdd64-e706-4d4c-8806-608db297f5a5"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#752fdd64-e706-4d4c-8806-608db297f5a5');
-
-(function(root) {
-  function now() {
-    return new Date();
-  }
-
-  var force = true;
-
-  if (typeof root._bokeh_onload_callbacks === "undefined" || force === true) {
-    root._bokeh_onload_callbacks = [];
-    root._bokeh_is_loading = undefined;
-  }
-
-  if (typeof (root._bokeh_timeout) === "undefined" || force === true) {
-    root._bokeh_timeout = Date.now() + 5000;
-    root._bokeh_failed_load = false;
-  }
-
-  function run_callbacks() {
-    try {
-      root._bokeh_onload_callbacks.forEach(function(callback) {
-        if (callback != null)
-          callback();
-      });
-    } finally {
-      delete root._bokeh_onload_callbacks
-    }
-    console.debug("Bokeh: all callbacks have finished");
-  }
-
-  function load_libs(css_urls, js_urls, js_modules, callback) {
-    if (css_urls == null) css_urls = [];
-    if (js_urls == null) js_urls = [];
-    if (js_modules == null) js_modules = [];
-
-    root._bokeh_onload_callbacks.push(callback);
-    if (root._bokeh_is_loading > 0) {
-      console.debug("Bokeh: BokehJS is being loaded, scheduling callback at", now());
-      return null;
-    }
-    if (js_urls.length === 0 && js_modules.length === 0) {
-      run_callbacks();
-      return null;
-    }
-    console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
-
-    function on_load() {
-      root._bokeh_is_loading--;
-      if (root._bokeh_is_loading === 0) {
-        console.debug("Bokeh: all BokehJS libraries/stylesheets loaded");
-        run_callbacks()
-      }
-    }
-
-    function on_error() {
-      console.error("failed to load " + url);
-    }
-
-    for (var i = 0; i < css_urls.length; i++) {
-      var url = css_urls[i];
-      const element = document.createElement("link");
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.rel = "stylesheet";
-      element.type = "text/css";
-      element.href = url;
-      console.debug("Bokeh: injecting link tag for BokehJS stylesheet: ", url);
-      document.body.appendChild(element);
-    }
-
-    var skip = [];
-    if (window.requirejs) {
-      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
-      
-      root._bokeh_is_loading = css_urls.length + 0;
-    } else {
-      root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
-    }
-    for (var i = 0; i < js_urls.length; i++) {
-      var url = js_urls[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    for (var i = 0; i < js_modules.length; i++) {
-      var url = js_modules[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
-      var element = document.createElement('script');
-      element.onload = on_load;
-      element.onerror = on_error;
-      element.async = false;
-      element.src = url;
-      element.type = "module";
-      console.debug("Bokeh: injecting script tag for BokehJS library: ", url);
-      document.head.appendChild(element);
-    }
-    if (!js_urls.length && !js_modules.length) {
-      on_load()
-    }
-  };
-
-  function inject_raw_css(css) {
-    const element = document.createElement("style");
-    element.appendChild(document.createTextNode(css));
-    document.body.appendChild(element);
-  }
-
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js", "https://unpkg.com/@holoviz/panel@0.12.6/dist/panel.min.js"];
-  var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.6/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/dataframe.css"];
-  var inline_js = [
-    function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\");\n      max-height: 400px;\n    }\n    ");
-    },
-    function(Bokeh) {
-      Bokeh.set_log_level("info");
-    },
-    function(Bokeh) {} // ensure no trailing comma for IE
-  ];
-
-  function run_inline_js() {
-    if ((root.Bokeh !== undefined) || (force === true)) {
-      for (var i = 0; i < inline_js.length; i++) {
-        inline_js[i].call(root, root.Bokeh);
-      }} else if (Date.now() < root._bokeh_timeout) {
-      setTimeout(run_inline_js, 100);
-    } else if (!root._bokeh_failed_load) {
-      console.log("Bokeh: BokehJS failed to load within specified timeout.");
-      root._bokeh_failed_load = true;
-    }
-  }
-
-  if (root._bokeh_is_loading === 0) {
-    console.debug("Bokeh: BokehJS loaded, going straight to plotting");
-    run_inline_js();
-  } else {
-    load_libs(css_urls, js_urls, js_modules, function() {
-      console.debug("Bokeh: BokehJS plotting callback run at", now());
-      run_inline_js();
-    });
-  }
-}(window));
-</script>
-</div>
-
-</div>
-
-<div class="output_area">
-
-
-
-
-<div id="b700eedb-e10f-46c5-81dd-28ece716e918"></div>
-<div class="output_subarea output_javascript ">
-<script type="text/javascript">
-var element = $('#b700eedb-e10f-46c5-81dd-28ece716e918');
-
-if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
-  window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
-}
-
-
-    function JupyterCommManager() {
-    }
-
-    JupyterCommManager.prototype.register_target = function(plot_id, comm_id, msg_handler) {
-      if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        comm_manager.register_target(comm_id, function(comm) {
-          comm.on_msg(msg_handler);
-        });
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        window.PyViz.kernels[plot_id].registerCommTarget(comm_id, function(comm) {
-          comm.onMsg = msg_handler;
-        });
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        google.colab.kernel.comms.registerTarget(comm_id, (comm) => {
-          var messages = comm.messages[Symbol.asyncIterator]();
-          function processIteratorResult(result) {
-            var message = result.value;
-            console.log(message)
-            var content = {data: message.data, comm_id};
-            var buffers = []
-            for (var buffer of message.buffers || []) {
-              buffers.push(new DataView(buffer))
-            }
-            var metadata = message.metadata || {};
-            var msg = {content, buffers, metadata}
-            msg_handler(msg);
-            return messages.next().then(processIteratorResult);
-          }
-          return messages.next().then(processIteratorResult);
-        })
-      }
-    }
-
-    JupyterCommManager.prototype.get_client_comm = function(plot_id, comm_id, msg_handler) {
-      if (comm_id in window.PyViz.comms) {
-        return window.PyViz.comms[comm_id];
-      } else if (window.comm_manager || ((window.Jupyter !== undefined) && (Jupyter.notebook.kernel != null))) {
-        var comm_manager = window.comm_manager || Jupyter.notebook.kernel.comm_manager;
-        var comm = comm_manager.new_comm(comm_id, {}, {}, {}, comm_id);
-        if (msg_handler) {
-          comm.on_msg(msg_handler);
-        }
-      } else if ((plot_id in window.PyViz.kernels) && (window.PyViz.kernels[plot_id])) {
-        var comm = window.PyViz.kernels[plot_id].connectToComm(comm_id);
-        comm.open();
-        if (msg_handler) {
-          comm.onMsg = msg_handler;
-        }
-      } else if (typeof google != 'undefined' && google.colab.kernel != null) {
-        var comm_promise = google.colab.kernel.comms.open(comm_id)
-        comm_promise.then((comm) => {
-          window.PyViz.comms[comm_id] = comm;
-          if (msg_handler) {
-            var messages = comm.messages[Symbol.asyncIterator]();
-            function processIteratorResult(result) {
-              var message = result.value;
-              var content = {data: message.data};
-              var metadata = message.metadata || {comm_id};
-              var msg = {content, metadata}
-              msg_handler(msg);
-              return messages.next().then(processIteratorResult);
-            }
-            return messages.next().then(processIteratorResult);
-          }
-        }) 
-        var sendClosure = (data, metadata, buffers, disposeOnDone) => {
-          return comm_promise.then((comm) => {
-            comm.send(data, metadata, buffers, disposeOnDone);
-          });
-        };
-        var comm = {
-          send: sendClosure
-        };
-      }
-      window.PyViz.comms[comm_id] = comm;
-      return comm;
-    }
-    window.PyViz.comm_manager = new JupyterCommManager();
-    
-
-
-var JS_MIME_TYPE = 'application/javascript';
-var HTML_MIME_TYPE = 'text/html';
-var EXEC_MIME_TYPE = 'application/vnd.holoviews_exec.v0+json';
-var CLASS_NAME = 'output';
-
-/**
- * Render data to the DOM node
- */
-function render(props, node) {
-  var div = document.createElement("div");
-  var script = document.createElement("script");
-  node.appendChild(div);
-  node.appendChild(script);
-}
-
-/**
- * Handle when a new output is added
- */
-function handle_add_output(event, handle) {
-  var output_area = handle.output_area;
-  var output = handle.output;
-  if ((output.data == undefined) || (!output.data.hasOwnProperty(EXEC_MIME_TYPE))) {
-    return
-  }
-  var id = output.metadata[EXEC_MIME_TYPE]["id"];
-  var toinsert = output_area.element.find("." + CLASS_NAME.split(' ')[0]);
-  if (id !== undefined) {
-    var nchildren = toinsert.length;
-    var html_node = toinsert[nchildren-1].children[0];
-    html_node.innerHTML = output.data[HTML_MIME_TYPE];
-    var scripts = [];
-    var nodelist = html_node.querySelectorAll("script");
-    for (var i in nodelist) {
-      if (nodelist.hasOwnProperty(i)) {
-        scripts.push(nodelist[i])
-      }
-    }
-
-    scripts.forEach( function (oldScript) {
-      var newScript = document.createElement("script");
-      var attrs = [];
-      var nodemap = oldScript.attributes;
-      for (var j in nodemap) {
-        if (nodemap.hasOwnProperty(j)) {
-          attrs.push(nodemap[j])
-        }
-      }
-      attrs.forEach(function(attr) { newScript.setAttribute(attr.name, attr.value) });
-      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
-    if (JS_MIME_TYPE in output.data) {
-      toinsert[nchildren-1].children[1].textContent = output.data[JS_MIME_TYPE];
-    }
-    output_area._hv_plot_id = id;
-    if ((window.Bokeh !== undefined) && (id in Bokeh.index)) {
-      window.PyViz.plot_index[id] = Bokeh.index[id];
-    } else {
-      window.PyViz.plot_index[id] = null;
-    }
-  } else if (output.metadata[EXEC_MIME_TYPE]["server_id"] !== undefined) {
-    var bk_div = document.createElement("div");
-    bk_div.innerHTML = output.data[HTML_MIME_TYPE];
-    var script_attrs = bk_div.children[0].attributes;
-    for (var i = 0; i < script_attrs.length; i++) {
-      toinsert[toinsert.length - 1].childNodes[1].setAttribute(script_attrs[i].name, script_attrs[i].value);
-    }
-    // store reference to server id on output_area
-    output_area._bokeh_server_id = output.metadata[EXEC_MIME_TYPE]["server_id"];
-  }
-}
-
-/**
- * Handle when an output is cleared or removed
- */
-function handle_clear_output(event, handle) {
-  var id = handle.cell.output_area._hv_plot_id;
-  var server_id = handle.cell.output_area._bokeh_server_id;
-  if (((id === undefined) || !(id in PyViz.plot_index)) && (server_id !== undefined)) { return; }
-  var comm = window.PyViz.comm_manager.get_client_comm("hv-extension-comm", "hv-extension-comm", function () {});
-  if (server_id !== null) {
-    comm.send({event_type: 'server_delete', 'id': server_id});
-    return;
-  } else if (comm !== null) {
-    comm.send({event_type: 'delete', 'id': id});
-  }
-  delete PyViz.plot_index[id];
-  if ((window.Bokeh !== undefined) & (id in window.Bokeh.index)) {
-    var doc = window.Bokeh.index[id].model.document
-    doc.clear();
-    const i = window.Bokeh.documents.indexOf(doc);
-    if (i > -1) {
-      window.Bokeh.documents.splice(i, 1);
-    }
-  }
-}
-
-/**
- * Handle kernel restart event
- */
-function handle_kernel_cleanup(event, handle) {
-  delete PyViz.comms["hv-extension-comm"];
-  window.PyViz.plot_index = {}
-}
-
-/**
- * Handle update_display_data messages
- */
-function handle_update_output(event, handle) {
-  handle_clear_output(event, {cell: {output_area: handle.output_area}})
-  handle_add_output(event, handle)
-}
-
-function register_renderer(events, OutputArea) {
-  function append_mime(data, metadata, element) {
-    // create a DOM node to render to
-    var toinsert = this.create_output_subarea(
-    metadata,
-    CLASS_NAME,
-    EXEC_MIME_TYPE
-    );
-    this.keyboard_manager.register_events(toinsert);
-    // Render to node
-    var props = {data: data, metadata: metadata[EXEC_MIME_TYPE]};
-    render(props, toinsert[0]);
-    element.append(toinsert);
-    return toinsert
-  }
-
-  events.on('output_added.OutputArea', handle_add_output);
-  events.on('output_updated.OutputArea', handle_update_output);
-  events.on('clear_output.CodeCell', handle_clear_output);
-  events.on('delete.Cell', handle_clear_output);
-  events.on('kernel_ready.Kernel', handle_kernel_cleanup);
-
-  OutputArea.prototype.register_mime_type(EXEC_MIME_TYPE, append_mime, {
-    safe: true,
-    index: 0
-  });
-}
-
-if (window.Jupyter !== undefined) {
-  try {
-    var events = require('base/js/events');
-    var OutputArea = require('notebook/js/outputarea').OutputArea;
-    if (OutputArea.prototype.mime_types().indexOf(EXEC_MIME_TYPE) == -1) {
-      register_renderer(events, OutputArea);
-    }
-  } catch(err) {
-  }
-}
-
-</script>
-</div>
-
-</div>
-
-</div>
-</div>
 
 </div>
     {% endraw %}
@@ -1335,10 +488,10 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="5ad1d562-c75e-4330-955f-51177319ae45"></div>
+<div id="89e7fc90-bd86-478b-b022-4c60a793bae0"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#5ad1d562-c75e-4330-955f-51177319ae45');
+var element = $('#89e7fc90-bd86-478b-b022-4c60a793bae0');
 
 (function(root) {
   function now() {
@@ -1506,10 +659,10 @@ var element = $('#5ad1d562-c75e-4330-955f-51177319ae45');
 
 
 
-<div id="28c8e583-cbb0-47af-b54e-37b9666ae547"></div>
+<div id="5a24d69a-8b20-40a8-8d09-447edd7cb6da"></div>
 <div class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#28c8e583-cbb0-47af-b54e-37b9666ae547');
+var element = $('#5a24d69a-8b20-40a8-8d09-447edd7cb6da');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -1787,7 +940,7 @@ if (window.Jupyter !== undefined) {
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="build_section_widgets" class="doc_header"><code>build_section_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L104" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>build_section_widgets</code>(<strong><code>section_name</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>fields</code></strong>:<code>List</code>[<code>dict</code>]=<em><code>[{}]</code></em>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
+<h4 id="build_section_widgets" class="doc_header"><code>build_section_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L102" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>build_section_widgets</code>(<strong><code>section_name</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>fields</code></strong>:<code>List</code>[<code>dict</code>]=<em><code>[{}]</code></em>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
 </blockquote>
 
 <pre><code>Construct text input widgets and place them into `cols` columns</code></pre>
@@ -1828,8 +981,10 @@ if (window.Jupyter !== undefined) {
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="build_variables_widgets" class="doc_header"><code>build_variables_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L126" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>build_variables_widgets</code>(<strong><code>ds</code></strong>:<code>Dataset</code>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
+<h4 id="build_variables_widgets" class="doc_header"><code>build_variables_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L124" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>build_variables_widgets</code>(<strong><code>ds</code></strong>:<code>Dataset</code>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
 </blockquote>
+
+<pre><code>search inside NetCDF coordinates for metadata. Layout widgets with specified `cols`.</code></pre>
 
 </div>
 
@@ -1859,8 +1014,10 @@ if (window.Jupyter !== undefined) {
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="MetadataEditor" class="doc_header"><code>class</code> <code>MetadataEditor</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L150" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>MetadataEditor</code>()</p>
+<h2 id="MetadataEditor" class="doc_header"><code>class</code> <code>MetadataEditor</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L149" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>MetadataEditor</code>()</p>
 </blockquote>
+
+<pre><code>Interactive ISO 19115-2 Metadata Editor</code></pre>
 
 </div>
 
@@ -1875,6 +1032,84 @@ if (window.Jupyter !== undefined) {
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.__call__" class="doc_header"><code>MetadataEditor.__call__</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L167" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.__call__</code>()</p>
+</blockquote>
+
+<pre><code>provide the dashboard</code></pre>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.update_export" class="doc_header"><code>MetadataEditor.update_export</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L173" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.update_export</code>()</p>
+</blockquote>
+
+<pre><code>setup the json export button callback</code></pre>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.update_extract" class="doc_header"><code>MetadataEditor.update_extract</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L195" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.update_extract</code>()</p>
+</blockquote>
+
+<pre><code>setup the load file button callback</code></pre>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.update_save" class="doc_header"><code>MetadataEditor.update_save</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L222" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.update_save</code>()</p>
+</blockquote>
+
+<pre><code>setup the in-place file update button callback</code></pre>
+
+</div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.make_widgets" class="doc_header"><code>MetadataEditor.make_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L263" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.make_widgets</code>()</p>
+</blockquote>
+
+<pre><code>init widgets!</code></pre>
+
+</div>
+
+</div>
+
+</div>
+</div>
 
 </div>
     {% endraw %}
@@ -1915,18 +1150,18 @@ if (window.Jupyter !== undefined) {
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
-<div id='1002'>
+<div id='1645'>
 
 
 
 
 
-  <div class="bk-root" id="fdcc2f70-de51-4bfd-b3a9-b803592e6dfb" data-root-id="1002"></div>
+  <div class="bk-root" id="a13f28c5-8c9b-457b-a6b8-dc8c75323ee2" data-root-id="1645"></div>
 </div>
 <script type="application/javascript">(function(root) {
   function embed_document(root) {
-    var docs_json = {"e66d533a-3054-47a7-822d-2fcf10baa400":{"defs":[{"extends":null,"module":null,"name":"ReactiveHTML1","overrides":[],"properties":[]},{"extends":null,"module":null,"name":"FlexBox1","overrides":[],"properties":[{"default":"flex-start","kind":null,"name":"align_content"},{"default":"flex-start","kind":null,"name":"align_items"},{"default":"row","kind":null,"name":"flex_direction"},{"default":"wrap","kind":null,"name":"flex_wrap"},{"default":"flex-start","kind":null,"name":"justify_content"}]},{"extends":null,"module":null,"name":"TemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]},{"extends":null,"module":null,"name":"MaterialTemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]}],"roots":{"references":[{"attributes":{"children":[{"id":"1100"}],"margin":[0,0,0,0],"name":"Column00207"},"id":"1099","type":"Column"},{"attributes":{"children":[[{"id":"1103"},0,0,1,1],[{"id":"1104"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00205"},"id":"1102","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The name of the controlled vocabulary from which variable standard names are taken","title":"standard_name_vocabulary"},"id":"1038","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1042"},{"id":"1043"}],"margin":[0,0,0,0],"name":"Column00144"},"id":"1041","type":"Column"},{"attributes":{"children":[[{"id":"1110"},0,0,1,1],[{"id":"1111"},0,1,1,1],[{"id":"1112"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00213"},"id":"1109","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Miscellaneous information about the data.","title":"comment"},"id":"1040","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00203","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1101","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1050"},0,0,1,1],[{"id":"1051"},0,1,1,1],[{"id":"1052"},0,2,1,1],[{"id":"1053"},1,0,1,1],[{"id":"1054"},1,1,1,1],[{"id":"1055"},1,2,1,1],[{"id":"1056"},2,0,1,1],[{"id":"1057"},2,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00156"},"id":"1049","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_north","title":"geospatial_lat_units"},"id":"1073","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_name"},"id":"1103","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1017"}],"margin":[0,0,0,0],"name":"Row00112"},"id":"1016","type":"Row"},{"attributes":{"children":[[{"id":"1021"},0,0,1,1],[{"id":"1022"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00118"},"id":"1020","type":"GridBox"},{"attributes":{"children":[[{"id":"1083"},0,0,1,1],[{"id":"1084"},0,1,1,1],[{"id":"1085"},0,2,1,1],[{"id":"1086"},1,0,1,1],[{"id":"1087"},1,1,1,1],[{"id":"1088"},1,2,1,1],[{"id":"1089"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00189"},"id":"1082","type":"GridBox"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00154","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1048","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_role"},"id":"1104","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum latitude","title":"geospatial_lat_min"},"id":"1050","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00110","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1015","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset conventions. E.g. CF-1.6, ISO 19115-2, COARDS","title":"Conventions"},"id":"1017","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum longitude","title":"geospatial_lon_max"},"id":"1053","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00116","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1019","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Globally unique identifier for the dataset","title":"id"},"id":"1021","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum latitude","title":"geospatial_lat_max"},"id":"1051","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1030"},{"id":"1031"}],"margin":[0,0,0,0],"name":"Column00132"},"id":"1029","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the vertical axis E.g. EPSG:4979","title":"geospatial_vertical_units"},"id":"1075","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum longitude","title":"geospatial_lon_min"},"id":"1052","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00136","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1036","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of first data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_start"},"id":"1054","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of last data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_end"},"id":"1055","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1036"},{"id":"1037"}],"margin":[0,0,0,0],"name":"Column00139"},"id":"1035","type":"Column"},{"attributes":{"children":[{"id":"1080"},{"id":"1090"}],"margin":[0,0,0,0],"name":"Column00200"},"id":"1079","type":"Column"},{"attributes":{"children":[[{"id":"1063"},0,0,1,1],[{"id":"1064"},0,1,1,1],[{"id":"1065"},0,2,1,1],[{"id":"1066"},1,0,1,1],[{"id":"1067"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00166"},"id":"1062","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in longitude with units specified","title":"geospatial_lon_resolution"},"id":"1072","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00175","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1069","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in latitude with units specified","title":"geospatial_lat_resolution"},"id":"1074","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_url"},"id":"1085","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00164","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1061","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_email"},"id":"1086","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"institution"},"id":"1087","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1123"},0,0,1,1],[{"id":"1124"},0,1,1,1],[{"id":"1125"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00227"},"id":"1122","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which the data was created","title":"date_created"},"id":"1088","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1069"},{"id":"1070"}],"margin":[0,0,0,0],"name":"Column00178"},"id":"1068","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The scientific project that produced the data","title":"project"},"id":"1089","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1091"},{"id":"1092"}],"margin":[0,0,0,0],"name":"Column00199"},"id":"1090","type":"Column"},{"attributes":{"children":[{"id":"1101"},{"id":"1102"}],"margin":[0,0,0,0],"name":"Column00206"},"id":"1100","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Provides an audit trail for modifications to the original data","title":"history"},"id":"1039","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The north, south, east, west bouding box","title":"geospatial_bounds"},"id":"1063","type":"TextAreaInput"},{"attributes":{"child":{"id":"1046"},"name":"Column00158","title":"Extent"},"id":"1058","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The vertical coordinate reference system (CRS) for the Z axis","title":"geospatial_bounds_vertical_crs"},"id":"1065","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00225","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1121","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The coordinate reference system (CRS) of the point coordinates geospatial_bounds","title":"geospatial_bounds_crs"},"id":"1064","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum altitude","title":"geospatial_vertical_min"},"id":"1056","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Duration of the dataset in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_duration"},"id":"1066","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A textual description of the processing (or quality control) level of the data","title":"processing_level"},"id":"1123","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time period between each datapoint in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_resolution"},"id":"1067","type":"TextAreaInput"},{"attributes":{"child":{"id":"1079"},"name":"Column00200","title":"Creator"},"id":"1098","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The organization that provides the initial id","title":"naming_authority"},"id":"1022","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The method of production of the original data. E.g. model-generated","title":"source"},"id":"1125","type":"TextAreaInput"},{"attributes":{"child":{"id":"1059"},"name":"Column00179","title":"Other Extent"},"id":"1078","type":"Panel"},{"attributes":{"children":[{"id":"1029"},{"id":"1035"},{"id":"1041"}],"margin":[0,0,0,0],"name":"Column00145"},"id":"1028","type":"Column"},{"attributes":{"children":[{"id":"1127"},{"id":"1128"}],"margin":[0,0,0,0],"name":"Column00239"},"id":"1126","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum altitude","title":"geospatial_vertical_max"},"id":"1057","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_east","title":"geospatial_lon_units"},"id":"1071","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Describe the restrictions to data access and distribution","title":"license"},"id":"1124","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00211","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1108","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"acknowledge various type of support for the project that produced this data","title":"acknowledgment"},"id":"1083","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1071"},0,0,1,1],[{"id":"1072"},0,1,1,1],[{"id":"1073"},0,2,1,1],[{"id":"1074"},1,0,1,1],[{"id":"1075"},1,1,1,1],[{"id":"1076"},1,2,1,1],[{"id":"1077"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00177"},"id":"1070","type":"GridBox"},{"attributes":{"children":[{"id":"1081"},{"id":"1082"}],"margin":[0,0,0,0],"name":"Column00190"},"id":"1080","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_name"},"id":"1084","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1093"},0,0,1,1],[{"id":"1094"},0,1,1,1],[{"id":"1095"},0,2,1,1],[{"id":"1096"},1,0,1,1],[{"id":"1097"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00198"},"id":"1092","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"creator_type"},"id":"1094","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1120"},{"id":"1126"}],"margin":[0,0,0,0],"name":"Column00240"},"id":"1119","type":"Column"},{"attributes":{"children":[{"id":"1108"},{"id":"1109"}],"margin":[0,0,0,0],"name":"Column00214"},"id":"1107","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Certical spacing of points with units specified","title":"geospatial_vertical_resolution"},"id":"1076","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00196","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1091","type":"panel.models.markup.HTML"},{"attributes":{"child":{"id":"1099"},"name":"Column00207","title":"Contributor"},"id":"1105","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was formally issued","title":"date_issued"},"id":"1097","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1114"},{"id":"1115"}],"margin":[0,0,0,0],"name":"Column00220"},"id":"1113","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'up' or 'down'","title":"geospatial_vertical_positive"},"id":"1077","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1061"},{"id":"1062"}],"margin":[0,0,0,0],"name":"Column00167"},"id":"1060","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was last modified","title":"date_modified"},"id":"1095","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00187","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1081","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this metadata was last modified","title":"date_metadata_modified"},"id":"1096","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1038"},0,0,1,1],[{"id":"1039"},0,1,1,1],[{"id":"1040"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00138"},"id":"1037","type":"GridBox"},{"attributes":{"children":[{"id":"1060"},{"id":"1068"}],"margin":[0,0,0,0],"name":"Column00179"},"id":"1059","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_institution"},"id":"1093","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1107"},{"id":"1113"}],"margin":[0,0,0,0],"name":"Column00221"},"id":"1106","type":"Column"},{"attributes":{"children":[{"id":"1024"},{"id":"1025"}],"margin":[0,0,0,0],"name":"Column00124"},"id":"1023","type":"Column"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Extract Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1007","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's name. Can be an individual or an institution","title":"publisher_name"},"id":"1110","type":"TextAreaInput"},{"attributes":{"client_comm_id":"670fe2f5463c4a9fa61121c2123fe739","comm_id":"4548de938ff5460abed6d30e62c717ab","plot_id":"1002"},"id":"1146","type":"panel.models.comm_manager.CommManager"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Update Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1008","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A paragraph describing the dataset","title":"summary"},"id":"1033","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Full Width Half Maximum for spectral bands","title":"camera_fwhm"},"id":"1144","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1121"},{"id":"1122"}],"margin":[0,0,0,0],"name":"Column00228"},"id":"1120","type":"Column"},{"attributes":{"reload":false},"id":"1147","type":"panel.models.location.Location"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Which rows are extracted from each camera frame","title":"camera_row_slice"},"id":"1143","type":"TextAreaInput"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Export to JSON","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1009","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's email. Can be an individual or an institution","title":"publisher_email"},"id":"1112","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's URL. Can be an individual or an institution","title":"publisher_url"},"id":"1111","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1014"},{"id":"1018"},{"id":"1023"}],"margin":[0,0,0,0],"name":"Column00125"},"id":"1013","type":"Column"},{"attributes":{"child":{"id":"1137"},"name":"Column00249","title":"Instrument"},"id":"1145","type":"Panel"},{"attributes":{"margin":[0,0,0,0],"tabs":[{"id":"1027"},{"id":"1045"},{"id":"1058"},{"id":"1078"},{"id":"1098"},{"id":"1105"},{"id":"1118"},{"id":"1136"},{"id":"1145"}]},"id":"1012","type":"Tabs"},{"attributes":{"children":[{"id":"1015"},{"id":"1016"}],"margin":[0,0,0,0],"name":"Column00113"},"id":"1014","type":"Column"},{"attributes":{"children":[{"id":"1019"},{"id":"1020"}],"margin":[0,0,0,0],"name":"Column00119"},"id":"1018","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00129","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1030","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1116"},0,0,1,1],[{"id":"1117"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00219"},"id":"1115","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A short description of the dataset","title":"title"},"id":"1032","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Unique name or identifier of vocabulary from which keywords are taken. E.g. CF:NetCDF COARDS Climate and Forecast Standard Names","title":"keywords_vocabulary"},"id":"1044","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A comma separated list of key words and phrases","title":"keywords"},"id":"1034","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Exposure time for each camera frame in ms","title":"camera_exposure_time"},"id":"1141","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1141"},0,0,1,1],[{"id":"1142"},0,1,1,1],[{"id":"1143"},0,2,1,1],[{"id":"1144"},1,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00247"},"id":"1140","type":"GridBox"},{"attributes":{"child":{"id":"1013"},"name":"Column00125","title":"Identification Reference"},"id":"1027","type":"Panel"},{"attributes":{"children":[{"id":"1032"},{"id":"1033"},{"id":"1034"}],"margin":[0,0,0,0],"name":"Row00131"},"id":"1031","type":"Row"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00217","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1114","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1047"}],"margin":[0,0,0,0],"name":"Column00158"},"id":"1046","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"publisher_type"},"id":"1116","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Link to a complete metadata record (or collection)","title":"metadata_link"},"id":"1026","type":"TextAreaInput"},{"attributes":{"child":{"id":"1028"},"name":"Column00145","title":"Text"},"id":"1045","type":"Panel"},{"attributes":{"child":{"id":"1106"},"name":"Column00221","title":"Publisher"},"id":"1118","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00245","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1139","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1048"},{"id":"1049"}],"margin":[0,0,0,0],"name":"Column00157"},"id":"1047","type":"Column"},{"attributes":{"child":{"id":"1119"},"name":"Column00240","title":"Other Attributes"},"id":"1136","type":"Panel"},{"attributes":{"children":[{"id":"1139"},{"id":"1140"}],"margin":[0,0,0,0],"name":"Column00248"},"id":"1138","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00121","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1024","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1044"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00143"},"id":"1043","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Controlled vocabulary for the names used in the `instrument` attribute","title":"instrument_vocabulary"},"id":"1131","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1129"},0,0,1,1],[{"id":"1130"},0,1,1,1],[{"id":"1131"},0,2,1,1],[{"id":"1132"},1,0,1,1],[{"id":"1133"},1,1,1,1],[{"id":"1134"},1,2,1,1],[{"id":"1135"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00238"},"id":"1128","type":"GridBox"},{"attributes":{"children":[{"id":"1007"},{"id":"1008"},{"id":"1009"}],"margin":[0,0,0,0],"name":"Column00252"},"id":"1006","type":"Column"},{"attributes":{"children":[{"id":"1003"},{"id":"1004"},{"id":"1011"}],"margin":[0,0,0,0],"name":"Column00254"},"id":"1002","type":"Column"},{"attributes":{"margin":[5,10,5,10],"name":""},"id":"1010","type":"Div"},{"attributes":{"children":[{"id":"1012"}],"margin":[0,0,0,0],"name":"Column00251"},"id":"1011","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Email address of those responsible for publishing the data, with its current metadata and format","title":"publisher_institution"},"id":"1117","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00141","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1042","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Published or web-based references that describe the data or methods used to produce it","title":"references"},"id":"1135","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Version identifier of the data file or product as assigned by the data creator","title":"product_version"},"id":"1133","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The overarching program(s) of which the dataset is a part","title":"program"},"id":"1134","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the contributing instrument(s) or sensor(s) used to create this data set or product","title":"instrument"},"id":"1130","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1026"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00123"},"id":"1025","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the platform(s) E.g. satellite, ship, station, aircraft","title":"platform"},"id":"1132","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Gain used for the camera","title":"camera_gain"},"id":"1142","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1005"},{"id":"1006"},{"id":"1010"}],"margin":[0,0,0,0],"name":"Row00253"},"id":"1004","type":"Row"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00103","text":"&lt;p&gt;&lt;strong&gt;Interactive Metadata Editor&lt;/strong&gt;: ISO 19115-2&lt;/p&gt;"},"id":"1003","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00236","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1127","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset datatype","title":"cdm_data_type"},"id":"1129","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1138"}],"margin":[0,0,0,0],"name":"Column00249"},"id":"1137","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter path string here...","title":"File path:"},"id":"1005","type":"TextAreaInput"}],"root_ids":["1002","1146","1147"]},"title":"Bokeh Application","version":"2.3.3"}};
-    var render_items = [{"docid":"e66d533a-3054-47a7-822d-2fcf10baa400","root_ids":["1002"],"roots":{"1002":"fdcc2f70-de51-4bfd-b3a9-b803592e6dfb"}}];
+    var docs_json = {"26a040c7-ee8e-441e-a931-dcb49d0a33d2":{"defs":[{"extends":null,"module":null,"name":"ReactiveHTML1","overrides":[],"properties":[]},{"extends":null,"module":null,"name":"FlexBox1","overrides":[],"properties":[{"default":"flex-start","kind":null,"name":"align_content"},{"default":"flex-start","kind":null,"name":"align_items"},{"default":"row","kind":null,"name":"flex_direction"},{"default":"wrap","kind":null,"name":"flex_wrap"},{"default":"flex-start","kind":null,"name":"justify_content"}]},{"extends":null,"module":null,"name":"TemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]},{"extends":null,"module":null,"name":"MaterialTemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]}],"roots":{"references":[{"attributes":{"children":[{"id":"1648"},{"id":"1649"},{"id":"1653"}],"margin":[0,0,0,0],"name":"Row00819"},"id":"1647","type":"Row"},{"attributes":{"children":[{"id":"1679"},{"id":"1680"}],"margin":[0,0,0,0],"name":"Column00705"},"id":"1678","type":"Column"},{"attributes":{"children":[[{"id":"1766"},0,0,1,1],[{"id":"1767"},0,1,1,1],[{"id":"1768"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00793"},"id":"1765","type":"GridBox"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00682","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1662","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1650"},{"id":"1651"},{"id":"1652"}],"margin":[0,0,0,0],"name":"Column00818"},"id":"1649","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00676","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1658","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1693"},0,0,1,1],[{"id":"1694"},0,1,1,1],[{"id":"1695"},0,2,1,1],[{"id":"1696"},1,0,1,1],[{"id":"1697"},1,1,1,1],[{"id":"1698"},1,2,1,1],[{"id":"1699"},2,0,1,1],[{"id":"1700"},2,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00722"},"id":"1692","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The vertical coordinate reference system (CRS) for the Z axis","title":"geospatial_bounds_vertical_crs"},"id":"1708","type":"TextAreaInput"},{"attributes":{"child":{"id":"1702"},"name":"Column00745","title":"Other Extent"},"id":"1721","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00791","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1764","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The coordinate reference system (CRS) of the point coordinates geospatial_bounds","title":"geospatial_bounds_crs"},"id":"1707","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Globally unique identifier for the dataset","title":"id"},"id":"1664","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A textual description of the processing (or quality control) level of the data","title":"processing_level"},"id":"1766","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The method of production of the original data. E.g. model-generated","title":"source"},"id":"1768","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1723"},{"id":"1733"}],"margin":[0,0,0,0],"name":"Column00766"},"id":"1722","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00720","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1691","type":"panel.models.markup.HTML"},{"attributes":{"margin":[0,0,0,0],"tabs":[{"id":"1670"},{"id":"1688"},{"id":"1701"},{"id":"1721"},{"id":"1741"},{"id":"1748"},{"id":"1761"},{"id":"1779"},{"id":"1788"}]},"id":"1655","type":"Tabs"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum latitude","title":"geospatial_lat_min"},"id":"1693","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Version identifier of the data file or product as assigned by the data creator","title":"product_version"},"id":"1776","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time period between each datapoint in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_resolution"},"id":"1710","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Describe the restrictions to data access and distribution","title":"license"},"id":"1767","type":"TextAreaInput"},{"attributes":{"child":{"id":"1656"},"name":"Column00691","title":"Identification Reference"},"id":"1670","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in longitude with units specified","title":"geospatial_lon_resolution"},"id":"1715","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the vertical axis E.g. EPSG:4979","title":"geospatial_vertical_units"},"id":"1718","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The north, south, east, west bouding box","title":"geospatial_bounds"},"id":"1706","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in latitude with units specified","title":"geospatial_lat_resolution"},"id":"1717","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum latitude","title":"geospatial_lat_max"},"id":"1694","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_east","title":"geospatial_lon_units"},"id":"1714","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1673"},{"id":"1674"}],"margin":[0,0,0,0],"name":"Column00698"},"id":"1672","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00741","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1712","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The overarching program(s) of which the dataset is a part","title":"program"},"id":"1777","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset datatype","title":"cdm_data_type"},"id":"1772","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1703"},{"id":"1711"}],"margin":[0,0,0,0],"name":"Column00745"},"id":"1702","type":"Column"},{"attributes":{"child":{"id":"1722"},"name":"Column00766","title":"Creator"},"id":"1741","type":"Panel"},{"attributes":{"children":[{"id":"1712"},{"id":"1713"}],"margin":[0,0,0,0],"name":"Column00744"},"id":"1711","type":"Column"},{"attributes":{"children":[{"id":"1781"}],"margin":[0,0,0,0],"name":"Column00815"},"id":"1780","type":"Column"},{"attributes":{"children":[[{"id":"1726"},0,0,1,1],[{"id":"1727"},0,1,1,1],[{"id":"1728"},0,2,1,1],[{"id":"1729"},1,0,1,1],[{"id":"1730"},1,1,1,1],[{"id":"1731"},1,2,1,1],[{"id":"1732"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00755"},"id":"1725","type":"GridBox"},{"attributes":{"children":[{"id":"1744"},{"id":"1745"}],"margin":[0,0,0,0],"name":"Column00772"},"id":"1743","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00687","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1667","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1782"},{"id":"1783"}],"margin":[0,0,0,0],"name":"Column00814"},"id":"1781","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00802","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1770","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1770"},{"id":"1771"}],"margin":[0,0,0,0],"name":"Column00805"},"id":"1769","type":"Column"},{"attributes":{"children":[[{"id":"1669"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00689"},"id":"1668","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Certical spacing of points with units specified","title":"geospatial_vertical_resolution"},"id":"1719","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1743"}],"margin":[0,0,0,0],"name":"Column00773"},"id":"1742","type":"Column"},{"attributes":{"child":{"id":"1762"},"name":"Column00806","title":"Other Attributes"},"id":"1779","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the contributing instrument(s) or sensor(s) used to create this data set or product","title":"instrument"},"id":"1773","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_name"},"id":"1746","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the platform(s) E.g. satellite, ship, station, aircraft","title":"platform"},"id":"1775","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_north","title":"geospatial_lat_units"},"id":"1716","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1646"},{"id":"1647"},{"id":"1654"}],"margin":[0,0,0,0],"name":"Column00820"},"id":"1645","type":"Column"},{"attributes":{"children":[{"id":"1764"},{"id":"1765"}],"margin":[0,0,0,0],"name":"Column00794"},"id":"1763","type":"Column"},{"attributes":{"children":[[{"id":"1714"},0,0,1,1],[{"id":"1715"},0,1,1,1],[{"id":"1716"},0,2,1,1],[{"id":"1717"},1,0,1,1],[{"id":"1718"},1,1,1,1],[{"id":"1719"},1,2,1,1],[{"id":"1720"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00743"},"id":"1713","type":"GridBox"},{"attributes":{"children":[{"id":"1660"}],"margin":[0,0,0,0],"name":"Row00678"},"id":"1659","type":"Row"},{"attributes":{"children":[{"id":"1675"},{"id":"1676"},{"id":"1677"}],"margin":[0,0,0,0],"name":"Row00697"},"id":"1674","type":"Row"},{"attributes":{"children":[{"id":"1704"},{"id":"1705"}],"margin":[0,0,0,0],"name":"Column00733"},"id":"1703","type":"Column"},{"attributes":{"children":[{"id":"1690"}],"margin":[0,0,0,0],"name":"Column00724"},"id":"1689","type":"Column"},{"attributes":{"children":[{"id":"1724"},{"id":"1725"}],"margin":[0,0,0,0],"name":"Column00756"},"id":"1723","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The organization that provides the initial id","title":"naming_authority"},"id":"1665","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1667"},{"id":"1668"}],"margin":[0,0,0,0],"name":"Column00690"},"id":"1666","type":"Column"},{"attributes":{"children":[[{"id":"1706"},0,0,1,1],[{"id":"1707"},0,1,1,1],[{"id":"1708"},0,2,1,1],[{"id":"1709"},1,0,1,1],[{"id":"1710"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00732"},"id":"1705","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Duration of the dataset in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_duration"},"id":"1709","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Controlled vocabulary for the names used in the `instrument` attribute","title":"instrument_vocabulary"},"id":"1774","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Published or web-based references that describe the data or methods used to produce it","title":"references"},"id":"1778","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00730","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1704","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1658"},{"id":"1659"}],"margin":[0,0,0,0],"name":"Column00679"},"id":"1657","type":"Column"},{"attributes":{"children":[{"id":"1672"},{"id":"1678"},{"id":"1684"}],"margin":[0,0,0,0],"name":"Column00711"},"id":"1671","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_role"},"id":"1747","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1734"},{"id":"1735"}],"margin":[0,0,0,0],"name":"Column00765"},"id":"1733","type":"Column"},{"attributes":{"children":[[{"id":"1664"},0,0,1,1],[{"id":"1665"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00684"},"id":"1663","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset conventions. E.g. CF-1.6, ISO 19115-2, COARDS","title":"Conventions"},"id":"1660","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"name":""},"id":"1653","type":"Div"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Export to JSON","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1652","type":"Button"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Update Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1651","type":"Button"},{"attributes":{"children":[{"id":"1657"},{"id":"1661"},{"id":"1666"}],"margin":[0,0,0,0],"name":"Column00691"},"id":"1656","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Link to a complete metadata record (or collection)","title":"metadata_link"},"id":"1669","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter path string here...","title":"File path:"},"id":"1648","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A short description of the dataset","title":"title"},"id":"1675","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'up' or 'down'","title":"geospatial_vertical_positive"},"id":"1720","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00753","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1724","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00695","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1673","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1736"},0,0,1,1],[{"id":"1737"},0,1,1,1],[{"id":"1738"},0,2,1,1],[{"id":"1739"},1,0,1,1],[{"id":"1740"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00764"},"id":"1735","type":"GridBox"},{"attributes":{"child":{"id":"1689"},"name":"Column00724","title":"Extent"},"id":"1701","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00669","text":"&lt;p&gt;&lt;strong&gt;Interactive Metadata Editor&lt;/strong&gt;: ISO 19115-2&lt;/p&gt;"},"id":"1646","type":"panel.models.markup.HTML"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Extract Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1650","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"acknowledge various type of support for the project that produced this data","title":"acknowledgment"},"id":"1726","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1662"},{"id":"1663"}],"margin":[0,0,0,0],"name":"Column00685"},"id":"1661","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"publisher_type"},"id":"1759","type":"TextAreaInput"},{"attributes":{"child":{"id":"1671"},"name":"Column00711","title":"Text"},"id":"1688","type":"Panel"},{"attributes":{"children":[[{"id":"1687"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00709"},"id":"1686","type":"GridBox"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00783","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1757","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1753"},0,0,1,1],[{"id":"1754"},0,1,1,1],[{"id":"1755"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00779"},"id":"1752","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Miscellaneous information about the data.","title":"comment"},"id":"1683","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum altitude","title":"geospatial_vertical_min"},"id":"1699","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Exposure time for each camera frame in ms","title":"camera_exposure_time"},"id":"1784","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A comma separated list of key words and phrases","title":"keywords"},"id":"1677","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The name of the controlled vocabulary from which variable standard names are taken","title":"standard_name_vocabulary"},"id":"1681","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of first data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_start"},"id":"1697","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this metadata was last modified","title":"date_metadata_modified"},"id":"1739","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Full Width Half Maximum for spectral bands","title":"camera_fwhm"},"id":"1787","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A paragraph describing the dataset","title":"summary"},"id":"1676","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00707","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1685","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Gain used for the camera","title":"camera_gain"},"id":"1785","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1685"},{"id":"1686"}],"margin":[0,0,0,0],"name":"Column00710"},"id":"1684","type":"Column"},{"attributes":{"children":[[{"id":"1784"},0,0,1,1],[{"id":"1785"},0,1,1,1],[{"id":"1786"},0,2,1,1],[{"id":"1787"},1,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00813"},"id":"1783","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum altitude","title":"geospatial_vertical_max"},"id":"1700","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Which rows are extracted from each camera frame","title":"camera_row_slice"},"id":"1786","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1750"},{"id":"1756"}],"margin":[0,0,0,0],"name":"Column00787"},"id":"1749","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"institution"},"id":"1730","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"creator_type"},"id":"1737","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was formally issued","title":"date_issued"},"id":"1740","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was last modified","title":"date_modified"},"id":"1738","type":"TextAreaInput"},{"attributes":{"child":{"id":"1742"},"name":"Column00773","title":"Contributor"},"id":"1748","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The scientific project that produced the data","title":"project"},"id":"1732","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1681"},0,0,1,1],[{"id":"1682"},0,1,1,1],[{"id":"1683"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00704"},"id":"1680","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Provides an audit trail for modifications to the original data","title":"history"},"id":"1682","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum longitude","title":"geospatial_lon_max"},"id":"1696","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1691"},{"id":"1692"}],"margin":[0,0,0,0],"name":"Column00723"},"id":"1690","type":"Column"},{"attributes":{"client_comm_id":"43cfc2326bcc49839204093248e77977","comm_id":"4063788085b747cea2c4caaafb5fe84c","plot_id":"1645"},"id":"1789","type":"panel.models.comm_manager.CommManager"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_institution"},"id":"1736","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1746"},0,0,1,1],[{"id":"1747"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00771"},"id":"1745","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Unique name or identifier of vocabulary from which keywords are taken. E.g. CF:NetCDF COARDS Climate and Forecast Standard Names","title":"keywords_vocabulary"},"id":"1687","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00811","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1782","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1759"},0,0,1,1],[{"id":"1760"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00785"},"id":"1758","type":"GridBox"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00769","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1744","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_url"},"id":"1728","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Email address of those responsible for publishing the data, with its current metadata and format","title":"publisher_institution"},"id":"1760","type":"TextAreaInput"},{"attributes":{"child":{"id":"1749"},"name":"Column00787","title":"Publisher"},"id":"1761","type":"Panel"},{"attributes":{"children":[{"id":"1751"},{"id":"1752"}],"margin":[0,0,0,0],"name":"Column00780"},"id":"1750","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00762","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1734","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum longitude","title":"geospatial_lon_min"},"id":"1695","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1772"},0,0,1,1],[{"id":"1773"},0,1,1,1],[{"id":"1774"},0,2,1,1],[{"id":"1775"},1,0,1,1],[{"id":"1776"},1,1,1,1],[{"id":"1777"},1,2,1,1],[{"id":"1778"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00804"},"id":"1771","type":"GridBox"},{"attributes":{"reload":false},"id":"1790","type":"panel.models.location.Location"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00702","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1679","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which the data was created","title":"date_created"},"id":"1731","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00777","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1751","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_email"},"id":"1729","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1655"}],"margin":[0,0,0,0],"name":"Column00817"},"id":"1654","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's name. Can be an individual or an institution","title":"publisher_name"},"id":"1753","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1757"},{"id":"1758"}],"margin":[0,0,0,0],"name":"Column00786"},"id":"1756","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_name"},"id":"1727","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's URL. Can be an individual or an institution","title":"publisher_url"},"id":"1754","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's email. Can be an individual or an institution","title":"publisher_email"},"id":"1755","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of last data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_end"},"id":"1698","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1763"},{"id":"1769"}],"margin":[0,0,0,0],"name":"Column00806"},"id":"1762","type":"Column"},{"attributes":{"child":{"id":"1780"},"name":"Column00815","title":"Instrument"},"id":"1788","type":"Panel"}],"root_ids":["1645","1789","1790"]},"title":"Bokeh Application","version":"2.3.3"}};
+    var render_items = [{"docid":"26a040c7-ee8e-441e-a931-dcb49d0a33d2","root_ids":["1645"],"roots":{"1645":"a13f28c5-8c9b-457b-a6b8-dc8c75323ee2"}}];
     root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
   }
   if (root.Bokeh !== undefined && root.Bokeh.Panel !== undefined) {
