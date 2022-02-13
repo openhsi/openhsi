@@ -347,6 +347,7 @@ class ELC(SpectralMatcher):
         super().__init__(**kwargs)
         self.interp(self.dc.binned_wavelengths)
         self.xx = np.zeros((len(self.wavelengths),2))
+        self.data = self.dc.dc.data.copy() # so saving is done on a different datacube
 
         self.title_txt = pn.pane.Markdown("**Interactive Empirical Line Calibrator**",)
         self.event_msg = pnw.StaticText(name="", value="Click export buttons to save desired reflectance datacubes.")
@@ -371,7 +372,7 @@ class ELC(SpectralMatcher):
         def click_func(event):
             # compute the ELC datacube
             self.event_msg.value = f"saving..."
-            self.dc.dc.data[...] = (self.dc.dc.data - self.b_ELC)/self.a_ELC
+            self.dc.dc.data[...] = (self.data - self.b_ELC)/self.a_ELC
             self.dc.timestamps.data = self.dc.ds_timestamps
             save_dir = "/".join(self.nc_path.split("/")[:-1])
             self.dc.save(save_dir,suffix="_ELC")
@@ -385,7 +386,7 @@ class ELC(SpectralMatcher):
         def click_func(event):
             # compute the 6SV datacube
             self.event_msg.value = f"saving..."
-            self.dc.dc.data[...] = self.dc.dc.data/self.rad_6SV
+            self.dc.dc.data[...] = self.data/self.rad_6SV
             self.dc.timestamps.data = self.dc.ds_timestamps
             save_dir = "/".join(self.nc_path.split("/")[:-1])
             self.dc.save(save_dir,suffix="_6SV")
@@ -421,7 +422,7 @@ class ELC(SpectralMatcher):
                 x = 0; y = 0
             x = int(x); y = int(y)
 
-            sim_df = self.topk_spectra(np.array(self.dc.dc.data[y,x,:]),5,refine=True)
+            sim_df = self.topk_spectra(np.array(self.data[y,x,:]),5,refine=True)
 
             return self.show(is_rad=True).opts(
                 legend_position='right', legend_offset=(0, 20),title=f'top match: {self.sim_df["label"][0]}, score: {self.sim_df["score"][0]:.3f}, position=({y:d},{x:d})').opts(framewise=True,
@@ -433,8 +434,8 @@ class ELC(SpectralMatcher):
                 x = 0; y = 0
             x = int(x); y = int(y)
 
-            spectra = (self.dc.dc.data[y,x,:] - self.b_ELC)/self.a_ELC
-            sim_df = self.topk_spectra(self.dc.dc.data[y,x,:],5,refine=True)
+            spectra = (self.data[y,x,:] - self.b_ELC)/self.a_ELC
+            sim_df = self.topk_spectra(self.data[y,x,:],5,refine=True)
 
             return (hv.Curve(zip(self.wavelengths,spectra),label="ELC estimate") * self.show(is_rad=False)).opts(axiswise=True,
                 legend_position='right', legend_offset=(0, 20),title=f'top match: {self.sim_df["label"][0]}, score: {self.sim_df["score"][0]:.3f}, position=({y:d},{x:d})').opts(framewise=True,
@@ -452,7 +453,7 @@ class ELC(SpectralMatcher):
             for i, (x0, x1, y0, y1) in enumerate(data):
                 if y1 > y0: y0, y1 = y1, y0
                 sz = ((y0-y1)*(x1-x0),len(self.wavelengths))
-                selection = np.reshape(np.array(self.dc.dc.data[y1:y0,x0:x1,:]),sz)
+                selection = np.reshape(np.array(self.data[y1:y0,x0:x1,:]),sz)
 
                 AA = np.zeros((len(self.wavelengths),sz[0],2))
                 bb = np.zeros((len(self.wavelengths),sz[0],1))

@@ -271,13 +271,13 @@ def slow_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
 # Cell
 
 @patch
-def dn2rad(self:CameraProperties, x:Array['λ,x',np.int32]) -> Array['λ,x',np.float32]:
+def dn2rad(self:CameraProperties, x:"Array['λ,x',np.int32]") -> "Array['λ,x',np.float32]":
     """Converts digital numbers to radiance (uW/cm^2/sr/nm). Use after cropping to useable area."""
 
     return np.float32( (x - self.dark_current) * self.settings["luminance"]/self.ref_luminance  *  self.spec_rad_ref/self.calibration['spec_rad_ref_luminance'] )
 
 @patch
-def rad2ref_6SV(self:CameraProperties, x:Array['λ,x',np.float32]) -> Array['λ,x',np.float32]:
+def rad2ref_6SV(self:CameraProperties, x:"Array['λ,x',np.float32]") -> "Array['λ,x',np.float32]":
     """"""
     # # If wavelength dimension shapes do not match, do some hacks
     # if x.shape[1] < self.rad_6SV.shape[0]:   # use wavelengths after binning to match input
