@@ -392,8 +392,11 @@ class DataCube(CameraProperties):
 
         self.timestamps = DateTimeBuffer(n_lines)
         self.dc_shape = (self.dc_shape[0],self.n_lines,self.dc_shape[1])
+        mem_sz = 4*reduce(lambda x,y: x*y, self.dc_shape)/2**20 # MB
+        if mem_sz > 3000 and input(f"{mem_sz:.02f} MB of RAM will be allocated. Continue? [y/n]") != "y":
+            print("Memory allocation stopped."); raise RuntimeError
+        if self.dc_shape[0] > 1: print(f"Allocated {mem_sz:.02f} MB of RAM.")
         self.dc = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
-        if self.dc_shape[0] > 1: print(f"Allocated {4*reduce(lambda x,y: x*y, self.dc_shape)/2**20:.02f} MB of RAM.")
 
         self.preserve_raw=preserve_raw
         if self.preserve_raw:
