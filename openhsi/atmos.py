@@ -258,7 +258,7 @@ from numpy.linalg import norm
 @delegates()
 class SpectralMatcher(SpectralLibrary):
     """Match OpenHSI spectra against spectral library using Spectral Angle Mapper algorithm"""
-    def __init__(self,pkl_path:str,**kwargs):
+    def __init__(self,pkl_path:str=None,**kwargs):
         """Prepare arrays for spectral matching in radiance.
         `pkl_path` is needed to get the openhsi wavelengths and precomputed 6SV radiance fit."""
         super().__init__(**kwargs)
@@ -489,15 +489,25 @@ class ELC(SpectralMatcher):
 
 class DataCubeViewer():
     """Explore datacubes"""
-    def __init__(self,nc_path:str,old_style:bool=False):
+    def __init__(self,nc_path:str,old_style:bool=False,datatype=str,boxsize=(1,1),data_aspect=1):
         """Load datacube at `nc_path` and setup UI."""
 
         self.nc_path = nc_path
         self.dc = DataCube(processing_lvl=-1)
         self.dc.load_nc(nc_path,old_style)
-        self.RGB = self.dc.show("bokeh",robust=True).opts(height=250, width=1000, invert_yaxis=True,tools=["tap"],toolbar="below")
+        self.RGB = self.dc.show("bokeh",robust=True).opts(data_aspect=data_aspect,height=500, invert_yaxis=True,tools=["tap"],toolbar="below")
         self.ylim = (0,np.max(self.dc.dc.data))
-        if self.ylim[1] < 7.: self.ylim = (0,1.1)
+        self.boxsize=boxsize
+
+        if datatype is "rad":
+            self.ylabelplot="radiance (uW/cm^2/sr/nm)"
+        elif datatype is "reflec":
+            self.ylabelplot="reflectance"
+            self.ylim = (0,1.1)
+        else:
+            self.ylabelplot="digital number"
+
+        # if self.ylim[1] < 7.: self.ylim = (0,1.1)
 
         self.title_txt = pn.pane.Markdown("**Interactive Datacube Viewer**",)
 
@@ -535,14 +545,14 @@ class DataCubeViewer():
                 x = 0; y = 0
             x = int(x); y = int(y)
 
-            c = self.dc.dc.data[y,x,:]
-            if type(c[0]) is np.float32:
-                ylabel = "radiance (uW/cm^2/sr/nm)"
-                if self.ylim[1] < 1.11:
-                    ylabel = "reflectance"
-            else:
-                ylabel = "digital number"
+            c = np.mean(self.dc.dc.data[y-self.boxsize[1]:y+self.boxsize[1],x-self.boxsize[0]:x+self.boxsize[0],:],axis=(0,1))
+            # if type(c[0]) is np.float32:
+            #     ylabel = "radiance (uW/cm^2/sr/nm)"
+            #     if self.ylim[1] < 1.11:
+            #         ylabel = "reflectance"
+            # else:
+            #     ylabel = "digital number"
 
-            return hv.Curve( zip(self.dc.binned_wavelengths,c), label="tap point").opts(xlabel="wavelength (nm)",ylabel=ylabel,
+            return hv.Curve( zip(self.dc.binned_wavelengths,c), label="tap point").opts(xlabel="wavelength (nm)",ylabel=self.ylabelplot,
                                                                                        ylim=self.ylim)
-        self.tap_curve =  hv.DynamicMap(tap, streams=[self.posxy]).opts(shared_axes=False,height=250,width=1000)
+        self.tap_curve =  hv.DynamicMap(tap, streams=[self.posxy]).opts(shared_axes=False,height=250,width=1000,axiswise=True)
