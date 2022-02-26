@@ -38,7 +38,7 @@ from .data import *
 # Cell
 
 class Model6SV():
-
+    """Create a 6SV model using Py6S."""
     def __init__(self, lat:"degrees" = -17.7, lon:"degrees" = 146.1, # Queensland
                  z_time:"zulu datetime" = datetime.strptime("2021-05-26 04:00","%Y-%m-%d %H:%M"),
                  station_num:int = 94299, region:str = "pac",

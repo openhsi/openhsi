@@ -6,14 +6,12 @@ __all__ = ['WebCamera', 'XimeaCamera', 'LucidCamera', 'FlirCamera']
 
 from fastcore.foundation import patch
 from fastcore.meta import delegates
-import cv2
 import numpy as np
 import ctypes
 import matplotlib.pyplot as plt
 import warnings
 from tqdm import tqdm
-
-
+from functools import partial
 
 # Cell
 from .capture import OpenHSI
@@ -27,25 +25,32 @@ class WebCamera(OpenHSI):
         """Initialise Webcam"""
         super().__init__(**kwargs)
 
+        try:
+            import cv2
+        except ModuleNotFoundError:
+            warnings.warn("ModuleNotFoundError: No module named 'cv2'. Did you try `pip install opencv-python`?",stacklevel=2)
+
         # Check if the webcam is opened correctly
         self.vid = cv2.VideoCapture(0)
         if not self.vid.isOpened():
             raise IOError("Cannot open webcam")
+
+        self.rgb2gray = partial(cv2.cvtColor, code=cv2.COLOR_RGB2GRAY)
+        self.resize   = partial(cv2.resize, dsize=tuple(np.flip(self.settings["resolution"])), interpolation=cv2.INTER_AREA)
+        self.close    = cv2.destroyAllWindows
 
     def start_cam(self):
         pass
 
     def stop_cam(self):
         self.vid.release()
-        cv2.destroyAllWindows()
+        self.close()
 
     def get_img(self) -> np.ndarray:
         ret, frame = self.vid.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        frame = cv2.resize(frame, tuple(np.flip(self.settings["resolution"])), interpolation = cv2.INTER_AREA)
+        frame = self.rgb2gray(frame)
+        frame = self.resize(frame)
         return frame
-
-
 
     def get_temp(self) -> float:
         return 20.0
