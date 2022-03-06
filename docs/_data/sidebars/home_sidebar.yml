@@ -68,5 +68,11 @@ entries:
       url: /geometry.html
     output: web
     title: Geometric Correction
+  - folderitems:
+    - output: web,pdf
+      title: Raspbian Install
+      url: /tutorial_raspbian.html
+    output: web
+    title: Guides
   output: web
   title: Sidebar

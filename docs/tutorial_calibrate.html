@@ -6,8 +6,8 @@ title: Generating Calibration Files for the OpenHSI Camera
 keywords: fastai
 sidebar: home_sidebar
 
-summary: "A notebook example."
-description: "A notebook example."
+summary: "A notebook example for generating settings and calibration files for the OpenHSI camera."
+description: "A notebook example for generating settings and calibration files for the OpenHSI camera."
 nb_path: "nbs/10_tutorial_calibrate.ipynb"
 ---
 <!--
@@ -44,6 +44,7 @@ Tools required:</p>
 <li>An integrating sphere (we use a Spectra PT from LabSphere)</li>
 <li>A HgAr lamp</li>
 </ul>
+<p>Adjust the camera class as needed. This example uses the <a href="/openhsi/cameras.html#LucidCamera"><code>LucidCamera</code></a>.</p>
 
 </div>
 </div>
@@ -77,14 +78,14 @@ Tools required:</p>
 <span class="kn">import</span> <span class="nn">holoviews</span> <span class="k">as</span> <span class="nn">hv</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">openhsi.calibrate</span> <span class="kn">import</span> <span class="n">SettingsBuilderMixin</span><span class="p">,</span> <span class="n">specta_pt_contoller</span><span class="p">,</span> <span class="n">sum_gaussians</span>
+<span class="kn">from</span> <span class="nn">openhsi.calibrate</span> <span class="kn">import</span> <span class="n">SettingsBuilderMixin</span><span class="p">,</span> <span class="n">SpectraPTController</span><span class="p">,</span> <span class="n">sum_gaussians</span>
 <span class="kn">from</span> <span class="nn">openhsi.cameras</span> <span class="kn">import</span> <span class="n">LucidCamera</span>
 
 <span class="n">hv</span><span class="o">.</span><span class="n">extension</span><span class="p">(</span><span class="s2">&quot;bokeh&quot;</span><span class="p">,</span> <span class="n">logo</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">panel</span> <span class="k">as</span> <span class="nn">pn</span>
 
 
-<span class="k">class</span> <span class="nc">CalibrateLucidCamera</span><span class="p">(</span><span class="n">SettingsBuilderMixin</span><span class="p">,</span> <span class="n">LucidCamera</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CalibrateCamera</span><span class="p">(</span><span class="n">SettingsBuilderMixin</span><span class="p">,</span> <span class="n">LucidCamera</span><span class="p">):</span>
     <span class="k">pass</span>
 
 <span class="n">json_path_template</span> <span class="o">=</span> <span class="s2">&quot;../cals/cam_settings_lucid_template.json&quot;</span>
@@ -104,7 +105,7 @@ Tools required:</p>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">json_path_target</span><span class="p">)):</span>
     <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">json_path_target</span><span class="p">))</span>
 
-<span class="n">spt</span> <span class="o">=</span> <span class="n">specta_pt_contoller</span><span class="p">()</span>
+<span class="n">spt</span> <span class="o">=</span> <span class="n">SpectraPTController</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -138,7 +139,7 @@ Tools required:</p>
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">spt</span><span class="o">.</span><span class="n">selectPreset</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 
-<span class="k">with</span> <span class="n">CalibrateLucidCamera</span><span class="p">(</span>
+<span class="k">with</span> <span class="n">CalibrateCamera</span><span class="p">(</span>
     <span class="n">json_path</span><span class="o">=</span><span class="n">json_path_template</span><span class="p">,</span> <span class="n">pkl_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">processing_lvl</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">exposure_ms</span><span class="o">=</span><span class="mi">20</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
 
@@ -185,7 +186,7 @@ Tools required:</p>
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CalibrateLucidCamera</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CalibrateCamera</span><span class="p">(</span>
     <span class="n">n_lines</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
     <span class="n">processing_lvl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="n">pkl_path</span><span class="o">=</span><span class="n">pkl_path_target</span><span class="p">,</span>
@@ -229,11 +230,11 @@ Tools required:</p>
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CalibrateLucidCamera</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CalibrateCamera</span><span class="p">(</span>
     <span class="n">json_path</span><span class="o">=</span><span class="n">json_path_target</span><span class="p">,</span> <span class="n">pkl_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">processing_lvl</span><span class="o">=-</span><span class="mi">1</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
     <span class="n">cam</span><span class="o">.</span><span class="n">deviceSettings</span><span class="p">[</span><span class="s2">&quot;Gain&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">10.0</span>
-    <span class="n">hvimg</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">retake_HgAr</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">numframes</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+    <span class="n">hvimg</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">retake_HgAr</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nframes</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
     <span class="c1"># hvimg=hv.Image(cam.crop(cam.calibration[&quot;HgAr_pic&quot;]), bounds=(0,0,*cam.calibration[&quot;HgAr_pic&quot;].shape)).opts(</span>
     <span class="c1">#                 xlabel=&quot;wavelength index&quot;,ylabel=&quot;cross-track&quot;,cmap=&quot;gray&quot;,title=&quot;HgAr spectra picture&quot;)</span>
 
@@ -242,7 +243,7 @@ Tools required:</p>
     <span class="n">smile_fit_hv</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">update_smile_shifts</span><span class="p">()</span>
 
     <span class="c1"># cam.deviceSettings[&#39;Gain&#39;].value=15.</span>
-    <span class="c1"># hvimg=cam.retake_HgAr(show=True,numframes=18)</span>
+    <span class="c1"># hvimg=cam.retake_HgAr(show=True,nframes=18)</span>
 
     <span class="n">cam</span><span class="o">.</span><span class="n">calibration</span><span class="p">[</span><span class="s2">&quot;smile_shifts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">calibration</span><span class="p">[</span><span class="s2">&quot;smile_shifts&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">0</span>
 
@@ -336,7 +337,7 @@ Tools required:</p>
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">spt</span><span class="o">.</span><span class="n">selectPreset</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 
-<span class="k">with</span> <span class="n">CalibrateLucidCamera</span><span class="p">(</span>
+<span class="k">with</span> <span class="n">CalibrateCamera</span><span class="p">(</span>
     <span class="n">json_path</span><span class="o">=</span><span class="n">json_path_target</span><span class="p">,</span> <span class="n">pkl_path</span><span class="o">=</span><span class="n">pkl_path_target</span><span class="p">,</span> <span class="n">processing_lvl</span><span class="o">=-</span><span class="mi">1</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
     <span class="n">hvim_flat</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">retake_flat_field</span><span class="p">(</span><span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -373,7 +374,7 @@ Tools required:</p>
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CalibrateLucidCamera</span><span class="p">(</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">with</span> <span class="n">CalibrateCamera</span><span class="p">(</span>
     <span class="n">json_path</span><span class="o">=</span><span class="n">json_path_target</span><span class="p">,</span> <span class="n">pkl_path</span><span class="o">=</span><span class="n">pkl_path_target</span><span class="p">,</span> <span class="n">processing_lvl</span><span class="o">=-</span><span class="mi">1</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
     <span class="n">cam</span><span class="o">.</span><span class="n">deviceSettings</span><span class="p">[</span><span class="s2">&quot;Gain&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">15.0</span>
@@ -458,7 +459,7 @@ Tools required:</p>
 <span class="c1"># luminances = np.append(luminances,0)</span>
 <span class="n">exposures</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
 
-<span class="k">with</span> <span class="n">CalibrateLucidCamera</span><span class="p">(</span>
+<span class="k">with</span> <span class="n">CalibrateCamera</span><span class="p">(</span>
     <span class="n">json_path</span><span class="o">=</span><span class="n">json_path_target</span><span class="p">,</span> <span class="n">pkl_path</span><span class="o">=</span><span class="n">pkl_path_target</span><span class="p">,</span> <span class="n">processing_lvl</span><span class="o">=-</span><span class="mi">1</span>
 <span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
 

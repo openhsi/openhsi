@@ -499,9 +499,10 @@ class DataCube(CameraProperties):
 
     def show(self, plot_lib:str = "bokeh",
              red_nm:float = 640., green_nm:float = 550., blue_nm:float = 470.,
-             robust:bool = False, hist_eq:bool = False) -> "bokeh or matplotlib plot":
-        """Generate a histogram equalised RGB plot from chosen RGB wavelengths.
-        The plotting backend can be specified by plot_lib and can be "bokeh" or "matplotlib". """
+             robust:bool = False, hist_eq:bool = False, **plot_kwargs) -> "bokeh or matplotlib plot":
+        """Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
+        The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
+        Further customise your plot with `**plot_kwargs`."""
         import holoviews as hv
         hv.extension(plot_lib,logo=False)
 
@@ -537,7 +538,7 @@ class DataCube(CameraProperties):
                          rgb[:,:,0],rgb[:,:,1],rgb[:,:,2])).opts(xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 
         if plot_lib == "bokeh":
-            return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3))
+            return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(**plot_kwargs)
         else: # plot_lib == "matplotlib"
-            return rgb_hv.opts(fig_inches=22)
+            return rgb_hv.opts(fig_inches=22).opts(**plot_kwargs)
 

@@ -27,5 +27,8 @@
   },
   "Geometric Correction": {
     "Georectification": "/geometry.html"
+  },
+  "Guides": {
+    "Raspbian Install": "/tutorial_raspbian.html"
   }
 }
