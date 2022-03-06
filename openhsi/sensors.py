@@ -164,7 +164,7 @@ class SensorStream():
         self.new_df = self.clean_df(df)
 
         # find the time offset between the board and the system time (including the small delay between loops)
-        offset_ms = np.min(df.rpi_time.to_numpy() - df.rtc_time.to_numpy() - np.timedelta64(100, "us"))
+        offset_ms = np.nanmin(df.rpi_time.to_numpy() - df.rtc_time.to_numpy() - np.timedelta64(100, "us"))
 
         offset_ms /= np.timedelta64(1,"ms") # convert to ms
 

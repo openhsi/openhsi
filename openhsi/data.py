@@ -418,8 +418,6 @@ class DataCube(CameraProperties):
         else: attrs = {}
         if hasattr(self, "ds_metadata"): attrs = self.ds_metadata
 
-        import holoviews as hv
-
         self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
         self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
@@ -468,7 +466,10 @@ class DataCube(CameraProperties):
         self.nc.datacube.attrs["description"] = "hyperspectral datacube"
 
         self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
-        hv.save(self.show("matplotlib",robust=True),f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png")
+
+        fig = self.show("matplotlib",hist_eq=True,quick_imshow=True)
+        fig.savefig(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png",
+                   bbox_inches='tight', pad_inches=0)
 
     def load_nc(self, nc_path:str, old_style:bool = False):
         """Lazy load a NetCDF datacube into the DataCube buffer."""
@@ -499,12 +500,12 @@ class DataCube(CameraProperties):
 
     def show(self, plot_lib:str = "bokeh",
              red_nm:float = 640., green_nm:float = 550., blue_nm:float = 470.,
-             robust:bool = False, hist_eq:bool = False, **plot_kwargs) -> "bokeh or matplotlib plot":
+             robust:bool = False, hist_eq:bool = False, quick_imshow:bool = False,
+             **plot_kwargs) -> "bokeh or matplotlib plot":
         """Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
         The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
-        Further customise your plot with `**plot_kwargs`."""
-        import holoviews as hv
-        hv.extension(plot_lib,logo=False)
+        Further customise your plot with `**plot_kwargs`. `quick_imshow` is used for saving figures quickly
+        but cannot be used to make interactive plots. """
 
         rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
         if hasattr(self, "binned_wavelengths"):
@@ -515,7 +516,6 @@ class DataCube(CameraProperties):
             rgb[...,0] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
             rgb[...,1] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
             rgb[...,2] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-
 
         if robust and not hist_eq: # scale everything to the 2% and 98% percentile
             vmax = np.nanpercentile(rgb, 98)
@@ -534,6 +534,13 @@ class DataCube(CameraProperties):
         else:
             rgb /= np.max(rgb)
 
+        if quick_imshow:
+            fig, ax = plt.subplots(figsize=(12,3))
+            ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
+            return fig
+
+        import holoviews as hv
+        hv.extension(plot_lib,logo=False)
         rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
                          rgb[:,:,0],rgb[:,:,1],rgb[:,:,2])).opts(xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 

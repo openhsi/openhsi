@@ -151,12 +151,10 @@ def save_shared_datacube(fname:str,shared_array:Array,c_dtype:type,shape:Tuple,c
     nc.datacube.attrs["description"] = "hyperspectral datacube"
 
     nc.to_netcdf(fname+".nc")
-
-    import holoviews as hv
-    hv.extension("bokeh",logo=False)
     dc = DataCube()
     dc.load_nc(fname+".nc")
-    hv.save(dc.show("matplotlib",robust=True),fname+".png")
+    fig = dc.show("matplotlib",hist_eq=True,quick_imshow=True)
+    fig.savefig(fname+".png",bbox_inches='tight', pad_inches=0)
 
 
 
