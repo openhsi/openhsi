@@ -316,7 +316,7 @@ def collect_sim(rtc_offset_ms:float=0) -> list:
 
 # Cell
 
-def interp2camera_times(df:pd.DataFrame, ts:np.array, save:bool=False) -> pd.DataFrame:
+def interp2camera_times(df:pd.DataFrame, ts:np.array) -> pd.DataFrame:
     """Interpolate the ancillary sensor data to the timestamps for when
     each frame was taken with the camera."""
     df_add = pd.DataFrame({"cam_now":ts,"type":"camera"}).set_index("cam_now",inplace=False)
