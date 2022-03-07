@@ -382,6 +382,7 @@ class DateTimeBuffer():
 
 # Cell
 from functools import reduce
+import psutil
 
 @delegates()
 class DataCube(CameraProperties):
@@ -389,7 +390,7 @@ class DataCube(CameraProperties):
     def __init__(self,
                  n_lines:int = 16, # how many along-track pixels
                  processing_lvl:int = -1, # desired real time processing level
-                 warn_mem_use:bool = True, # give a warning if trying to allocate too much memory (> 3 GB)
+                 warn_mem_use:bool = True, # give a warning if trying to allocate too much memory (> 80% of available RAM)
                  preserve_raw:bool = False, # not implemented
                  **kwargs):
         """Preallocate array buffers"""
@@ -401,7 +402,8 @@ class DataCube(CameraProperties):
         self.timestamps = DateTimeBuffer(n_lines)
         self.dc_shape = (self.dc_shape[0],self.n_lines,self.dc_shape[1])
         mem_sz = 4*reduce(lambda x,y: x*y, self.dc_shape)/2**20 # MB
-        if warn_mem_use and mem_sz > 3000 and input(f"{mem_sz:.02f} MB of RAM will be allocated. Continue? [y/n]") != "y":
+        mem_thresh = 0.8*psutil.virtual_memory().available/2**20 # 80% of available memory in MB
+        if warn_mem_use and mem_sz > mem_thresh and input(f"{mem_sz:.02f} MB of RAM will be allocated. Continue? [y/n]") != "y":
             print("Memory allocation stopped."); raise RuntimeError
         if self.dc_shape[0] > 1: print(f"Allocated {mem_sz:.02f} MB of RAM.")
         self.dc = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
