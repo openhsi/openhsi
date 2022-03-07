@@ -23,6 +23,5 @@ dependencies:
   - pyserial
   - netcdf4
   - Py6S
-  - pip
-  - pip:
-    - opencv-python
+  - hvplot
+  - datashader

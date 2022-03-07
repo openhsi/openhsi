@@ -164,7 +164,7 @@ class SensorStream():
         self.new_df = self.clean_df(df)
 
         # find the time offset between the board and the system time (including the small delay between loops)
-        offset_ms = np.nanmin(df.rpi_time.to_numpy() - df.rtc_time.to_numpy() - np.timedelta64(100, "us"))
+        offset_ms = np.nanmin(df.rpi_time.to_numpy() - df.rtc_time.to_numpy() - np.timedelta64(1, "ms"))
 
         offset_ms /= np.timedelta64(1,"ms") # convert to ms
 
@@ -200,7 +200,7 @@ class SensorStream():
 
                 while self.ser.in_waiting > 0:
                     self.packets.append( decode_packet(self.read_packet()) )
-                time.sleep(0.000_1)
+                time.sleep(0.001)
 
             elif GPIO.input(self.start_pin) == False: # button off, stop collection and save packets to file
 
@@ -211,7 +211,7 @@ class SensorStream():
                     #os.system("umount /dev/sda1"); self.is_mounted = False # keeps causing problems...
                     self.packets = []
 
-                time.sleep(0.000_1)
+                time.sleep(0.001)
 
     def clean_df(self, df:pd.DataFrame) -> pd.DataFrame:
         """Converts time offsets in `df` into datetime and splits sensor readings that update

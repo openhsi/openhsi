@@ -55,7 +55,6 @@ jobs:
       run: |
         conda install conda-build
         conda develop .
-        conda install -c conda-forge hvplot # placeholder so tests pass
 
     - name: Read all notebooks
       shell: bash -l {0}

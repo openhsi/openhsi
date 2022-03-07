@@ -111,7 +111,11 @@ class CircArrayBuffer():
 
 class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
-    def __init__(self, json_path:str = None, pkl_path:str = None, print_settings=False, **kwargs):
+    def __init__(self,
+                 json_path:str = None, # path to settings file
+                 pkl_path:str  = None, # path to calibration file
+                 print_settings= False, # print out settings file contents
+                 **kwargs):
         """Load the settings and calibration files"""
         self.json_path = json_path
         self.pkl_path = pkl_path
@@ -382,8 +386,12 @@ from functools import reduce
 @delegates()
 class DataCube(CameraProperties):
     """Facilitates the collection, viewing, and saving of hyperspectral datacubes."""
-
-    def __init__(self, n_lines:int = 16, processing_lvl:int = -1, preserve_raw:bool=False, **kwargs):
+    def __init__(self,
+                 n_lines:int = 16, # how many along-track pixels
+                 processing_lvl:int = -1, # desired real time processing level
+                 warn_mem_use:bool = True, # give a warning if trying to allocate too much memory (> 3 GB)
+                 preserve_raw:bool = False, # not implemented
+                 **kwargs):
         """Preallocate array buffers"""
         self.n_lines = n_lines
         self.proc_lvl = processing_lvl
@@ -393,7 +401,7 @@ class DataCube(CameraProperties):
         self.timestamps = DateTimeBuffer(n_lines)
         self.dc_shape = (self.dc_shape[0],self.n_lines,self.dc_shape[1])
         mem_sz = 4*reduce(lambda x,y: x*y, self.dc_shape)/2**20 # MB
-        if mem_sz > 3000 and input(f"{mem_sz:.02f} MB of RAM will be allocated. Continue? [y/n]") != "y":
+        if warn_mem_use and mem_sz > 3000 and input(f"{mem_sz:.02f} MB of RAM will be allocated. Continue? [y/n]") != "y":
             print("Memory allocation stopped."); raise RuntimeError
         if self.dc_shape[0] > 1: print(f"Allocated {mem_sz:.02f} MB of RAM.")
         self.dc = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
@@ -542,10 +550,12 @@ class DataCube(CameraProperties):
         import holoviews as hv
         hv.extension(plot_lib,logo=False)
         rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
-                         rgb[:,:,0],rgb[:,:,1],rgb[:,:,2])).opts(xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+                         rgb[:,:,0],rgb[:,:,1],rgb[:,:,2]))
 
         if plot_lib == "bokeh":
-            return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(**plot_kwargs)
+            return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(**plot_kwargs).opts(
+                xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
         else: # plot_lib == "matplotlib"
-            return rgb_hv.opts(fig_inches=22).opts(**plot_kwargs)
+            return rgb_hv.opts(fig_inches=22).opts(**plot_kwargs).opts(
+                xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 

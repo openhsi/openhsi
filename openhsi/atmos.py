@@ -37,20 +37,27 @@ from .data import *
 
 # Cell
 
-class Model6SV():
+class Model6SV(object):
     """Create a 6SV model using Py6S."""
-    def __init__(self, lat:"degrees" = -17.7, lon:"degrees" = 146.1, # Queensland
-                 z_time:"zulu datetime" = datetime.strptime("2021-05-26 04:00","%Y-%m-%d %H:%M"),
-                 station_num:int = 94299, region:str = "pac",
-                 alt:"km" = 0.12, zen:"degrees" = 0., azi:"degrees" = 0.,
-                 tile_type:GroundReflectance = 1.0,
-                 aero_profile:AeroProfile = AeroProfile.Maritime,
-                 wavelength_array:"array [nm]" = np.arange(400, 800, 4),
-                 sixs_path=None):
+    def __init__(self,
+                 lat:float = -17.7, # latitude in degrees
+                 lon:float = 146.1, # longitude in degrees
+                 z_time:datetime = datetime.strptime("2021-05-26 04:00","%Y-%m-%d %H:%M"), # Zulu datetime
+                 station_num:int = 94299, # radiosonde station number
+                 region:str = "pac", # radiosonde region code
+                 alt:float = 0.12,   # altitude in km
+                 zen:float = 0.,     # viewing zenith angle in degrees
+                 azi:float = 0.,     # viewing azimuth angle in degrees
+                 tile_type:GroundReflectance = 1.0, # ground reflectance for spectralon panel
+                 aero_profile:AeroProfile = AeroProfile.Maritime, # 6SV aerosol profile
+                 wavelength_array:np.array = None, # wavelengths array in nm
+                 sixs_path:str=None, # path to 6SV executable
+                ):
         """Calculates the at sensor radiance using 6SV for location at latitude `lat` and longitude `lon` at time `z_time` and altitude `alt`.
         The `station_num` and `region` refers to the radiosonde data. You can also specify the viewing zenith `zen` and azimuth `azi`.
         The radiance is calculated for wavelengths in `wavelength_array`. The 6SV executable path can be specified in `sixs_path`."""
 
+        if wavelength_array is None: wavelength_array = np.arange(400,800,4)
         self.wavelength_array = wavelength_array/1e3 # convert to μm for Py6S
         s = SixS(sixs_path)
 

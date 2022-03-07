@@ -28,7 +28,7 @@ class WebCamera(OpenHSI):
         try:
             import cv2
         except ModuleNotFoundError:
-            warnings.warn("ModuleNotFoundError: No module named 'cv2'. Did you try `pip install opencv-python`?",stacklevel=2)
+            warnings.warn("ModuleNotFoundError: No module named 'cv2'. Do you have opencv-python installed?",stacklevel=2)
 
         # Check if the webcam is opened correctly
         self.vid = cv2.VideoCapture(0)
@@ -149,24 +149,6 @@ class LucidCamera(OpenHSI):
             warnings.warn(
                 "ModuleNotFoundError: No module named 'arena_api'.", stacklevel=2
             )
-
-        # init api and connect to device
-        #         try:
-        #             self.arsys.device_infos
-        #             print("2")
-        #             if self.settings["mac_addr"]:
-        #                 device_infos={"mac": self.settings["mac_addr"]} # use specfic camera
-        #                 print("3")
-        #             else:
-        #                 device_infos={} # or use first camera found
-
-        #             # self.device = arsys.create_device(device_infos=[{"mac": mac_addr}])[0]
-
-        #             self.device = arsys.create_device(device_infos=[device_infos])[0]
-        #         except:
-        #             warnings.warn(
-        #                 "DeviceNotFoundError: Please connect a lucid vision camera and run again.",
-        #                 stacklevel=2)
 
         try:
             self.arsys.device_infos
