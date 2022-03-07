@@ -37,20 +37,27 @@ from .data import *
 
 # Cell
 
-class Model6SV():
-
-    def __init__(self, lat:"degrees" = -17.7, lon:"degrees" = 146.1, # Queensland
-                 z_time:"zulu datetime" = datetime.strptime("2021-05-26 04:00","%Y-%m-%d %H:%M"),
-                 station_num:int = 94299, region:str = "pac",
-                 alt:"km" = 0.12, zen:"degrees" = 0., azi:"degrees" = 0.,
-                 tile_type:GroundReflectance = 1.0,
-                 aero_profile:AeroProfile = AeroProfile.Maritime,
-                 wavelength_array:"array [nm]" = np.arange(400, 800, 4),
-                 sixs_path=None):
+class Model6SV(object):
+    """Create a 6SV model using Py6S."""
+    def __init__(self,
+                 lat:float = -17.7, # latitude in degrees
+                 lon:float = 146.1, # longitude in degrees
+                 z_time:datetime = datetime.strptime("2021-05-26 04:00","%Y-%m-%d %H:%M"), # Zulu datetime
+                 station_num:int = 94299, # radiosonde station number
+                 region:str = "pac", # radiosonde region code
+                 alt:float = 0.12,   # altitude in km
+                 zen:float = 0.,     # viewing zenith angle in degrees
+                 azi:float = 0.,     # viewing azimuth angle in degrees
+                 tile_type:GroundReflectance = 1.0, # ground reflectance for spectralon panel
+                 aero_profile:AeroProfile = AeroProfile.Maritime, # 6SV aerosol profile
+                 wavelength_array:np.array = None, # wavelengths array in nm
+                 sixs_path:str=None, # path to 6SV executable
+                ):
         """Calculates the at sensor radiance using 6SV for location at latitude `lat` and longitude `lon` at time `z_time` and altitude `alt`.
         The `station_num` and `region` refers to the radiosonde data. You can also specify the viewing zenith `zen` and azimuth `azi`.
         The radiance is calculated for wavelengths in `wavelength_array`. The 6SV executable path can be specified in `sixs_path`."""
 
+        if wavelength_array is None: wavelength_array = np.arange(400,800,4)
         self.wavelength_array = wavelength_array/1e3 # convert to μm for Py6S
         s = SixS(sixs_path)
 
@@ -347,6 +354,7 @@ class ELC(SpectralMatcher):
         super().__init__(**kwargs)
         self.interp(self.dc.binned_wavelengths)
         self.xx = np.zeros((len(self.wavelengths),2))
+        self.data = self.dc.dc.data.copy() # so saving is done on a different datacube
 
         self.title_txt = pn.pane.Markdown("**Interactive Empirical Line Calibrator**",)
         self.event_msg = pnw.StaticText(name="", value="Click export buttons to save desired reflectance datacubes.")
@@ -371,7 +379,7 @@ class ELC(SpectralMatcher):
         def click_func(event):
             # compute the ELC datacube
             self.event_msg.value = f"saving..."
-            self.dc.dc.data[...] = (self.dc.dc.data - self.b_ELC)/self.a_ELC
+            self.dc.dc.data[...] = (self.data - self.b_ELC)/self.a_ELC
             self.dc.timestamps.data = self.dc.ds_timestamps
             save_dir = "/".join(self.nc_path.split("/")[:-1])
             self.dc.save(save_dir,suffix="_ELC")
@@ -385,7 +393,7 @@ class ELC(SpectralMatcher):
         def click_func(event):
             # compute the 6SV datacube
             self.event_msg.value = f"saving..."
-            self.dc.dc.data[...] = self.dc.dc.data/self.rad_6SV
+            self.dc.dc.data[...] = self.data/self.rad_6SV
             self.dc.timestamps.data = self.dc.ds_timestamps
             save_dir = "/".join(self.nc_path.split("/")[:-1])
             self.dc.save(save_dir,suffix="_6SV")
@@ -421,7 +429,7 @@ class ELC(SpectralMatcher):
                 x = 0; y = 0
             x = int(x); y = int(y)
 
-            sim_df = self.topk_spectra(np.array(self.dc.dc.data[y,x,:]),5,refine=True)
+            sim_df = self.topk_spectra(np.array(self.data[y,x,:]),5,refine=True)
 
             return self.show(is_rad=True).opts(
                 legend_position='right', legend_offset=(0, 20),title=f'top match: {self.sim_df["label"][0]}, score: {self.sim_df["score"][0]:.3f}, position=({y:d},{x:d})').opts(framewise=True,
@@ -433,8 +441,8 @@ class ELC(SpectralMatcher):
                 x = 0; y = 0
             x = int(x); y = int(y)
 
-            spectra = (self.dc.dc.data[y,x,:] - self.b_ELC)/self.a_ELC
-            sim_df = self.topk_spectra(self.dc.dc.data[y,x,:],5,refine=True)
+            spectra = (self.data[y,x,:] - self.b_ELC)/self.a_ELC
+            sim_df = self.topk_spectra(self.data[y,x,:],5,refine=True)
 
             return (hv.Curve(zip(self.wavelengths,spectra),label="ELC estimate") * self.show(is_rad=False)).opts(axiswise=True,
                 legend_position='right', legend_offset=(0, 20),title=f'top match: {self.sim_df["label"][0]}, score: {self.sim_df["score"][0]:.3f}, position=({y:d},{x:d})').opts(framewise=True,
@@ -452,7 +460,7 @@ class ELC(SpectralMatcher):
             for i, (x0, x1, y0, y1) in enumerate(data):
                 if y1 > y0: y0, y1 = y1, y0
                 sz = ((y0-y1)*(x1-x0),len(self.wavelengths))
-                selection = np.reshape(np.array(self.dc.dc.data[y1:y0,x0:x1,:]),sz)
+                selection = np.reshape(np.array(self.data[y1:y0,x0:x1,:]),sz)
 
                 AA = np.zeros((len(self.wavelengths),sz[0],2))
                 bb = np.zeros((len(self.wavelengths),sz[0],1))

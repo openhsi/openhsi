@@ -34,10 +34,9 @@ nb_path: "nbs/06_metadata.ipynb"
 
 
 
-<div id="9ef39e98-0596-488b-a57b-19dd0db09a54"></div>
-<div class="output_subarea output_javascript ">
+<div id="66c48a0f-9917-435d-856a-4e390df9ead2" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#9ef39e98-0596-488b-a57b-19dd0db09a54');
+var element = $('#66c48a0f-9917-435d-856a-4e390df9ead2');
 
 (function(root) {
   function now() {
@@ -83,6 +82,7 @@ var element = $('#9ef39e98-0596-488b-a57b-19dd0db09a54');
       return null;
     }
     console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
+    root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
 
     function on_load() {
       root._bokeh_is_loading--;
@@ -112,18 +112,10 @@ var element = $('#9ef39e98-0596-488b-a57b-19dd0db09a54');
     if (window.requirejs) {
       window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
       
-      root._bokeh_is_loading = css_urls.length + 0;
-    } else {
-      root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
     }
     for (var i = 0; i < js_urls.length; i++) {
       var url = js_urls[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
       var element = document.createElement('script');
       element.onload = on_load;
       element.onerror = on_error;
@@ -134,12 +126,7 @@ var element = $('#9ef39e98-0596-488b-a57b-19dd0db09a54');
     }
     for (var i = 0; i < js_modules.length; i++) {
       var url = js_modules[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
       var element = document.createElement('script');
       element.onload = on_load;
       element.onerror = on_error;
@@ -160,12 +147,12 @@ var element = $('#9ef39e98-0596-488b-a57b-19dd0db09a54');
     document.body.appendChild(element);
   }
 
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js", "https://unpkg.com/@holoviz/panel@0.12.6/dist/panel.min.js"];
+  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.3.min.js", "https://unpkg.com/@holoviz/panel@0.12.1/dist/panel.min.js"];
   var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.6/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/dataframe.css"];
+  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.1/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/dataframe.css"];
   var inline_js = [
     function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\");\n      max-height: 400px;\n    }\n    ");
+      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\")\n    }\n    ");
     },
     function(Bokeh) {
       Bokeh.set_log_level("info");
@@ -205,10 +192,9 @@ var element = $('#9ef39e98-0596-488b-a57b-19dd0db09a54');
 
 
 
-<div id="ef162440-765e-492c-afd9-9e3e224a89e1"></div>
-<div class="output_subarea output_javascript ">
+<div id="29ace47c-ce5e-424d-857c-d84056da2911" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#ef162440-765e-492c-afd9-9e3e224a89e1');
+var element = $('#29ace47c-ce5e-424d-857c-d84056da2911');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -488,10 +474,9 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="89e7fc90-bd86-478b-b022-4c60a793bae0"></div>
-<div class="output_subarea output_javascript ">
+<div id="31bc9787-2ee8-44fd-a79e-9d663d4deecf" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#89e7fc90-bd86-478b-b022-4c60a793bae0');
+var element = $('#31bc9787-2ee8-44fd-a79e-9d663d4deecf');
 
 (function(root) {
   function now() {
@@ -537,6 +522,7 @@ var element = $('#89e7fc90-bd86-478b-b022-4c60a793bae0');
       return null;
     }
     console.debug("Bokeh: BokehJS not loaded, scheduling load and callback at", now());
+    root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
 
     function on_load() {
       root._bokeh_is_loading--;
@@ -566,18 +552,10 @@ var element = $('#89e7fc90-bd86-478b-b022-4c60a793bae0');
     if (window.requirejs) {
       window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
       
-      root._bokeh_is_loading = css_urls.length + 0;
-    } else {
-      root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
     }
     for (var i = 0; i < js_urls.length; i++) {
       var url = js_urls[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
       var element = document.createElement('script');
       element.onload = on_load;
       element.onerror = on_error;
@@ -588,12 +566,7 @@ var element = $('#89e7fc90-bd86-478b-b022-4c60a793bae0');
     }
     for (var i = 0; i < js_modules.length; i++) {
       var url = js_modules[i];
-      if (skip.indexOf(url) >= 0) {
-	if (!window.requirejs) {
-	  on_load();
-	}
-	continue;
-      }
+      if (skip.indexOf(url) >= 0) { on_load(); continue; }
       var element = document.createElement('script');
       element.onload = on_load;
       element.onerror = on_error;
@@ -614,12 +587,12 @@ var element = $('#89e7fc90-bd86-478b-b022-4c60a793bae0');
     document.body.appendChild(element);
   }
 
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js", "https://unpkg.com/@holoviz/panel@0.12.6/dist/panel.min.js"];
+  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.3.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.3.3.min.js", "https://unpkg.com/@holoviz/panel@0.12.1/dist/panel.min.js"];
   var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.6/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/dataframe.css"];
+  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.1/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.1/dist/css/dataframe.css"];
   var inline_js = [
     function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\");\n      max-height: 400px;\n    }\n    ");
+      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\")\n    }\n    ");
     },
     function(Bokeh) {
       Bokeh.set_log_level("info");
@@ -659,10 +632,9 @@ var element = $('#89e7fc90-bd86-478b-b022-4c60a793bae0');
 
 
 
-<div id="5a24d69a-8b20-40a8-8d09-447edd7cb6da"></div>
-<div class="output_subarea output_javascript ">
+<div id="f566db79-d938-458e-a0dc-13f5749bfd17" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#5a24d69a-8b20-40a8-8d09-447edd7cb6da');
+var element = $('#f566db79-d938-458e-a0dc-13f5749bfd17');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -1149,8 +1121,7 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_html rendered_html output_subarea output_execute_result">
-<div id='1645'>
+<div class="output_html rendered_html output_subarea output_execute_result"><div id='1645'>
 
 
 
@@ -1181,8 +1152,7 @@ if (window.Jupyter !== undefined) {
       }
     }, 25, root)
   }
-})(window);</script>
-</div>
+})(window);</script></div>
 
 </div>
 
