@@ -24,4 +24,5 @@ dependencies:
   - netcdf4
   - Py6S
   - hvplot
+  - streamz
   - datashader
