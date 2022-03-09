@@ -1,8 +1,12 @@
 SRC = $(wildcard ./nbs/*.ipynb)
 
+help:
+	cat Makefile
+
 all: openhsi docs
 
 openhsi: $(SRC)
+	nbdev_clean_nbs
 	nbdev_build_lib
 	touch openhsi
 
@@ -18,8 +22,15 @@ docs: $(SRC)
 test:
 	nbdev_test_nbs --verbose True --flags test
 
-release: pypi
-	nbdev_bump_version
+release: pypi conda_release
+	fastrelease_bump_version
+
+conda_release:
+	fastrelease_conda_package --do_build false && \
+	cd conda && \
+	conda build --no-anaconda-upload --output-folder build openhsi && \
+	anaconda upload build/noarch/{name}-{ver}-*.tar.bz2
+	cd ..
 
 pypi: dist
 	twine upload --repository pypi dist/*

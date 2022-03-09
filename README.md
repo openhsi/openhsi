@@ -16,6 +16,8 @@ or
 
 `conda install -c openhsi openhsi`
 
+[![Anaconda-Server Badge](https://anaconda.org/openhsi/openhsi/badges/installer/conda.svg)](https://anaconda.org/openhsi/openhsi)
+
 The source code can be found on [GitHub](https://github.com/openhsi/openhsi).
 
 ## Requirements
