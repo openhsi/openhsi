@@ -141,4 +141,9 @@ checklink/cookies.txt
 
 cals/
 tests/
-working
+working/
+data/
+
+# deployment stuff
+token
+ conda/

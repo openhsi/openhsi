@@ -93,7 +93,8 @@ fig.opts(fig_inches=7,title="simulated hyperspectral datacube")
 
 ## Hardware cameras
 
-![](nbs/../assets/openhsi_cam.png "The hardware consists of a collimator tube with a slit (1) mounted in a 3D printed housing (2). A diffraction grating (3) is used to split the incoming light into its component colours to be detected on the camera sensor (4).")
+![](https://raw.githubusercontent.com/openhsi/openhsi/master/assets/openhsi_cam.png "The hardware consists of a collimator tube with a slit (1) mounted in a 3D printed housing (2). A diffraction grating (3) is used to split the incoming light into its component colours to be detected on the camera sensor (4).")
+
 The hardware consists of a collimator tube with a slit (1) mounted in a 3D printed housing (2). A diffraction grating (3) is used to split the incoming light into its component colours to be detected on the camera sensor (4).  
 
 We have the following implementations in [`cameras` module](https://openhsi.github.io/openhsi/cameras.html):

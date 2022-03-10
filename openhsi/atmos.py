@@ -488,16 +488,38 @@ class ELC(SpectralMatcher):
 # Cell
 
 class DataCubeViewer():
-    """Explore datacubes"""
-    def __init__(self,nc_path:str,old_style:bool=False):
+    """Explore datacubes
+        Optional key/val pair arguement overrides (**kwargs)
+        ylim
+        ylabel
+    """
+    def __init__(self,
+                 nc_path:str=None, # path to the NetCDF file
+                 old_style:bool=False, # if datacube is stored as cross-track, along-track, wavelength coords
+                 img_aspect_ratio:float=0.25, # aspect ratio for the datacube viewer
+                 box_sz:tuple=(1,1), # Any binning (nrows, ncols) around the tap point. Default is a single pixel
+                 **kwargs):
         """Load datacube at `nc_path` and setup UI."""
 
         self.nc_path = nc_path
-        self.dc = DataCube(processing_lvl=-1)
+        self.dc      = DataCube(processing_lvl=-1)
         self.dc.load_nc(nc_path,old_style)
-        self.RGB = self.dc.show("bokeh",robust=True).opts(height=250, width=1000, invert_yaxis=True,tools=["tap"],toolbar="below")
-        self.ylim = (0,np.max(self.dc.dc.data))
-        if self.ylim[1] < 7.: self.ylim = (0,1.1)
+        self.RGB     = self.dc.show("bokeh",robust=True).opts(height=int(1000*img_aspect_ratio), width=1000, invert_yaxis=True,tools=["tap"],toolbar="below")
+        self.ylim    = (0,np.max(self.dc.dc.data))
+        self.box_sz  = box_sz
+        self._bhalf = (box_sz[0]//2, box_sz[1]//1)
+
+        if 'ylabel' in kwargs:
+            self.ylabelplot=kwargs.get("ylabel")
+        else:
+            if type(self.dc.dc.data.dtype) is np.float32:
+                self.ylabelplot = "radiance (uW/cm^2/sr/nm)"
+                if self.ylim[1] < 2:
+                    self.ylabelplot = "reflectance"
+            else: self.ylabelplot = "digital number"
+
+        if 'ylim' in kwargs: self.ylim=kwargs.get("ylim")
+        else: self.ylim = (0,np.max(self.dc.dc.data))
 
         self.title_txt = pn.pane.Markdown("**Interactive Datacube Viewer**",)
 
@@ -532,17 +554,14 @@ class DataCubeViewer():
 
         def tap(x,y):
             if x is None or y is None:
-                x = 0; y = 0
+                x = 1; y = 1
             x = int(x); y = int(y)
 
-            c = self.dc.dc.data[y,x,:]
-            if type(c[0]) is np.float32:
-                ylabel = "radiance (uW/cm^2/sr/nm)"
-                if self.ylim[1] < 1.11:
-                    ylabel = "reflectance"
-            else:
-                ylabel = "digital number"
+            x_slice = slice( np.max((x-self._bhalf[1],0)), np.min((x-self._bhalf[1]+self.box_sz[1],self.dc.dc.data.shape[1])) )
+            y_slice = slice( np.max((y-self._bhalf[0],0)), np.min((y-self._bhalf[0]+self.box_sz[0],self.dc.dc.data.shape[0])) )
+            c = np.mean(self.dc.dc.data[y_slice,x_slice,:],axis=(0,1))
+            #c = self.dc.dc.data[y,x,:]
 
-            return hv.Curve( zip(self.dc.binned_wavelengths,c), label="tap point").opts(xlabel="wavelength (nm)",ylabel=ylabel,
+            return hv.Curve( zip(self.dc.binned_wavelengths,c), label=f"tap point at ({x},{y}),").opts(xlabel="wavelength (nm)",ylabel=self.ylabelplot,
                                                                                        ylim=self.ylim)
         self.tap_curve =  hv.DynamicMap(tap, streams=[self.posxy]).opts(shared_axes=False,height=250,width=1000)

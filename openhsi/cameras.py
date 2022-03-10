@@ -25,10 +25,7 @@ class WebCamera(OpenHSI):
         """Initialise Webcam"""
         super().__init__(**kwargs)
 
-        try:
-            import cv2
-        except ModuleNotFoundError:
-            warnings.warn("ModuleNotFoundError: No module named 'cv2'. Do you have opencv-python installed?",stacklevel=2)
+        import cv2
 
         # Check if the webcam is opened correctly
         self.vid = cv2.VideoCapture(0)
@@ -68,11 +65,8 @@ class XimeaCamera(OpenHSI):
 
         super().__init__(**kwargs)
 
-        try:
-            from ximea import xiapi
-            self.xiapi=xiapi # make avalaible for later access just in case.
-        except ModuleNotFoundError:
-            warnings.warn("ModuleNotFoundError: No module named 'ximea'.",stacklevel=2)
+        from ximea import xiapi
+        self.xiapi=xiapi # make avalaible for later access just in case.
 
         self.xicam = self.xiapi.Camera()
 
@@ -140,25 +134,17 @@ class LucidCamera(OpenHSI):
         # https://thinklucid.com/downloads-hub/
         super().__init__(**kwargs)
 
-        try:
-            from arena_api.system import system as arsys
-            self.arsys = arsys  # make avalaible for later access just in case.
-            arsys.destroy_device() # reset an existing connections.
+        from arena_api.system import system as arsys
 
-        except ModuleNotFoundError:
-            warnings.warn(
-                "ModuleNotFoundError: No module named 'arena_api'.", stacklevel=2
-            )
+        self.arsys = arsys  # make avalaible for later access just in case.
+        arsys.destroy_device() # reset an existing connections.
 
         try:
             self.arsys.device_infos
             #self.device = arsys.create_device(device_infos=[{"mac": mac_addr}])[0]
             self.device = arsys.create_device()[0]
-        except:
-            warnings.warn(
-                "DeviceNotFoundError: Please connect a lucid vision camera and run again.",
-                stacklevel=2,
-            )
+        except DeviceNotFoundError as exc:
+            raise RuntimeError("DeviceNotFoundError: Please connect a lucid vision camera and run again.") from exc
 
         # allow api to optimise stream
         tl_stream_nodemap = self.device.tl_stream_nodemap
@@ -306,10 +292,7 @@ class FlirCamera(OpenHSI):
         """Initialise FLIR camera"""
         super().__init__(**kwargs)
 
-        try:
-            from simple_pyspin import Camera
-        except ModuleNotFoundError:
-            warnings.warn("ModuleNotFoundError: No module named 'PySpin'.",stacklevel=2)
+        from simple_pyspin import Camera
 
         self.flircam = Camera()
         self.flircam.init()
@@ -373,8 +356,9 @@ def switched_camera(
     try: import RPi.GPIO as GPIO
     except ModuleNotFoundError:
         try: import Jetson.GPIO as GPIO
-        except ModuleNotFoundError:
-            print("No module named RPi or Jetson. Did you try `pip install RPi.GPIO` or `pip install Jetson.GPIO`?")
+        except ModuleNotFoundError as exc:
+            raise RuntimeError("No module named RPi or Jetson. Did you try `pip install RPi.GPIO` or `pip install Jetson.GPIO`?") from exc
+
     GPIO.setmode(GPIO.BCM) # BCM pin-numbering scheme from Raspberry Pi
     GPIO.setup(switch_pin, GPIO.IN)
 
