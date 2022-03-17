@@ -57,7 +57,7 @@ curl https://pyenv.run <span class="p">|</span> bash
 <p>With pyenv ready, you can easily install essential any version of python, from a vanilla cpython too miniforge oy pypy.
 For open OpenHSI, Miniforge is a good option as the base environment for minimal effort. You can also get it without pyenv if you prefer at <a href="https://github.com/conda-forge/miniforge">https://github.com/conda-forge/miniforge</a>.</p>
 <p><a href="https://pythonspeed.com/articles/conda-vs-pip/">https://pythonspeed.com/articles/conda-vs-pip/</a> - some notes on conda vs pip.</p>
-<h4 id="Install-NodeJS">Install NodeJS<a class="anchor-link" href="#Install-NodeJS"> </a></h4><p>Bokeh plotting library depends on nodeJS and is used to run OpenHSI interactive tools in a web browser.</p>
+<h4 id="Install-NodeJS">Install NodeJS<a class="anchor-link" href="#Install-NodeJS"> </a></h4><p>The Bokeh plotting library depends on nodeJS and is used to run OpenHSI interactive tools in a web browser.</p>
 <div class="highlight"><pre><span></span>sudo apt install nodejs
 </pre></div>
 <h3 id="Miniforge-with-pyenv">Miniforge with pyenv<a class="anchor-link" href="#Miniforge-with-pyenv"> </a></h3><div class="highlight"><pre><span></span>pyenv install miniforge3
@@ -118,23 +118,45 @@ And install the python library (this is the same on conda based or pip based pyt
 <p>Note <code>eth0</code> should be the adapter name the camera is connected to.</p>
 <h4 id="Jumbo-Packets-on-a-Pi4">Jumbo Packets on a Pi4<a class="anchor-link" href="#Jumbo-Packets-on-a-Pi4"> </a></h4><p>Using Raspberry Pi OS, some additional effort is required.
 <a href="https://support.thinklucid.com/knowledgebase/jumbo-frames-on-raspberry-pi/"> https://support.thinklucid.com/knowledgebase/jumbo-frames-on-raspberry-pi/</a></p>
-<h3 id="Install-Spinnaker-SDK-(FLIR-based-OpenHSI)">Install Spinnaker SDK (FLIR based OpenHSI)<a class="anchor-link" href="#Install-Spinnaker-SDK-(FLIR-based-OpenHSI)"> </a></h3><p>Download and install the Spinnaker SDK and python wheel. - <a href="https://www.flir.com.au/products/spinnaker-sdk/">https://www.flir.com.au/products/spinnaker-sdk/</a></p>
-<blockquote><p>On an Intel/Amd, you want amd64/x86_64 version on raspi you want aarch64 or arm64.</p>
-</blockquote>
-<p>The 20.04 version has the follow dependancies:```bashsudo apt install libusb-1.0-0 libavcodec58 libavformat58 libswscale5 libswresample3 libavutil56 qt5-default</p>
-
-<pre><code>and then installing via and following prompts.
-```bash
-sudo sh install_spinnaker.sh
-pip install --no-deps spinnaker_python-&lt;your needed version&gt;.whl</code></pre>
+<h3 id="Install-Spinnaker-SDK-(FLIR-based-OpenHSI)">Install Spinnaker SDK (FLIR based OpenHSI)<a class="anchor-link" href="#Install-Spinnaker-SDK-(FLIR-based-OpenHSI)"> </a></h3><p>Download and install the Spinnaker SDK and python wheel. - <a href="https://www.flir.com.au/products/spinnaker-sdk/">https://www.flir.com.au/products/spinnaker-sdk/</a>
+{% include tip.html content='On an Intel/Amd, you want amd64/x86_64 version on raspi you want aarch64 or arm64.' %}
+The 20.04 version has the follow dependancies:</p>
+<div class="highlight"><pre><span></span>sudo apt install libusb-1.0-0 libavcodec58 libavformat58 libswscale5 libswresample3 libavutil56 qt5-default
+</pre></div>
+<p>and then installing the FLIR SDK.</p>
+<div class="highlight"><pre><span></span>sudo sh install_spinnaker.sh
+pip install --no-deps spinnaker_python-&lt;your needed version&gt;.whl
+</pre></div>
+<p>One of the prompts will ask you if you want to increase the USB buffer. Answer yes to this option.</p>
 <p>More information on getting the FLIR SDK on a Raspberry Pi and Jetson is here
 <a href="https://www.flir.com.au/support-center/iis/machine-vision/application-note/using-spinnaker-on-arm-and-embedded-systems/">https://www.flir.com.au/support-center/iis/machine-vision/application-note/using-spinnaker-on-arm-and-embedded-systems/</a></p>
-<h4 id="On-Raspi">On Raspi<a class="anchor-link" href="#On-Raspi"> </a></h4><p>You will need to install Spinnaker however you'll find that spinview-qt will not install because it is missing a dependency which we actually don't ned (unless you want to use the GUI called SpinView, you probably do).</p>
+<h4 id="On-Raspbian-64-bit">On Raspbian 64 bit<a class="anchor-link" href="#On-Raspbian-64-bit"> </a></h4><p>You will need to install Spinnaker however you'll find that <code>spinview-qt</code> will not install because it is missing a dependency which we actually don't require in <code>openhsi</code>. If you want to use a GUI called SpinView to view Camera output, then installing <code>spinview-qt</code> will let you use it but I haven't yet figured out how on Raspbian 64 bit. It's something to do with the QT5 package no longer being included in Debian 11+ package sources.</p>
 <div class="highlight"><pre><span></span>sudo apt install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
 </pre></div>
-<p>If you don't want qt, follow the hacks found in <a href="https://askubuntu.com/questions/1335184/qt5-default-not-in-ubuntu-21-04">https://askubuntu.com/questions/1335184/qt5-default-not-in-ubuntu-21-04</a>. You extract the offending package, changed a line stating the dependency, then repackaged the files.</p>
+<p>To proceed without <code>spinview-qt</code>, follow the hacks found in <a href="https://askubuntu.com/questions/1335184/qt5-default-not-in-ubuntu-21-04">https://askubuntu.com/questions/1335184/qt5-default-not-in-ubuntu-21-04</a>. You extract the offending package, change a line stating the dependency, then repackaged the files.</p>
 <p>More information on getting the FLIR SDK on a Raspberry Pi and Jetson is here <a href="https://www.flir.com.au/support-center/iis/machine-vision/application-note/using-spinnaker-on-arm-and-embedded-systems/">https://www.flir.com.au/support-center/iis/machine-vision/application-note/using-spinnaker-on-arm-and-embedded-systems/</a></p>
-<h3 id="Install-Ximea-SDK-(Ximea-based-OpenHSI)">Install Ximea SDK (Ximea based OpenHSI)<a class="anchor-link" href="#Install-Ximea-SDK-(Ximea-based-OpenHSI)"> </a></h3><p>TBD</p>
+<h3 id="Install-Ximea-SDK-(Ximea-based-OpenHSI)">Install Ximea SDK (Ximea based OpenHSI)<a class="anchor-link" href="#Install-Ximea-SDK-(Ximea-based-OpenHSI)"> </a></h3><p>Navigate to <a href="https://www.ximea.com/support/wiki/apis/Python">https://www.ximea.com/support/wiki/apis/Python</a> and click on the Linux installation instructions. 
+This will bring you to the page <a href="https://www.ximea.com/support/wiki/apis/XIMEA_Linux_Software_Package#Installation">https://www.ximea.com/support/wiki/apis/XIMEA_Linux_Software_Package#Installation</a> which lists everything you need to install the Ximea API.</p>
+<p>A 64 bit OS is required to run the GUI called XIMEA CamTool</p>
+<div class="highlight"><pre><span></span>wget https://www.ximea.com/downloads/recent/XIMEA_Linux_SP.tgz
+tar xzf XIMEA_Linux_SP.tgz
+<span class="nb">cd</span> package
+./install
+<span class="c1">#./install -pcie # -pcie flag needed for PCIE cameras</span>
+
+<span class="c1"># if build fails, run the following </span>
+<span class="c1">#sudo apt-get update &amp;&amp; sudo apt-get install build-essential linux-headers-&quot;$(uname -r)&quot;</span>
+</pre></div>
+<h4 id="Increase-USB-memory-limit">Increase USB memory limit<a class="anchor-link" href="#Increase-USB-memory-limit"> </a></h4><p>This is from the XIMEA page <a href="https://www.ximea.com/support/wiki/apis/Raspberry_Pi_4_Benchmarks#Increase-USB-memory-limit">https://www.ximea.com/support/wiki/apis/Raspberry_Pi_4_Benchmarks#Increase-USB-memory-limit</a></p>
+<p>The default memory limit for buffers allocated for USB devices (usually 16MB) is too low for XIMEA USB cameras.This can be changed permanently following these steps:</p>
+<ol>
+<li>Open the file /boot/firmware/cmdline.txt in your preferred texteditor</li>
+<li>Append the following (in the same line):
+usbcore.usbfs_memory_mb=0</li>
+<li>Reboot the system</li>
+<li>Check if the changes are applied. The following command should print 0:
+cat /sys/module/usbcore/parameters/usbfs_memory_mb</li>
+</ol>
 
 </div>
 </div>
@@ -158,7 +180,7 @@ sudo usermod -a -G i2c pi
 <p>Now, to use UART at high speed, we need to change a few more settings documented here
 <a href="https://www.abelectronics.co.uk/kb/article/1035/serial-port-setup-in-raspberry-pi-os">https://www.abelectronics.co.uk/kb/article/1035/serial-port-setup-in-raspberry-pi-os</a></p>
 <h3 id="4.2-Disable-serial-login-shell">4.2 Disable serial login shell<a class="anchor-link" href="#4.2-Disable-serial-login-shell"> </a></h3><p>remove <code>console=serial0,115200</code> from /boot/cmdline.txt
-then reboot.</p>
+then reboot. This will allow us to run a higher baud rate.</p>
 <h3 id="4.3---Use-PI0UART-instead-of-miniUART">4.3 - Use PI0UART instead of miniUART<a class="anchor-link" href="#4.3---Use-PI0UART-instead-of-miniUART"> </a></h3><p>Add to end of file /boot/config.txt we need to add a configuration to <code>/boot/config.txt</code>.</p>
 <div class="highlight"><pre><span></span>sudo <span class="nb">echo</span> <span class="s1">&#39;dtoverlay=disable-bt&#39;</span> &gt;&gt; /boot/config.txt
 </pre></div>
@@ -166,31 +188,36 @@ then reboot.</p>
 <div class="highlight"><pre><span></span>sudo systemctl disable hciuart
 sudo reboot
 </pre></div>
+<p>{% include note.html content='The trade off with allowing higher baud rates is no bluetooth. ' %}</p>
+<h3 id="4.4-Controlling-GPIO-pins">4.4 Controlling GPIO pins<a class="anchor-link" href="#4.4-Controlling-GPIO-pins"> </a></h3><p>If you are running this on a Raspberry Pi 4, you'll need to install the GPIO library.
+<code>pip install RPi.GPIO</code></p>
+<p>If you are running this on a Jetson, you'll need the corresponding Jetson version. 
+<code>pip install Jetson.GPIO</code></p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="4.4---Installing-the-Battery-Hat-software">4.4 - Installing the Battery Hat software<a class="anchor-link" href="#4.4---Installing-the-Battery-Hat-software"> </a></h3><p>To deploy the Raspberry Pi on a remote platform, it needs power. We use the X728 version 2.1 battery hat from Suptronics which lets us turn on and safe shutdown the Pi while indicating power left.</p>
+<h3 id="4.5---Installing-the-Battery-Hat-software">4.5 - Installing the Battery Hat software<a class="anchor-link" href="#4.5---Installing-the-Battery-Hat-software"> </a></h3><p>To deploy the Raspberry Pi on a remote platform, it needs power. We use the X728 version 2.1 battery hat from Suptronics which lets us turn on and safe shutdown the Pi while indicating power left.</p>
 <p>Since we are using Debian 11, we need to use systemd to enable /etc/rc-local which the battery hat scripts use. Follow the steps in 
 <a href="https://www.linuxbabe.com/linux-server/how-to-enable-etcrc-local-with-systemd">https://www.linuxbabe.com/linux-server/how-to-enable-etcrc-local-with-systemd</a></p>
 <p>The software for the battery hat can be found here:
 <a href="https://wiki.geekworm.com/X728-Software">https://wiki.geekworm.com/X728-Software</a>
 Be aware that you need to make some changes to get them to install
-Change <code>python-smbus</code> to <code>python3-smbus</code>
-<code>sudo apt-get install python3-smbus</code>
-<code>pip install smbus</code>
-<code>pip install RPi.GPIO</code>
-Python 2 is deprecated so convert x728pld.py to Python 3 syntax.
-Add PY_VERSION=3 on line 86 in x728-v2.0.sh (or equivalent in v2.1)</p>
+Change <code>python-smbus</code> to <code>python3-smbus</code>.</p>
+<div class="highlight"><pre><span></span>sudo apt-get install python3-smbus
+pip install smbus
+</pre></div>
+<p>Add PY_VERSION=3 on line 86 in x728-v2.1.sh to force the installer to use Python 3.
+Python 2 is deprecated so convert x728pld.py to Python 3 syntax. All the print statements need <code>(</code> and <code>)</code>.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="4.5---Mounting-SSD-without-sudo">4.5 - Mounting SSD without sudo<a class="anchor-link" href="#4.5---Mounting-SSD-without-sudo"> </a></h3><p>The reason why we want to mount the SSD without sudo is that we can then write to it without sudo.</p>
+<h3 id="4.6---Mounting-SSD-without-sudo">4.6 - Mounting SSD without sudo<a class="anchor-link" href="#4.6---Mounting-SSD-without-sudo"> </a></h3><p>The reason why we want to mount the SSD without sudo is that we can then write to it without sudo.</p>
 <p>First, identify your SSD using
 <code>sudo fdisk -l</code>
 I followed the steps in 
@@ -201,7 +228,7 @@ I followed the steps in
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Congratulations, you now have a Raspbian 64 bit OS that can run the <a href="/openhsi/cameras.html#FlirCamera"><code>FlirCamera</code></a> and <code>openhsi</code>!</p>
+<p>Congratulations, you now have a Raspbian 64 bit OS that can run <code>openhsi</code>!</p>
 
 </div>
 </div>

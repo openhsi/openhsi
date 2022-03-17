@@ -26,6 +26,7 @@ Depending on your camera sensor, install:
 - Ximea SDK (See https://www.ximea.com/support/wiki/apis/Python)
 - FLIR Spinnaker SDK with the python package (See https://www.flir.com/products/spinnaker-sdk/)
 - LUCID SDK (See https://thinklucid.com/downloads-hub/)
+{% include note.html content='A descriptive installation guide on Linux platforms can be found at https://openhsi.github.io/openhsi/tutorial_installing_linux.html' %}
 
 ## Development and Contributions
 
@@ -104,3 +105,32 @@ We have the following implementations in [`cameras` module](https://openhsi.gith
 - `FlirCamera`
 
 These all have the same interface so in principle, these OpenHSI cameras can be used interchangeably as long as you have the right calibration files. 
+
+## Frequently Asked Questions
+
+**I'm having trouble with the software install. Do you have a guide?**
+
+Check out our [Linux Installation Guide](https://openhsi.github.io/openhsi/tutorial_installing_linux.html).
+
+**Where can I get a quick overview of what `openhsi` can do?**
+
+Our [Quick Start Guide](https://openhsi.github.io/openhsi/tutorial_camera.html) is the best place to start. The sidebar also includes documentation for each software module in more detail. 
+
+
+**The OpenHSI camera is a pushbroom sensor and requires motion to scan a 2D space. What kind of motion should I apply?**
+
+Any motion that allows you to scan a 2D space is okay. This can be from translating the camera is space or from applying a rotation. (or both translation and rotation)
+The developers of `openhsi` has flown the OpenHSI camera on a drone which sweeps across an area of interest in multiple overlapping swaths. You can fly this camera on other platforms, vehicles, etc... 
+
+**How fast should I move the camera?**
+
+It'll depend on what your case is. This answer assumes you want square pixels.
+Assuming the cross-track (scan line) spatial resolution is 0.42 mrad in the field of view, and your altitude is 120 m, the ground sample distance is:
+
+GSD $\approx$ 0.00042 $\times$ 120 (using the small angle approximation) = 5 cm
+
+Assuming your frame rate is 98 FPS at your desired processing level, and you want to get square pixels, you want to be flying at speed
+
+$v$ = 98 $\times$ 0.05 = 4.9 m/s
+
+If you fly faster/slower than this, your datacube will appear to be stretched spatially.
