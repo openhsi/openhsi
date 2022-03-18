@@ -524,7 +524,7 @@ class DataCube(CameraProperties):
     def show(self,
              plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
              red_nm:float = 640.,    # Wavelength in nm to use as the red
-             green_nm:float = 550.,  # Wavelength in nm to use as the gree
+             green_nm:float = 550.,  # Wavelength in nm to use as the green
              blue_nm:float = 470.,   # Wavelength in nm to use as the blue
              robust:bool = False,    # Choose to plot using the 2-98% percentile. Robust to outliers
              hist_eq:bool = False,   # Choose to plot using histogram equilisation
