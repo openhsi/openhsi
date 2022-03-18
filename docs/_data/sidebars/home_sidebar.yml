@@ -70,9 +70,9 @@ entries:
     title: Geometric Correction
   - folderitems:
     - output: web,pdf
-      title: Raspbian Install
-      url: /tutorial_raspbian.html
+      title: Linux Install
+      url: /tutorial_installing_linux.html
     output: web
-    title: Guides
+    title: Install Guides
   output: web
   title: Sidebar
