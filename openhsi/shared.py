@@ -84,7 +84,7 @@ def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix
             attrs = json.load(json_file)
     else: attrs = {}
 
-    self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
+    self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=True, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
     if hasattr(self, "binned_wavelengths"):
@@ -188,7 +188,7 @@ class SharedOpenHSI(SharedDataCube):
 
             if callable(getattr(self,"get_temp",None)):
                 self.cam_temperatures.put( self.get_temp() )
-        self.stop_cam()
+        #self.stop_cam()
 
     def avgNimgs(self, n) -> np.ndarray:
         """Take `n` images and find the average"""

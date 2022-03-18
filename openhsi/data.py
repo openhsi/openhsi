@@ -44,7 +44,12 @@ class Array(np.ndarray, Generic[Shape, DType]):
 class CircArrayBuffer():
     """Circular FIFO Buffer implementation on ndarrays. Each put/get is a (n-1)darray."""
 
-    def __init__(self, size:tuple = (100,100), axis:int = 0, dtype:type = np.int32, show_func:Callable[[np.ndarray],"plot"] = None):
+    def __init__(self,
+                 size:tuple = (100,100), # Shape of n-dim circular buffer to preallocate
+                 axis:int = 0,           # Which axis to traverse when filling the buffer
+                 dtype:type = np.int32,  # Buffer numpy data type
+                 show_func:Callable[[np.ndarray],"plot"] = None, # Custom plotting function if desired
+                ):
         """Preallocate a array of `size` and type `dtype` and init write/read pointer."""
         self.data = np.zeros(size, dtype=dtype)
         self.size = size
@@ -112,9 +117,9 @@ class CircArrayBuffer():
 class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
     def __init__(self,
-                 json_path:str = None, # path to settings file
-                 pkl_path:str  = None, # path to calibration file
-                 print_settings= False, # print out settings file contents
+                 json_path:str = None,  # Path to settings file
+                 pkl_path:str  = None,  # Path to calibration file
+                 print_settings:bool = False, # Print out settings file contents
                  **kwargs):
         """Load the settings and calibration files"""
         self.json_path = json_path
@@ -388,10 +393,10 @@ import psutil
 class DataCube(CameraProperties):
     """Facilitates the collection, viewing, and saving of hyperspectral datacubes."""
     def __init__(self,
-                 n_lines:int = 16, # how many along-track pixels
-                 processing_lvl:int = -1, # desired real time processing level
-                 warn_mem_use:bool = True, # give a warning if trying to allocate too much memory (> 80% of available RAM)
-                 preserve_raw:bool = False, # not implemented
+                 n_lines:int = 16,          # How many along-track pixels desired
+                 processing_lvl:int = -1,   # Desired real time processing level
+                 warn_mem_use:bool = True,  # Give a warning if trying to allocate too much memory (> 80% of available RAM)
+                 preserve_raw:bool = False, # Not implemented
                  **kwargs):
         """Preallocate array buffers"""
         self.n_lines = n_lines
@@ -420,7 +425,12 @@ class DataCube(CameraProperties):
         self.timestamps.update()
         self.dc.put( self.pipeline(x) )
 
-    def save(self, save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str=""):
+    def save(self,
+             save_dir:str,                 # Path to folder where all datacubes will be saved at
+             preconfig_meta_path:str=None, # Path to a .json file that includes metadata fields to be saved inside datacube
+             prefix:str="",                # Prepend a custom prefix to your file name
+             suffix:str="",                # Append a custom suffix to your file name
+            ):
         """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time."""
         if preconfig_meta_path is not None:
             with open(preconfig_meta_path) as json_file:
@@ -428,7 +438,7 @@ class DataCube(CameraProperties):
         else: attrs = {}
         if hasattr(self, "ds_metadata"): attrs = self.ds_metadata
 
-        self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
+        self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=True, exist_ok=True)
         self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
         if hasattr(self, "binned_wavelengths"):
@@ -481,7 +491,10 @@ class DataCube(CameraProperties):
         fig.savefig(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png",
                    bbox_inches='tight', pad_inches=0)
 
-    def load_nc(self, nc_path:str, old_style:bool = False):
+    def load_nc(self,
+                nc_path:str,            # Path to a NetCDF4 file
+                old_style:bool = False, # Only for backwards compatibility for datacubes created before first release
+               ):
         """Lazy load a NetCDF datacube into the DataCube buffer."""
         with xr.open_dataset(nc_path) as ds:
             if old_style: # cross-track, along-track, wavelength
@@ -508,10 +521,16 @@ class DataCube(CameraProperties):
             self.binned_wavelengths = np.array(ds.wavelength)
             self.dc.slots_left      = 0 # indicate that the data buffer is full
 
-    def show(self, plot_lib:str = "bokeh",
-             red_nm:float = 640., green_nm:float = 550., blue_nm:float = 470.,
-             robust:bool = False, hist_eq:bool = False, quick_imshow:bool = False,
-             **plot_kwargs) -> "bokeh or matplotlib plot":
+    def show(self,
+             plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
+             red_nm:float = 640.,    # Wavelength in nm to use as the red
+             green_nm:float = 550.,  # Wavelength in nm to use as the gree
+             blue_nm:float = 470.,   # Wavelength in nm to use as the blue
+             robust:bool = False,    # Choose to plot using the 2-98% percentile. Robust to outliers
+             hist_eq:bool = False,   # Choose to plot using histogram equilisation
+             quick_imshow:bool = False, # Used to skip holoviews and use matplotlib for a static plot
+             **plot_kwargs,          # Any other plotting options to be used in your plotting backend
+            ) -> "bokeh or matplotlib plot":
         """Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
         The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
         Further customise your plot with `**plot_kwargs`. `quick_imshow` is used for saving figures quickly
