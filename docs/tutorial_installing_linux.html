@@ -88,6 +88,14 @@ bash Miniforge3-<span class="k">$(</span>uname<span class="k">)</span>-<span cla
 <h3 id="cpython-with-pyenv">cpython with pyenv<a class="anchor-link" href="#cpython-with-pyenv"> </a></h3><div class="highlight"><pre><span></span>pyenv install <span class="m">3</span>.8.12
 </pre></div>
 <p>And the use pip later.</p>
+<h3 id="Install-Jupyter-Lab">Install Jupyter Lab<a class="anchor-link" href="#Install-Jupyter-Lab"> </a></h3><p>All the interactive tools in <code>openhsi</code> require Jupyter Notebooks because it uses web tools. 
+To install, follow the steps in <a href="https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html">https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html</a></p>
+<p>In short, it boils down to 
+<code>conda install -c conda-forge jupyterlab</code>
+or
+<code>pip install jupyterlab</code>.</p>
+<p>You will also need some Jupyter Extensions. Navigate to the Jupyter Extensions tab and search for
+<code>jupyterlab-manager</code>, and <code>jupyter_bokeh</code>.</p>
 
 </div>
 </div>
@@ -189,7 +197,7 @@ tar xzf XIMEA_Linux_SP.tgz
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="4.1---Enable-I2C-and-UART">4.1 - Enable I2C and UART<a class="anchor-link" href="#4.1---Enable-I2C-and-UART"> </a></h3><p>Open the Raspberry Pi config tool.</p>
+<h3 id="4.1-Enable-I2C-and-UART">4.1 Enable I2C and UART<a class="anchor-link" href="#4.1-Enable-I2C-and-UART"> </a></h3><p>Open the Raspberry Pi config tool.</p>
 <div class="highlight"><pre><span></span>sudo raspi-config
 </pre></div>
 <p>And enable I2C and UART. For more instructions see <a href="https://askubuntu.com/questions/1273700/enable-spi-and-i2c-on-ubuntu-20-04-raspberry-pi">https://askubuntu.com/questions/1273700/enable-spi-and-i2c-on-ubuntu-20-04-raspberry-pi</a>.
@@ -201,7 +209,7 @@ sudo usermod -a -G i2c pi
 <a href="https://www.abelectronics.co.uk/kb/article/1035/serial-port-setup-in-raspberry-pi-os">https://www.abelectronics.co.uk/kb/article/1035/serial-port-setup-in-raspberry-pi-os</a></p>
 <h3 id="4.2-Disable-serial-login-shell">4.2 Disable serial login shell<a class="anchor-link" href="#4.2-Disable-serial-login-shell"> </a></h3><p>remove <code>console=serial0,115200</code> from /boot/cmdline.txt
 then reboot. This will allow us to run a higher baud rate.</p>
-<h3 id="4.3---Use-PI0UART-instead-of-miniUART">4.3 - Use PI0UART instead of miniUART<a class="anchor-link" href="#4.3---Use-PI0UART-instead-of-miniUART"> </a></h3><p>Add to end of file /boot/config.txt we need to add a configuration to <code>/boot/config.txt</code>.</p>
+<h3 id="4.3-Use-PI0UART-instead-of-miniUART">4.3 Use PI0UART instead of miniUART<a class="anchor-link" href="#4.3-Use-PI0UART-instead-of-miniUART"> </a></h3><p>Add to end of file /boot/config.txt we need to add a configuration to <code>/boot/config.txt</code>.</p>
 <div class="highlight"><pre><span></span>sudo <span class="nb">echo</span> <span class="s1">&#39;dtoverlay=disable-bt&#39;</span> &gt;&gt; /boot/config.txt
 </pre></div>
 <p>Then in the terminal</p>
@@ -219,7 +227,7 @@ sudo reboot
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="4.5---Installing-the-Battery-Hat-software">4.5 - Installing the Battery Hat software<a class="anchor-link" href="#4.5---Installing-the-Battery-Hat-software"> </a></h3><p>To deploy the Raspberry Pi on a remote platform, it needs power. We use the X728 version 2.1 battery hat from Suptronics which lets us turn on and safe shutdown the Pi while indicating power left.</p>
+<h3 id="4.5-Installing-the-Battery-Hat-software">4.5 Installing the Battery Hat software<a class="anchor-link" href="#4.5-Installing-the-Battery-Hat-software"> </a></h3><p>To deploy the Raspberry Pi on a remote platform, it needs power. We use the X728 version 2.1 battery hat from Suptronics which lets us turn on and safe shutdown the Pi while indicating power left.</p>
 <p>Since we are using Debian 11, we need to use systemd to enable /etc/rc-local which the battery hat scripts use. Follow the steps in 
 <a href="https://www.linuxbabe.com/linux-server/how-to-enable-etcrc-local-with-systemd">https://www.linuxbabe.com/linux-server/how-to-enable-etcrc-local-with-systemd</a></p>
 <p>The software for the battery hat can be found here:
