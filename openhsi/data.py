@@ -44,7 +44,12 @@ class Array(np.ndarray, Generic[Shape, DType]):
 class CircArrayBuffer():
     """Circular FIFO Buffer implementation on ndarrays. Each put/get is a (n-1)darray."""
 
-    def __init__(self, size:tuple = (100,100), axis:int = 0, dtype:type = np.int32, show_func:Callable[[np.ndarray],"plot"] = None):
+    def __init__(self,
+                 size:tuple = (100,100), # Shape of n-dim circular buffer to preallocate
+                 axis:int = 0,           # Which axis to traverse when filling the buffer
+                 dtype:type = np.int32,  # Buffer numpy data type
+                 show_func:Callable[[np.ndarray],"plot"] = None, # Custom plotting function if desired
+                ):
         """Preallocate a array of `size` and type `dtype` and init write/read pointer."""
         self.data = np.zeros(size, dtype=dtype)
         self.size = size
@@ -112,9 +117,9 @@ class CircArrayBuffer():
 class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
     def __init__(self,
-                 json_path:str = None, # path to settings file
-                 pkl_path:str  = None, # path to calibration file
-                 print_settings= False, # print out settings file contents
+                 json_path:str = None,  # Path to settings file
+                 pkl_path:str  = None,  # Path to calibration file
+                 print_settings:bool = False, # Print out settings file contents
                  **kwargs):
         """Load the settings and calibration files"""
         self.json_path = json_path
@@ -388,10 +393,10 @@ import psutil
 class DataCube(CameraProperties):
     """Facilitates the collection, viewing, and saving of hyperspectral datacubes."""
     def __init__(self,
-                 n_lines:int = 16, # how many along-track pixels
-                 processing_lvl:int = -1, # desired real time processing level
-                 warn_mem_use:bool = True, # give a warning if trying to allocate too much memory (> 80% of available RAM)
-                 preserve_raw:bool = False, # not implemented
+                 n_lines:int = 16,          # How many along-track pixels desired
+                 processing_lvl:int = -1,   # Desired real time processing level
+                 warn_mem_use:bool = True,  # Give a warning if trying to allocate too much memory (> 80% of available RAM)
+                 preserve_raw:bool = False, # Not implemented
                  **kwargs):
         """Preallocate array buffers"""
         self.n_lines = n_lines
@@ -415,149 +420,168 @@ class DataCube(CameraProperties):
     def __repr__(self):
         return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
 
-    def put(self, x:np.ndarray):
-        """Applies the composed tranforms and writes the 2D array into the data cube. Stores a timestamp for each push."""
-        self.timestamps.update()
-        self.dc.put( self.pipeline(x) )
 
-    def save(self, save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str=""):
-        """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time."""
-        if preconfig_meta_path is not None:
-            with open(preconfig_meta_path) as json_file:
-                attrs = json.load(json_file)
-        else: attrs = {}
-        if hasattr(self, "ds_metadata"): attrs = self.ds_metadata
 
-        self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=False, exist_ok=True)
-        self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
+@patch
+def put(self:DataCube, x:np.ndarray):
+    """Applies the composed tranforms and writes the 2D array into the data cube. Stores a timestamp for each push."""
+    self.timestamps.update()
+    self.dc.put( self.pipeline(x) )
 
-        if hasattr(self, "binned_wavelengths"):
-            wavelengths = self.binned_wavelengths if self.proc_lvl not in (3,7,8) else self.λs
-        else:
-            wavelengths = np.arange(self.dc.data.shape[2])
+@patch
+def save(self:DataCube,
+         save_dir:str,                 # Path to folder where all datacubes will be saved at
+         preconfig_meta_path:str=None, # Path to a .json file that includes metadata fields to be saved inside datacube
+         prefix:str="",                # Prepend a custom prefix to your file name
+         suffix:str="",                # Append a custom suffix to your file name
+        ):
+    """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time."""
+    if preconfig_meta_path is not None:
+        with open(preconfig_meta_path) as json_file:
+            attrs = json.load(json_file)
+    else: attrs = {}
+    if hasattr(self, "ds_metadata"): attrs = self.ds_metadata
 
-        if hasattr(self,"cam_temperatures"):
-            self.coords = dict(wavelength=(["wavelength"],wavelengths),
-                               x=(["x"],np.arange(self.dc.data.shape[0])),
-                               y=(["y"],np.arange(self.dc.data.shape[1])),
-                               time=(["time"],self.timestamps.data.astype(np.datetime64)),
-                               temperature=(["temperature"],self.cam_temperatures.data))
-        else:
-            self.coords = dict(wavelength=(["wavelength"],wavelengths),
-                               x=(["x"],np.arange(self.dc.data.shape[0])),
-                               y=(["y"],np.arange(self.dc.data.shape[1])),
-                               time=(["time"],self.timestamps.data.astype(np.datetime64)))
+    self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=True, exist_ok=True)
+    self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
-        # time coordinates can only be saved in np.datetime64 format
-        self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
-                             coords=self.coords, attrs=attrs)
+    if hasattr(self, "binned_wavelengths"):
+        wavelengths = self.binned_wavelengths if self.proc_lvl not in (3,7,8) else self.λs
+    else:
+        wavelengths = np.arange(self.dc.data.shape[2])
 
-        """provide metadata to NetCDF coordinates"""
-        self.nc.x.attrs["long_name"]   = "cross-track"
-        self.nc.x.attrs["units"]       = "pixels"
-        self.nc.x.attrs["description"] = "cross-track spatial coordinates"
-        self.nc.y.attrs["long_name"]   = "along-track"
-        self.nc.y.attrs["units"]       = "pixels"
-        self.nc.y.attrs["description"] = "along-track spatial coordinates"
-        self.nc.time.attrs["long_name"]   = "along-track"
-        self.nc.time.attrs["description"] = "along-track spatial coordinates"
-        self.nc.wavelength.attrs["long_name"]   = "wavelength_nm"
-        self.nc.wavelength.attrs["units"]       = "nanometers"
-        self.nc.wavelength.attrs["description"] = "wavelength in nanometers."
-        if hasattr(self,"cam_temperatures"):
-            self.nc.temperature.attrs["long_name"] = "camera temperature"
-            self.nc.temperature.attrs["units"] = "degrees Celsius"
-            self.nc.temperature.attrs["description"] = "temperature of sensor at time of image capture"
+    if hasattr(self,"cam_temperatures"):
+        self.coords = dict(wavelength=(["wavelength"],wavelengths),
+                           x=(["x"],np.arange(self.dc.data.shape[0])),
+                           y=(["y"],np.arange(self.dc.data.shape[1])),
+                           time=(["time"],self.timestamps.data.astype(np.datetime64)),
+                           temperature=(["temperature"],self.cam_temperatures.data))
+    else:
+        self.coords = dict(wavelength=(["wavelength"],wavelengths),
+                           x=(["x"],np.arange(self.dc.data.shape[0])),
+                           y=(["y"],np.arange(self.dc.data.shape[1])),
+                           time=(["time"],self.timestamps.data.astype(np.datetime64)))
 
-        self.nc.datacube.attrs["long_name"]   = "hyperspectral datacube"
-        self.nc.datacube.attrs["units"]       = "digital number"
-        if self.proc_lvl in (4,5,7): self.nc.datacube.attrs["units"] = "uW/cm^2/sr/nm"
-        elif self.proc_lvl in (6,8): self.nc.datacube.attrs["units"] = "percentage reflectance"
-        self.nc.datacube.attrs["description"] = "hyperspectral datacube"
+    # time coordinates can only be saved in np.datetime64 format
+    self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
+                         coords=self.coords, attrs=attrs)
 
-        self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
+    """provide metadata to NetCDF coordinates"""
+    self.nc.x.attrs["long_name"]   = "cross-track"
+    self.nc.x.attrs["units"]       = "pixels"
+    self.nc.x.attrs["description"] = "cross-track spatial coordinates"
+    self.nc.y.attrs["long_name"]   = "along-track"
+    self.nc.y.attrs["units"]       = "pixels"
+    self.nc.y.attrs["description"] = "along-track spatial coordinates"
+    self.nc.time.attrs["long_name"]   = "along-track"
+    self.nc.time.attrs["description"] = "along-track spatial coordinates"
+    self.nc.wavelength.attrs["long_name"]   = "wavelength_nm"
+    self.nc.wavelength.attrs["units"]       = "nanometers"
+    self.nc.wavelength.attrs["description"] = "wavelength in nanometers."
+    if hasattr(self,"cam_temperatures"):
+        self.nc.temperature.attrs["long_name"] = "camera temperature"
+        self.nc.temperature.attrs["units"] = "degrees Celsius"
+        self.nc.temperature.attrs["description"] = "temperature of sensor at time of image capture"
 
-        fig = self.show("matplotlib",hist_eq=True,quick_imshow=True)
-        fig.savefig(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png",
-                   bbox_inches='tight', pad_inches=0)
+    self.nc.datacube.attrs["long_name"]   = "hyperspectral datacube"
+    self.nc.datacube.attrs["units"]       = "digital number"
+    if self.proc_lvl in (4,5,7): self.nc.datacube.attrs["units"] = "uW/cm^2/sr/nm"
+    elif self.proc_lvl in (6,8): self.nc.datacube.attrs["units"] = "percentage reflectance"
+    self.nc.datacube.attrs["description"] = "hyperspectral datacube"
 
-    def load_nc(self, nc_path:str, old_style:bool = False):
-        """Lazy load a NetCDF datacube into the DataCube buffer."""
-        with xr.open_dataset(nc_path) as ds:
-            if old_style: # cross-track, along-track, wavelength
-                self.dc      = CircArrayBuffer(size=ds.datacube.shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
-                self.dc.data = np.array(ds.datacube)
-            else: # wavelength, cross-track, along-track -> convert to old_style (datacube inserts do not need transpose)
-                shape = (*ds.datacube.shape[1:],ds.datacube.shape[0])
-                self.dc      = CircArrayBuffer(size=shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
-                self.dc.data = np.moveaxis(np.array(ds.datacube), 0, -1)
-            print(f"Allocated {4*reduce(lambda x,y: x*y, ds.datacube.shape)/2**20:.02f} MB of RAM.")
+    self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
 
-            self.ds_timestamps = ds.time.to_numpy() # type is np.datetime64. convert to datetime.datetime
-            unix_epoch = np.datetime64(0, 's')
-            one_second = np.timedelta64(1, 's')
-            seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
-            self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
-            self.timestamps.data = self.ds_timestamps
-            self.ds_metadata = ds.attrs
+    fig = self.show("matplotlib",hist_eq=True,quick_imshow=True)
+    fig.savefig(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png",
+               bbox_inches='tight', pad_inches=0)
 
-            if hasattr(ds,"temperature"):
-                self.ds_temperatures = ds.temperature.to_numpy()
-                self.cam_temperatures = CircArrayBuffer(size=self.ds_temperatures.shape,dtype=np.float32)
-                self.cam_temperatures.data = self.ds_temperatures
-            self.binned_wavelengths = np.array(ds.wavelength)
-            self.dc.slots_left      = 0 # indicate that the data buffer is full
+@patch
+def load_nc(self:DataCube,
+            nc_path:str,            # Path to a NetCDF4 file
+            old_style:bool = False, # Only for backwards compatibility for datacubes created before first release
+           ):
+    """Lazy load a NetCDF datacube into the DataCube buffer."""
+    with xr.open_dataset(nc_path) as ds:
+        if old_style: # cross-track, along-track, wavelength
+            self.dc      = CircArrayBuffer(size=ds.datacube.shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
+            self.dc.data = np.array(ds.datacube)
+        else: # wavelength, cross-track, along-track -> convert to old_style (datacube inserts do not need transpose)
+            shape = (*ds.datacube.shape[1:],ds.datacube.shape[0])
+            self.dc      = CircArrayBuffer(size=shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
+            self.dc.data = np.moveaxis(np.array(ds.datacube), 0, -1)
+        print(f"Allocated {4*reduce(lambda x,y: x*y, ds.datacube.shape)/2**20:.02f} MB of RAM.")
 
-    def show(self, plot_lib:str = "bokeh",
-             red_nm:float = 640., green_nm:float = 550., blue_nm:float = 470.,
-             robust:bool = False, hist_eq:bool = False, quick_imshow:bool = False,
-             **plot_kwargs) -> "bokeh or matplotlib plot":
-        """Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
-        The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
-        Further customise your plot with `**plot_kwargs`. `quick_imshow` is used for saving figures quickly
-        but cannot be used to make interactive plots. """
+        self.ds_timestamps = ds.time.to_numpy() # type is np.datetime64. convert to datetime.datetime
+        unix_epoch = np.datetime64(0, 's')
+        one_second = np.timedelta64(1, 's')
+        seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
+        self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
+        self.timestamps.data = self.ds_timestamps
+        self.ds_metadata = ds.attrs
 
-        rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
-        if hasattr(self, "binned_wavelengths"):
-            rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]
-            rgb[...,1] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-green_nm))]
-            rgb[...,2] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-blue_nm))]
-        else:
-            rgb[...,0] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-            rgb[...,1] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-            rgb[...,2] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+        if hasattr(ds,"temperature"):
+            self.ds_temperatures = ds.temperature.to_numpy()
+            self.cam_temperatures = CircArrayBuffer(size=self.ds_temperatures.shape,dtype=np.float32)
+            self.cam_temperatures.data = self.ds_temperatures
+        self.binned_wavelengths = np.array(ds.wavelength)
+        self.dc.slots_left      = 0 # indicate that the data buffer is full
 
-        if robust and not hist_eq: # scale everything to the 2% and 98% percentile
-            vmax = np.nanpercentile(rgb, 98)
-            vmin = np.nanpercentile(rgb, 2)
-            rgb = ((rgb.astype("f8") - vmin) / (vmax - vmin)).astype("f4")
-            rgb = np.minimum(np.maximum(rgb, 0), 1)
-        elif hist_eq and not robust:
-            img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
-            cdf = img_hist.cumsum() # cumulative distribution function
-            cdf = 1. * cdf / cdf[-1] # normalize
-            img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
-            rgb = img_eq.reshape(rgb.shape)
-        elif robust and hist_eq:
-            warnings.warn("Cannot mix robust with histogram equalisation. No RGB adjustments will be made.",stacklevel=2)
-            rgb /= np.max(rgb)
-        else:
-            rgb /= np.max(rgb)
+@patch
+def show(self:DataCube,
+         plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
+         red_nm:float = 640.,    # Wavelength in nm to use as the red
+         green_nm:float = 550.,  # Wavelength in nm to use as the green
+         blue_nm:float = 470.,   # Wavelength in nm to use as the blue
+         robust:bool = False,    # Choose to plot using the 2-98% percentile. Robust to outliers
+         hist_eq:bool = False,   # Choose to plot using histogram equilisation
+         quick_imshow:bool = False, # Used to skip holoviews and use matplotlib for a static plot
+         **plot_kwargs,          # Any other plotting options to be used in your plotting backend
+        ) -> "bokeh or matplotlib plot":
+    """Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
+    The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
+    Further customise your plot with `**plot_kwargs`. `quick_imshow` is used for saving figures quickly
+    but cannot be used to make interactive plots. """
 
-        if quick_imshow:
-            fig, ax = plt.subplots(figsize=(12,3))
-            ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
-            return fig
+    rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
+    if hasattr(self, "binned_wavelengths"):
+        rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]
+        rgb[...,1] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-green_nm))]
+        rgb[...,2] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-blue_nm))]
+    else:
+        rgb[...,0] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+        rgb[...,1] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+        rgb[...,2] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
 
-        import holoviews as hv
-        hv.extension(plot_lib,logo=False)
-        rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
-                         rgb[:,:,0],rgb[:,:,1],rgb[:,:,2]))
+    if robust and not hist_eq: # scale everything to the 2% and 98% percentile
+        vmax = np.nanpercentile(rgb, 98)
+        vmin = np.nanpercentile(rgb, 2)
+        rgb = ((rgb.astype("f8") - vmin) / (vmax - vmin)).astype("f4")
+        rgb = np.minimum(np.maximum(rgb, 0), 1)
+    elif hist_eq and not robust:
+        img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
+        cdf = img_hist.cumsum() # cumulative distribution function
+        cdf = 1. * cdf / cdf[-1] # normalize
+        img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
+        rgb = img_eq.reshape(rgb.shape)
+    elif robust and hist_eq:
+        warnings.warn("Cannot mix robust with histogram equalisation. No RGB adjustments will be made.",stacklevel=2)
+        rgb /= np.max(rgb)
+    else:
+        rgb /= np.max(rgb)
 
-        if plot_lib == "bokeh":
-            return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(**plot_kwargs).opts(
-                xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
-        else: # plot_lib == "matplotlib"
-            return rgb_hv.opts(fig_inches=22).opts(**plot_kwargs).opts(
-                xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+    if quick_imshow:
+        fig, ax = plt.subplots(figsize=(12,3))
+        ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
+        return fig
 
+    import holoviews as hv
+    hv.extension(plot_lib,logo=False)
+    rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
+                     rgb[:,:,0],rgb[:,:,1],rgb[:,:,2]))
+
+    if plot_lib == "bokeh":
+        return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(**plot_kwargs).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+    else: # plot_lib == "matplotlib"
+        return rgb_hv.opts(fig_inches=22).opts(**plot_kwargs).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)

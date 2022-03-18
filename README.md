@@ -14,7 +14,7 @@ Documentation can be found here: [https://openhsi.github.io/openhsi/](https://op
 
 or
 
-`conda install -c openhsi openhsi`
+`conda install -c conda-forge openhsi`
 
 The source code can be found on [GitHub](https://github.com/openhsi/openhsi).
 

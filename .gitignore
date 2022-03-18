@@ -33,6 +33,7 @@ parts/
 sdist/
 var/
 wheels/
+conda/
 *.egg-info/
 .installed.cfg
 *.egg
