@@ -87,11 +87,11 @@ conda activate openhsi
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="3.-Install-Camera-SDK">3. Install Camera SDK<a class="anchor-link" href="#3.-Install-Camera-SDK"> </a></h2><h3 id="Install-Lucid-Vision-Arena-SDK-(Sydney-Photonics/Robonation-OpenHSI)">Install Lucid Vision Arena SDK (Sydney Photonics/Robonation OpenHSI)<a class="anchor-link" href="#Install-Lucid-Vision-Arena-SDK-(Sydney-Photonics/Robonation-OpenHSI)"> </a></h3><p>The Robonation OpenHSI uses the detector from <a href="http://thinklucid.com">Lucid Vision Labs Inc</a>. Their full SDK is required to use the sensor with the OpenHSI libary. This can be acquired from <a href="https://thinklucid.com/downloads-hub/">https://thinklucid.com/downloads-hub/</a>.</p>
 <p>Run the installer and follow the prompts. We recommend picking delveoper install, so you get AreaView progam, which may be helpful in troublshooting.</p>
-<h4 id="Arena-Additional-Setup">Arena Additional Setup<a class="anchor-link" href="#Arena-Additional-Setup"> </a></h4><p>At the end of the innstaller click the option to show the Arena Getting Started Guide, which has some instructons for final setup. (the path to these will be somethink like this: file:///C:/Program%20Files/Lucid%20Vision%20Labs/Arena%20SDK/docs/html/arena_sdk_windows.html)</p>
+<h4 id="Arena-Additional-Setup">Arena Additional Setup<a class="anchor-link" href="#Arena-Additional-Setup"> </a></h4><p>At the end of the innstaller click the option to show the Arena Getting Started Guide, which has some instructons for final setup. (the path to these will be somethink like this: <code>C:/Program Files/Lucid Vision Labs/Arena SDK/docs/html/arena_sdk_windows.html</code>)</p>
 <p>In the instructions you will be shown how setup the LUCID Lightweight Filter Driver for Windows and enable jumbo frames.</p>
-<h4 id="Install-Arean-Python-Library">Install Arean Python Library<a class="anchor-link" href="#Install-Arean-Python-Library"> </a></h4><p>And then install the arena python library (this is the same on a conda based or pip based python env):
-<code>`bash
-pip install arena_api-&lt;version&gt;-py3-none-any.whl --no-dependencies</code></p>
+<h4 id="Install-Arean-Python-Library">Install Arean Python Library<a class="anchor-link" href="#Install-Arean-Python-Library"> </a></h4><p>And then install the arena python library (this is the same on a conda based or pip based python env):</p>
+<div class="highlight"><pre><span></span>pip install --no-deps arena_api-&lt;version&gt;-py3-none-any.whl
+</pre></div>
 
 </div>
 </div>
