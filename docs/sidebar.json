@@ -29,6 +29,7 @@
     "Georectification": "/geometry.html"
   },
   "Install Guides": {
-    "Linux Install": "/tutorial_installing_linux.html"
+    "Linux Install": "/tutorial_installing_linux.html",
+    "Windows Install": "/tutorial_installing_windows.html"
   }
 }
