@@ -22,15 +22,13 @@ docs: $(SRC)
 test:
 	nbdev_test_nbs --verbose True --flags test
 
-release: pypi conda_release
+release: pypi
 	fastrelease_bump_version
 
 conda_release:
-	fastrelease_conda_package --do_build false && \
-	cd conda && \
-	conda build --no-anaconda-upload --output-folder build openhsi && \
-	anaconda upload build/noarch/{name}-{ver}-*.tar.bz2
-	cd ..
+	# usage : make conda_release version=0.x.x
+	# copy from conda-forge,  after https://github.com/conda-forge/openhsi-feedstock is updated.
+	anaconda copy conda-forge/openhsi/$(version) --to-owner openhsi
 
 pypi: dist
 	twine upload --repository pypi dist/*

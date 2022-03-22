@@ -136,7 +136,7 @@ sudo sh Arena_SDK_&lt;platform&gt;.conf
 </pre></div>
 <p>{% include important.html content='You must keep the SDK files in the same location that you ran this command, or re-run the configiuration script. No files are copied or moved, just locations recorded for the arena python api to find.' %}
 And then install the arena python library (this is the same on a conda based or pip based python env):</p>
-<div class="highlight"><pre><span></span>pip install arena_api-&lt;version&gt;-py3-none-any.whl --no-dependencies
+<div class="highlight"><pre><span></span>pip install --no-deps arena_api-&lt;version&gt;-py3-none-any.whl
 </pre></div>
 <h4 id="Enable-Jumbo-Packets">Enable Jumbo Packets<a class="anchor-link" href="#Enable-Jumbo-Packets"> </a></h4><p>To ensure optimal performance you need to make sure your GigE link is setup for jumbo packets.</p>
 <p>On Ubuntu system this can be done using (you may want to set this up to occur on startup):</p>

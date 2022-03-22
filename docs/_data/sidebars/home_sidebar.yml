@@ -72,6 +72,9 @@ entries:
     - output: web,pdf
       title: Linux Install
       url: /tutorial_installing_linux.html
+    - output: web,pdf
+      title: Windows Install
+      url: /tutorial_installing_windows.html
     output: web
     title: Install Guides
   output: web

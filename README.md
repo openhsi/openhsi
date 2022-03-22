@@ -110,7 +110,8 @@ These all have the same interface so in principle, these OpenHSI cameras can be 
 
 **I'm having trouble with the software install. Do you have a guide?**
 
-Check out our [Linux Installation Guide](https://openhsi.github.io/openhsi/tutorial_installing_linux.html).
+Check out our [Linux Installation Guide](https://openhsi.github.io/openhsi/tutorial_installing_linux.html)
+and [Windows Installation Guide](https://openhsi.github.io/openhsi/tutorial_installing_windows.html).
 
 **Where can I get a quick overview of what `openhsi` can do?**
 
