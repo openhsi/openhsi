@@ -85,7 +85,10 @@ class OpenHSI(DataCube):
 @delegates()
 class SimulatedCamera(OpenHSI):
     """Simulated camera using an RGB image as an input. Hyperspectral data is produced using CIE XYZ matching functions."""
-    def __init__(self, img_path:str = None, mode:str = None, **kwargs):
+    def __init__(self,
+                 img_path:str = None, # Path to an RGB image file
+                 mode:str = None,     # Default is to generate lines from the RGB image. Other options are `HgAr` and `flat` to simulate the HgAr spectrum and a flat field respectively.
+                 **kwargs):
         """Initialise Simulated Camera"""
         super().__init__(**kwargs)
         self.mode = mode
@@ -235,6 +238,8 @@ class ProcessRawDatacube(OpenHSI):
         """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time.
         Override the processing buffer timestamps with the timestamps in original file, also for camera temperatures."""
         self.timestamps.data = self.buff.ds_timestamps
+        if hasattr(self.buff,"ds_metadata"):
+            self.ds_metadata = self.buff.ds_metadata
         if hasattr(self.buff,"ds_temperatures"):
             self.cam_temperatures.data = self.buff.ds_temperatures
         super().save(save_dir=save_dir, **kwargs)
@@ -246,7 +251,7 @@ class ProcessRawDatacube(OpenHSI):
 @delegates()
 class ProcessDatacube(ProcessRawDatacube):
     """Post-process datacubes"""
-    def __init__(self, **kwargs):
+    def __init__(self, fname:str, processing_lvl:int, json_path:str, pkl_path:str, old_style:bool=False, **kwargs):
         """Post-process datacubes further!"""
         super().__init__(**kwargs)
 
