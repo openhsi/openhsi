@@ -167,6 +167,19 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <p>Alternatively, you can supply a custom pipeline of transforms to 
 <a href="/openhsi/cameras.html#LucidCamera.set_processing_lvl(custom_tfms = List[Callable[[np.ndarray],np.ndarray]]"><code>LucidCamera.set_processing_lvl(custom_tfms = List[Callable[[np.ndarray],np.ndarray]] )</code></a>).</p>
 <h3 id="A-note-on-binning-schemes">A note on binning schemes<a class="anchor-link" href="#A-note-on-binning-schemes"> </a></h3><p>We provide a fast binning scheme that only involves one memory allocation to speed things up and it assumes that the wavelength profile along the spectral axis is linear. In practice, it is not exacly linear so we also provide a slow binning scheme that does it properly at the cost of requiring more memory allocations. We found that the extra time needed was around 2 ms on a Jetson Xavier board.</p>
+<h3 id="Post-processing-Datacubes">Post-processing Datacubes<a class="anchor-link" href="#Post-processing-Datacubes"> </a></h3><p>If you are collecting raw data and want to post-process them into radiance or reflectance, you can use <a href="/openhsi/capture.html#ProcessDatacube"><code>ProcessDatacube</code></a> from the <a href="https://openhsi.github.io/openhsi/capture.html#ProcessDatacube">capture</a> module. 
+For example, we have a datacube of digital numbers and we want to convert them to radiance. We need to pass a <code>processing_lvl</code> that includes the radiance conversion (so the the <code>dn2rad</code> method is initialised). Then we can pass in a list of transforms to <code>load_next_tfms</code> which will be applied to the whole datacube.</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.capture</span> <span class="kn">import</span> <span class="n">ProcessDatacube</span>
+
+<span class="n">dc2process</span> <span class="o">=</span> <span class="n">ProcessDatacube</span><span class="p">(</span><span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;path_to_datacube_file.nc&quot;</span><span class="p">,</span> <span class="n">processing_lvl</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                             <span class="n">json_path</span><span class="o">=</span><span class="n">json_path</span><span class="p">,</span> <span class="n">pkl_path</span><span class="o">=</span><span class="n">pkl_path</span><span class="p">)</span>
+<span class="n">dc2process</span><span class="o">.</span><span class="n">load_next_tfms</span><span class="p">([</span><span class="n">proced_dc</span><span class="o">.</span><span class="n">dn2rad</span><span class="p">])</span>
+<span class="n">dc2process</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+</pre></div>
+<p>Just like the <a href="/openhsi/capture.html#SimulatedCamera"><code>SimulatedCamera</code></a>, you can then view your post-processed datacube by using</p>
+<div class="highlight"><pre><span></span><span class="n">dc2process</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">hist_eq</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+<p>or similar. More on visualisation in the next section.</p>
 
 </div>
 </div>
