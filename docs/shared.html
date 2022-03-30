@@ -141,7 +141,101 @@ Save is done in a separate multiprocess.Process.</code></pre>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="save_shared_datacube" class="doc_header"><code>save_shared_datacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L121" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>save_shared_datacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>shared_array</code></strong>:<a href="/openhsi/capture.html#Array"><code>Array</code></a>, <strong><code>c_dtype</code></strong>:<code>type</code>, <strong><code>shape</code></strong>:<code>Tuple</code>, <strong><code>coords_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>attrs_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>proc_lvl</code></strong>:<code>int</code>)</p>
+<h4 id="SharedDataCube.show" class="doc_header"><code>SharedDataCube.show</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L117" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>SharedDataCube.show</code>(<strong><code>plot_lib</code></strong>:<code>str</code>=<em><code>'bokeh'</code></em>, <strong><code>red_nm</code></strong>:<code>float</code>=<em><code>640.0</code></em>, <strong><code>green_nm</code></strong>:<code>float</code>=<em><code>550.0</code></em>, <strong><code>blue_nm</code></strong>:<code>float</code>=<em><code>470.0</code></em>, <strong><code>robust</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong><code>hist_eq</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong><code>quick_imshow</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong>**<code>plot_kwargs</code></strong>)</p>
+</blockquote>
+
+<pre><code>Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
+The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
+Further customise your plot with `**plot_kwargs`. `quick_imshow` is used for saving figures quickly
+but cannot be used to make interactive plots.</code></pre>
+<table>
+<thead><tr>
+<th></th>
+<th>Type</th>
+<th>Default</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>plot_lib</code></strong></td>
+<td><code>str</code></td>
+<td><code>bokeh</code></td>
+<td>Plotting backend. This can be 'bokeh' or 'matplotlib'</td>
+</tr>
+<tr>
+<td><strong><code>red_nm</code></strong></td>
+<td><code>float</code></td>
+<td><code>0</code></td>
+<td>Wavelength in nm to use as the red</td>
+</tr>
+<tr>
+<td><strong><code>green_nm</code></strong></td>
+<td><code>float</code></td>
+<td><code>0</code></td>
+<td>Wavelength in nm to use as the green</td>
+</tr>
+<tr>
+<td><strong><code>blue_nm</code></strong></td>
+<td><code>float</code></td>
+<td><code>0</code></td>
+<td>Wavelength in nm to use as the blue</td>
+</tr>
+<tr>
+<td><strong><code>robust</code></strong></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Choose to plot using the 2-98% percentile. Robust to outliers</td>
+</tr>
+<tr>
+<td><strong><code>hist_eq</code></strong></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Choose to plot using histogram equilisation</td>
+</tr>
+<tr>
+<td><strong><code>quick_imshow</code></strong></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Used to skip holoviews and use matplotlib for a static plot</td>
+</tr>
+<tr>
+<td><strong><code>plot_kwargs</code></strong></td>
+<td></td>
+<td></td>
+<td><em>No Content</em></td>
+</tr>
+<tr>
+<td><strong>Returns</strong></td>
+<td><code>bokeh or matplotlib plot</code></td>
+<td></td>
+<td>Any other plotting options to be used in your plotting backend</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="save_shared_datacube" class="doc_header"><code>save_shared_datacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L178" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>save_shared_datacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>shared_array</code></strong>:<a href="/openhsi/capture.html#Array"><code>Array</code></a>, <strong><code>c_dtype</code></strong>:<code>type</code>, <strong><code>shape</code></strong>:<code>Tuple</code>, <strong><code>coords_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>attrs_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>proc_lvl</code></strong>:<code>int</code>)</p>
 </blockquote>
 
 </div>
@@ -179,7 +273,7 @@ Save is done in a separate multiprocess.Process.</code></pre>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="SharedOpenHSI" class="doc_header"><code>class</code> <code>SharedOpenHSI</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L164" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedOpenHSI</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedDataCube"><code>SharedDataCube</code></a></p>
+<h2 id="SharedOpenHSI" class="doc_header"><code>class</code> <code>SharedOpenHSI</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L237" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedOpenHSI</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedDataCube"><code>SharedDataCube</code></a></p>
 </blockquote>
 
 <pre><code>Base Class for the OpenHSI Camera.</code></pre>
@@ -226,7 +320,7 @@ Save is done in a separate multiprocess.Process.</code></pre>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="SharedFlirCamera" class="doc_header"><code>class</code> <code>SharedFlirCamera</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L207" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedFlirCamera</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedOpenHSI"><code>SharedOpenHSI</code></a></p>
+<h2 id="SharedFlirCamera" class="doc_header"><code>class</code> <code>SharedFlirCamera</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L280" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedFlirCamera</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedOpenHSI"><code>SharedOpenHSI</code></a></p>
 </blockquote>
 
 <pre><code>Interface for FLIR camera</code></pre>

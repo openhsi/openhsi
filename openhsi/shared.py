@@ -87,10 +87,7 @@ def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix
     self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=True, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
-    if hasattr(self, "binned_wavelengths"):
-        wavelengths = self.binned_wavelengths if self.proc_lvl not in (3,7,8) else self.λs
-    else:
-        wavelengths = np.arange(self.dc.data.shape[2])
+    wavelengths = self.binned_wavelengths if hasattr(self, "binned_wavelengths") else np.arange(self.dc.data.shape[2])
 
     if hasattr(self,"cam_temperatures"):
         self.coords = dict(wavelength=(["wavelength"],wavelengths),
@@ -116,6 +113,66 @@ def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix
     if hasattr(self,"cam_temperatures"):
         self.cam_temperatures = self.cam_temps_swaps[self.current_swap]
     return p
+
+@patch
+def show(self:SharedDataCube,
+         plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
+         red_nm:float = 640.,    # Wavelength in nm to use as the red
+         green_nm:float = 550.,  # Wavelength in nm to use as the green
+         blue_nm:float = 470.,   # Wavelength in nm to use as the blue
+         robust:bool = False,    # Choose to plot using the 2-98% percentile. Robust to outliers
+         hist_eq:bool = False,   # Choose to plot using histogram equilisation
+         quick_imshow:bool = False, # Used to skip holoviews and use matplotlib for a static plot
+         **plot_kwargs,          # Any other plotting options to be used in your plotting backend
+        ) -> "bokeh or matplotlib plot":
+    """Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
+    The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
+    Further customise your plot with `**plot_kwargs`. `quick_imshow` is used for saving figures quickly
+    but cannot be used to make interactive plots. """
+
+    rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
+    if hasattr(self, "binned_wavelengths"):
+        rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]
+        rgb[...,1] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-green_nm))]
+        rgb[...,2] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-blue_nm))]
+    else:
+        rgb[...,0] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+        rgb[...,1] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+        rgb[...,2] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+
+    if robust and not hist_eq: # scale everything to the 2% and 98% percentile
+        vmax = np.nanpercentile(rgb, 98)
+        vmin = np.nanpercentile(rgb, 2)
+        rgb = ((rgb.astype("f8") - vmin) / (vmax - vmin)).astype("f4")
+        rgb = np.minimum(np.maximum(rgb, 0), 1)
+    elif hist_eq and not robust:
+        img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
+        cdf = img_hist.cumsum() # cumulative distribution function
+        cdf = 1. * cdf / cdf[-1] # normalize
+        img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
+        rgb = img_eq.reshape(rgb.shape)
+    elif robust and hist_eq:
+        warnings.warn("Cannot mix robust with histogram equalisation. No RGB adjustments will be made.",stacklevel=2)
+        rgb /= np.max(rgb)
+    else:
+        rgb /= np.max(rgb)
+
+    if quick_imshow:
+        fig, ax = plt.subplots(figsize=(12,3))
+        ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
+        return fig
+
+    import holoviews as hv
+    hv.extension(plot_lib,logo=False)
+    rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
+                     rgb[:,:,0],rgb[:,:,1],rgb[:,:,2]))
+
+    if plot_lib == "bokeh":
+        return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(**plot_kwargs).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+    else: # plot_lib == "matplotlib"
+        return rgb_hv.opts(fig_inches=22).opts(**plot_kwargs).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 
 
 def save_shared_datacube(fname:str,shared_array:Array,c_dtype:type,shape:Tuple,coords_dict:Dict,attrs_dict:Dict,proc_lvl:int):
@@ -151,10 +208,26 @@ def save_shared_datacube(fname:str,shared_array:Array,c_dtype:type,shape:Tuple,c
     nc.datacube.attrs["description"] = "hyperspectral datacube"
 
     nc.to_netcdf(fname+".nc")
-    dc = DataCube()
-    dc.load_nc(fname+".nc")
-    fig = dc.show("matplotlib",hist_eq=True,quick_imshow=True)
+
+    # quick save the histogram equalised RGB
+    rgb = np.zeros( (*shape[:2],3), dtype=np.float32)
+    rgb[...,0] = data[:,:,np.argmin(np.abs(coords_dict["wavelength"][1]-640.))]
+    rgb[...,1] = data[:,:,np.argmin(np.abs(coords_dict["wavelength"][1]-550.))]
+    rgb[...,2] = data[:,:,np.argmin(np.abs(coords_dict["wavelength"][1]-470.))]
+    img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
+    cdf = img_hist.cumsum() # cumulative distribution function
+    cdf = 1. * cdf / cdf[-1] # normalize
+    img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
+    rgb = img_eq.reshape(rgb.shape)
+    fig, ax = plt.subplots(figsize=(12,3))
+    ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
     fig.savefig(fname+".png",bbox_inches='tight', pad_inches=0)
+
+    #dc = DataCube()
+    #dc.load_nc(fname+".nc")
+    #fig = dc.show("matplotlib",hist_eq=True,quick_imshow=True)
+    #fig.savefig(fname+".png",bbox_inches='tight', pad_inches=0)
+
 
 
 

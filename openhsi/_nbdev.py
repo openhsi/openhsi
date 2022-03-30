@@ -72,6 +72,7 @@ index = {"Array": "01_capture.ipynb",
          "SharedCircArrayBuffer": "11_shared.ipynb",
          "SharedDataCube": "11_shared.ipynb",
          "SharedDataCube.save": "11_shared.ipynb",
+         "SharedDataCube.show": "11_shared.ipynb",
          "save_shared_datacube": "11_shared.ipynb",
          "SharedOpenHSI": "11_shared.ipynb",
          "SharedFlirCamera": "11_shared.ipynb"}

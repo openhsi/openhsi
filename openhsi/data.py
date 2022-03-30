@@ -441,10 +441,7 @@ def save(self:DataCube,
     self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=True, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
-    if hasattr(self, "binned_wavelengths"):
-        wavelengths = self.binned_wavelengths if self.proc_lvl not in (3,7,8) else self.λs
-    else:
-        wavelengths = np.arange(self.dc.data.shape[2])
+    wavelengths = self.binned_wavelengths if hasattr(self, "binned_wavelengths") else np.arange(self.dc.data.shape[2])
 
     if hasattr(self,"cam_temperatures"):
         self.coords = dict(wavelength=(["wavelength"],wavelengths),
