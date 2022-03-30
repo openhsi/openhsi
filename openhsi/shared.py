@@ -175,7 +175,18 @@ def show(self:SharedDataCube,
             xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 
 
-def save_shared_datacube(fname:str,shared_array:Array,c_dtype:type,shape:Tuple,coords_dict:Dict,attrs_dict:Dict,proc_lvl:int):
+
+# Cell
+
+def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
+                         shared_array:Array, # multiprocessing.Array shared array
+                         c_dtype:type,       # numpy data type
+                         shape:Tuple,        # datacube numpy shape
+                         coords_dict:Dict,   # coordinates dictionary
+                         attrs_dict:Dict,    # metadata dictionary
+                         proc_lvl:int,       # processing level used
+                        ) -> "process object":
+    """Saves a NetCDF4 file given all the function parameters. Designed to be used with SharedOpenHSI which allocates a shared array."""
 
     data = np.frombuffer(shared_array.get_obj(),dtype=c_dtype)
     data = data.reshape(shape)
@@ -222,13 +233,6 @@ def save_shared_datacube(fname:str,shared_array:Array,c_dtype:type,shape:Tuple,c
     fig, ax = plt.subplots(figsize=(12,3))
     ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
     fig.savefig(fname+".png",bbox_inches='tight', pad_inches=0)
-
-    #dc = DataCube()
-    #dc.load_nc(fname+".nc")
-    #fig = dc.show("matplotlib",hist_eq=True,quick_imshow=True)
-    #fig.savefig(fname+".png",bbox_inches='tight', pad_inches=0)
-
-
 
 
 # Cell
