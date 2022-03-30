@@ -395,9 +395,8 @@ class DataCube(CameraProperties):
     def __init__(self,
                  n_lines:int = 16,          # How many along-track pixels desired
                  processing_lvl:int = -1,   # Desired real time processing level
-                 warn_mem_use:bool = True,  # Give a warning if trying to allocate too much memory (> 80% of available RAM)
-                 preserve_raw:bool = False, # Not implemented
-                 **kwargs):
+                 warn_mem_use:bool = True,  # Raise error if trying to allocate too much memory (> 80% of available RAM)
+                 **kwargs,):
         """Preallocate array buffers"""
         self.n_lines = n_lines
         self.proc_lvl = processing_lvl
@@ -408,19 +407,16 @@ class DataCube(CameraProperties):
         self.dc_shape = (self.dc_shape[0],self.n_lines,self.dc_shape[1])
         mem_sz = 4*reduce(lambda x,y: x*y, self.dc_shape)/2**20 # MB
         mem_thresh = 0.8*psutil.virtual_memory().available/2**20 # 80% of available memory in MB
-        if warn_mem_use and mem_sz > mem_thresh and input(f"{mem_sz:.02f} MB of RAM will be allocated. Continue? [y/n]") != "y":
-            print("Memory allocation stopped."); raise RuntimeError
-        if self.dc_shape[0] > 1: print(f"Allocated {mem_sz:.02f} MB of RAM.")
+        if warn_mem_use and mem_sz > mem_thresh and input(f"{mem_sz:.02f} MB of RAM will be allocated. You have {mem_thresh/.8:.2f} MB available. Continue? [y/n]") != "y":
+            raise RuntimeError(f"""Datacube memory allocation ({mem_sz:.02f} MB) exceeded >80% available RAM ({mem_thresh/.8:.2f} MB).
+            Halted by user (did not receive `y` at prompt).
+            To proceed, you can let `warn_mem_use=False`, decrease `n_lines`, use a `processing_lvl`>=2
+            that includes binning, or continue anyway by entering `y` at the prompt.""")
+        if self.dc_shape[0] > 1: print(f"Allocated {mem_sz:.02f} MB of RAM. There was {mem_thresh/.8:.2f} MB available.")
         self.dc = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_out)
-
-        self.preserve_raw=preserve_raw
-        if self.preserve_raw:
-            self.dc_raw = CircArrayBuffer(size=self.dc_shape, axis=1, dtype=self.dtype_in)
 
     def __repr__(self):
         return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
-
-
 
 @patch
 def put(self:DataCube, x:np.ndarray):
@@ -445,10 +441,7 @@ def save(self:DataCube,
     self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=True, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
-    if hasattr(self, "binned_wavelengths"):
-        wavelengths = self.binned_wavelengths if self.proc_lvl not in (3,7,8) else self.λs
-    else:
-        wavelengths = np.arange(self.dc.data.shape[2])
+    wavelengths = self.binned_wavelengths if hasattr(self, "binned_wavelengths") else np.arange(self.dc.data.shape[2])
 
     if hasattr(self,"cam_temperatures"):
         self.coords = dict(wavelength=(["wavelength"],wavelengths),
@@ -499,9 +492,17 @@ def save(self:DataCube,
 def load_nc(self:DataCube,
             nc_path:str,            # Path to a NetCDF4 file
             old_style:bool = False, # Only for backwards compatibility for datacubes created before first release
+            warn_mem_use:bool = True, # Raise error if trying to allocate too much memory (> 80% of available RAM)
            ):
     """Lazy load a NetCDF datacube into the DataCube buffer."""
     with xr.open_dataset(nc_path) as ds:
+
+        mem_sz = 4*reduce(lambda x,y: x*y, ds.datacube.shape)/2**20 # MB
+        mem_thresh = 0.8*psutil.virtual_memory().available/2**20 # 80% of available memory in MB
+        if warn_mem_use and mem_sz > mem_thresh and input(f"{mem_sz:.02f} MB of RAM will be allocated. You have {mem_thresh/.8:.2f} MB available. Continue? [y/n]") != "y":
+            raise RuntimeError(f"""Datacube load buffer memory allocation ({mem_sz:.02f} MB) exceeded >80% available RAM ({mem_thresh/.8:.2f} MB).
+            Halted by user (did not receive `y` at prompt). To proceed, you can let `warn_mem_use=False`, or continue anyway by entering `y` at the prompt.""")
+
         if old_style: # cross-track, along-track, wavelength
             self.dc      = CircArrayBuffer(size=ds.datacube.shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
             self.dc.data = np.array(ds.datacube)
@@ -509,7 +510,7 @@ def load_nc(self:DataCube,
             shape = (*ds.datacube.shape[1:],ds.datacube.shape[0])
             self.dc      = CircArrayBuffer(size=shape, axis=1, dtype=type(np.array(ds.datacube[0,0])[0]))
             self.dc.data = np.moveaxis(np.array(ds.datacube), 0, -1)
-        print(f"Allocated {4*reduce(lambda x,y: x*y, ds.datacube.shape)/2**20:.02f} MB of RAM.")
+        print(f"Allocated {mem_sz:.02f} MB of RAM for the load buffer. There was {mem_thresh/.8:.2f} MB available.")
 
         self.ds_timestamps = ds.time.to_numpy() # type is np.datetime64. convert to datetime.datetime
         unix_epoch = np.datetime64(0, 's')
