@@ -298,7 +298,7 @@ class SharedFlirCamera(SharedOpenHSI):
         self.flircam.GainAuto = 'Off'
         self.flircam.Gain = 0
         self.flircam.AcquisitionFrameRateAuto = 'Off'
-        self.flircam.AcquisitionFrameRateEnabled = True
+        #self.flircam.AcquisitionFrameRateEnabled = True
         self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
 
         self.flircam.ExposureAuto = 'Off'
@@ -330,7 +330,7 @@ class SharedFlirCamera(SharedOpenHSI):
         self.settings["exposure_ms"] = exposure_ms
 
         self.flircam.AcquisitionFrameRateAuto = 'Off'
-        self.flircam.AcquisitionFrameRateEnabled = True
+        #self.flircam.AcquisitionFrameRateEnabled = True
         self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
         self.flircam.ExposureAuto = 'Off'
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us

@@ -75,6 +75,9 @@ entries:
     - output: web,pdf
       title: Windows Install
       url: /tutorial_installing_windows.html
+    - output: web,pdf
+      title: Custom Pipelines
+      url: /tutorial_custom_pipeline.html
     output: web
     title: Install Guides
   output: web

@@ -209,6 +209,7 @@ class SensorStream():
                     self.ser.write(b'n') # let sensor board to stop sending packets
                     self.save()
                     #os.system("umount /dev/sda1"); self.is_mounted = False # keeps causing problems...
+                    self.is_mounted = False # not actually unmounted but lets you keep collecting with button pressses
                     self.packets = []
 
                 time.sleep(0.001)
@@ -468,7 +469,7 @@ class SensorDashboard():
             contents.append( np_buff[20].view(np.uint8)    ) # number of satellites in view and used in compute
 
             # remove before export
-            contents[0] += 2*np.random.rand() - 1; contents[1] += 2*np.random.rand() - 1 # obfuscate my position
+            #contents[0] += 2*np.random.rand() - 1; contents[1] += 2*np.random.rand() - 1 # obfuscate my position
 
             contents.append( np_buff[ 8:12].view(np.float32)[0] ) # temperature [deg C]
             contents.append( np_buff[12:16].view(np.float32)[0] ) # pressure [hPa]
