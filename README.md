@@ -35,14 +35,18 @@ This whole software library, testing suite, documentation website, and PyPI/cond
 
 ## Citation
 
-If OpenHSI has been useful for your research, please acknowledge the project in your academic publication. We have a publication in progress. 
+If OpenHSI has been useful for your research, please acknowledge the project in your academic publication. The OpenHSI paper has been published in MDPI Remote Sensing and can be accessed at [https://www.mdpi.com/2072-4292/14/9/2244](https://www.mdpi.com/2072-4292/14/9/2244).
 
 ```
-@Article{        mao2022openhsi,
- title         = {OpenHSI: A complete open-source hyperspectral imaging solution for everyone},
- author        = {Yiwei Mao, and Christopher H. Betters, et al.},
- year          = {2022},
- journal       = {},
+@article{mao2022openhsi,
+  title={OpenHSI: A Complete Open-Source Hyperspectral Imaging Solution for Everyone},
+  author={Mao, Yiwei and Betters, Christopher H and Evans, Bradley and Artlett, Christopher P and Leon-Saval, Sergio G and Garske, Samuel and Cairns, Iver H and Cocks, Terry and Winter, Robert and Dell, Timothy},
+  journal={Remote Sensing},
+  volume={14},
+  number={9},
+  pages={2244},
+  year={2022},
+  publisher={MDPI}
 }
 ```
 
@@ -78,6 +82,8 @@ with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing
 
 
 
+
+The RGB representation is made using selected bands for red, green, and blue. These bands can be customised along with options for displaying the image without outliers affecting the colour scale/contrast. The example flag used here is `robust` which takes the 2-98% percentile. There is also the `hist_eq` flag which performs histogram equalisation. If none of these flags are set, then the colour scale uses the min and max value. 
 
 ```python
 fig.opts(fig_inches=7,title="simulated hyperspectral datacube")

@@ -30,6 +30,7 @@
   },
   "Install Guides": {
     "Linux Install": "/tutorial_installing_linux.html",
-    "Windows Install": "/tutorial_installing_windows.html"
+    "Windows Install": "/tutorial_installing_windows.html",
+    "Custom Pipelines": "/tutorial_custom_pipeline.html"
   }
 }

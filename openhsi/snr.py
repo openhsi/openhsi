@@ -37,7 +37,7 @@ class Widget_SNR(param.Parameterized):
     pixel_length_x_μm   = param.Number(65, bounds=(1,80),doc="pixel length x (μm)")
     pixel_length_y_μm   = param.Number(6.9, bounds=(1,60),doc="pixel length y (μm)")
     integration_time_ms = param.Number(10, bounds=(5,100), step=1,doc="integration time (ms)")
-    bandwidth_nm        = param.Number(4, bounds=(0.1,20), step=0.1,doc="FWHM bandwidth (nm)")
+    bandwidth_nm        = param.Number(1.5, bounds=(0.1,20), step=0.1,doc="FWHM bandwidth (nm)")
     QE_model            = param.ObjectSelector(default="imx252qe", doc="Camera QE model", objects =
                                 [f.split(".")[0] for f in os.listdir("assets") if ".csv" in f and "qe" in f])
     surface_albedo      = param.Number(0.3, bounds=(0,1.0),doc="constant surface albedo reflectance")

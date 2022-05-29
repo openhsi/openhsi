@@ -166,19 +166,19 @@ but cannot be used to make interactive plots.</code></pre>
 <tr>
 <td><strong><code>red_nm</code></strong></td>
 <td><code>float</code></td>
-<td><code>0</code></td>
+<td><code>640.0</code></td>
 <td>Wavelength in nm to use as the red</td>
 </tr>
 <tr>
 <td><strong><code>green_nm</code></strong></td>
 <td><code>float</code></td>
-<td><code>0</code></td>
+<td><code>550.0</code></td>
 <td>Wavelength in nm to use as the green</td>
 </tr>
 <tr>
 <td><strong><code>blue_nm</code></strong></td>
 <td><code>float</code></td>
-<td><code>0</code></td>
+<td><code>470.0</code></td>
 <td>Wavelength in nm to use as the blue</td>
 </tr>
 <tr>
@@ -204,12 +204,6 @@ but cannot be used to make interactive plots.</code></pre>
 <td></td>
 <td></td>
 <td><em>No Content</em></td>
-</tr>
-<tr>
-<td><strong>Returns</strong></td>
-<td><code>bokeh or matplotlib plot</code></td>
-<td></td>
-<td>Any other plotting options to be used in your plotting backend</td>
 </tr>
 </tbody>
 </table>
@@ -242,7 +236,7 @@ but cannot be used to make interactive plots.</code></pre>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="save_shared_datacube" class="doc_header"><code>save_shared_datacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L181" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>save_shared_datacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>shared_array</code></strong>:<a href="/openhsi/capture.html#Array"><code>Array</code></a>, <strong><code>c_dtype</code></strong>:<code>type</code>, <strong><code>shape</code></strong>:<code>Tuple</code>, <strong><code>coords_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>attrs_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>proc_lvl</code></strong>:<code>int</code>)</p>
+<h4 id="save_shared_datacube" class="doc_header"><code>save_shared_datacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L181" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>save_shared_datacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>shared_array</code></strong>:<code>BaseContext.Array</code>, <strong><code>c_dtype</code></strong>:<code>type</code>, <strong><code>shape</code></strong>:<code>typing.Tuple</code>, <strong><code>coords_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>attrs_dict</code></strong>:<code>Dict</code>[<code>~KT</code>, <code>~VT</code>], <strong><code>proc_lvl</code></strong>:<code>int</code>)</p>
 </blockquote>
 
 <pre><code>Saves a NetCDF4 file given all the function parameters. Designed to be used with SharedOpenHSI which allocates a shared array.</code></pre>
@@ -263,7 +257,7 @@ but cannot be used to make interactive plots.</code></pre>
 </tr>
 <tr>
 <td><strong><code>shared_array</code></strong></td>
-<td><code>Array</code></td>
+<td><code>BaseContext.Array</code></td>
 <td></td>
 <td>multiprocessing.Array shared array</td>
 </tr>
@@ -275,19 +269,19 @@ but cannot be used to make interactive plots.</code></pre>
 </tr>
 <tr>
 <td><strong><code>shape</code></strong></td>
-<td><code>Tuple</code></td>
+<td><code>typing.Tuple</code></td>
 <td></td>
 <td>datacube numpy shape</td>
 </tr>
 <tr>
 <td><strong><code>coords_dict</code></strong></td>
-<td><code>Dict</code></td>
+<td><code>typing.Dict</code></td>
 <td></td>
 <td>coordinates dictionary</td>
 </tr>
 <tr>
 <td><strong><code>attrs_dict</code></strong></td>
-<td><code>Dict</code></td>
+<td><code>typing.Dict</code></td>
 <td></td>
 <td>metadata dictionary</td>
 </tr>
@@ -296,12 +290,6 @@ but cannot be used to make interactive plots.</code></pre>
 <td><code>int</code></td>
 <td></td>
 <td>processing level used</td>
-</tr>
-<tr>
-<td><strong>Returns</strong></td>
-<td><code>process object</code></td>
-<td></td>
-<td></td>
 </tr>
 </tbody>
 </table>

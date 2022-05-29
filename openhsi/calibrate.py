@@ -57,13 +57,10 @@ def sum_gaussians(x:"indices np.array",
 
 class SettingsBuilderMixin():
 
-    def retake_flat_field(self, show:bool = True) -> "figure object or None":
-        """Take and store an image of with the OpenHSI slit illuminated but a uniform light source.
-
-        Keyword arguments:
-
-            show -- flag to show holowview plot of image.
-        """
+    def retake_flat_field(self,
+                          show:bool = True, # flag to show taken image
+                         ) -> "figure object or None":
+        """Take and store an image of with the OpenHSI slit illuminated but a uniform light source."""
         self.start_cam()
         self.calibration["flat_field_pic"] = self.get_img()
         self.stop_cam()
@@ -72,14 +69,22 @@ class SettingsBuilderMixin():
             return hv.Image(self.calibration["flat_field_pic"], bounds=(0,0,*self.calibration["flat_field_pic"].shape)).opts(
                     xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="flat field picture")
 
-    def retake_HgAr(self, show:bool = True, nframes:int = 10) -> "figure object or None":
-        """Take and store an image with OpenHSI illuminated but HgAr calibration source.
+    def retake_emission_lines(self,
+                              show:bool = True, # flag to show
+                              nframes:int = 10, # number of frames to average for image
+                             ) -> "figure object or None":
+        """Take and store an image with camera illuminated with a calibration source."""
+        self.calibration["HgAr_pic"] = self.avgNimgs(nframes)
 
-        Keyword arguments:
+        if show:
+            return hv.Image(self.crop(self.calibration["HgAr_pic"]), bounds=(0,0,*self.calibration["HgAr_pic"].shape)).opts(
+                    xlabel="wavelength index",ylabel="cross-track",cmap="gray",title="Emission lines picture")
 
-            show -- flag to show holowview plot of image.
-            nframes -- number of frames to average for image (default 10).
-        """
+    def retake_HgAr(self,
+                    show:bool = True, # flag to show
+                    nframes:int = 10, # number of frames to average for image
+                   ) -> "figure object or None":
+        """Take and store an image with OpenHSI camera illuminated with a HgAr calibration source."""
         self.calibration["HgAr_pic"] = self.avgNimgs(nframes)
 
         if show:
@@ -91,13 +96,11 @@ class SettingsBuilderMixin():
         """Set settings resolution to match flat field image"""
         self.settings["resolution"] = np.shape(self.calibration["flat_field_pic"])
 
-    def update_row_minmax(self, edgezone:int = 4, show=True) -> "figure object or None":
-        """Find edges of slit in flat field images and determine region to crop
-
-        Keyword arguments:
-            edgezone -- number of pixel buffer to add to crop region (default 4).
-            show -- flag to show holowview plot of slice and edges identified.
-        """
+    def update_row_minmax(self,
+                          edgezone:int = 4, # number of pixel buffer to add to crop region
+                          show:bool = True, # flag to show plot of slice and edges identified
+                         ) -> "figure object or None":
+        """Find edges of slit in flat field images and determine region to crop."""
         col_summed = np.sum(self.calibration["flat_field_pic"],axis=1)
         edges      = np.abs(np.gradient(col_summed))
         locs       = find_peaks(edges, height=5000, width=1.5, prominence=0.01)[0]
@@ -113,12 +116,10 @@ class SettingsBuilderMixin():
                     hv.Curve(zip((row_max,row_max),(0,big)),label=f"{row_max}").opts(color="r") ).opts(
                     xlim=(0,num),ylim=(0,big),legend_position='top_left')
 
-    def update_smile_shifts(self, show=True) -> "figure object or None":
-        """Determine Smile and shifts to correct from HgAr image.
-
-        Keyword arguments:
-            show -- flag to show holowview plot of slice and edges identified.
-        """
+    def update_smile_shifts(self,
+                            show=True, # flag to show plot of smile shifts for each cross track pixel.
+                           ) -> "figure object or None":
+        """Determine Smile and shifts to correct from spectral lines image."""
         cropped = self.crop(self.calibration["HgAr_pic"])
         rows, cols = cropped.shape
 
@@ -138,27 +139,21 @@ class SettingsBuilderMixin():
             return hv.Curve(zip(np.arange(rows),shifts)).opts(
                             invert_axes=True,invert_yaxis=True,xlabel="row index",ylabel="pixel shift")
 
-    def fit_HgAr_lines(self, top_k:int = 10,
-                       brightest_peaks:list = [435.833,546.074,763.511],
-                       filter_window:int = 1,
-                       interactive_peak_id:bool = False,
-                       find_peaks_height:int = 10,
-                       prominence:float = 0.2,
-                       width:float = 1.5,
-                       distance:int = 10,
-                       max_match_error:float = 2.0,
-                       verbose:bool = False) -> "figure object":
+    def fit_emission_lines(self,
+                           brightest_peaks:list, # list of wavelength for the brightest peaks in spectral lines image
+                           emission_lines:list,  # list of emission lines to match
+                           top_k:int = 10,       # how many peaks to use in fit
+                           filter_window:int = 1,       # filter window for scipy.signal.savgol_filter. Needs to be odd.
+                           interactive_peak_id:bool = False, # flag to interactively confirm wavelength of peaks
+                           find_peaks_height:int = 10,  # anything above this value is free game for a peak
+                           prominence:float = 0.2,      # prominence for scipy.signal.find_peaks
+                           width:float = 1.5,           # peak width for scipy.signal.find_peaks
+                           distance:int = 10,           # distance for scipy.signal.find_peaks
+                           max_match_error:float = 2.0, # max diff between peak estimate wavelength and wavelength from line list
+                           verbose:bool = False,        # more detailed diagnostic messages
+                          ) -> "figure object":
         """Finds the index to wavelength map given a spectra and a list of emission lines.
-        To filter the spectra, set `filter_window` to an odd number > 1.
-
-        Keyword arguments:
-        brightest_peaks -- list of wavelength for the brightest peaks in HgAr image.
-        filter_window -- filter window for scipy.signal.savgol_filter
-        interactive_peak_id -- flag to interactively confirm wavelength of peaks
-        find_peaks_height, prominence, width, distance -- inputs for scipy.signal.find_peaks
-        max_match_error -- maximum diffeence between peak estimate wavelength and wavelength of HgAr linelist.
-        verbose -- more detailed diagnostic printing.
-        """
+        To filter the spectra, set `filter_window` to an odd number > 1."""
 
         cropped      = self.crop(self.calibration["HgAr_pic"])
         rows, cols   = cropped.shape
@@ -169,10 +164,10 @@ class SettingsBuilderMixin():
 
         filtered_spec = savgol_filter(spectra, filter_window, min(3,filter_window-1))
         μ, props      = find_peaks(filtered_spec,
-                                   height = find_peaks_height,
-                                   width = width,
+                                   height     = find_peaks_height,
+                                   width      = width,
                                    prominence = prominence,
-                                   distance=distance)
+                                   distance   = distance)
 
         A = props["peak_heights"] # amplitude
         σ = 0.5 * props["widths"] # standard deviation
@@ -213,7 +208,7 @@ class SettingsBuilderMixin():
 
         plt.plot(μ[top_A_idx], brightest_peaks, "xr")
         plt.plot(np.arange(len(spectra)), first_fit(np.arange(len(spectra))))
-        plt.legend(['Identified Peaks', 'Spectra']); plt.xlabel("array index"); plt.ylabel("digital number")
+        plt.legend(['Identified Peaks', 'Spectra']); plt.xlabel("array index"); plt.ylabel("predicted wavelength (nm)")
         plt.show()
 
         # match estimated peak wavelength with real line for final fit, verify match is better than max_match_error.
@@ -238,7 +233,7 @@ class SettingsBuilderMixin():
 
         plt.plot(matching_centroid[top_A_idx], closest_HgAr_line[top_A_idx], "xr")
         plt.plot(np.arange(len(spectra)), final_fit(np.arange(len(spectra))))
-        plt.legend(['Identified Peaks', 'Spectra']); plt.xlabel("array index"); plt.ylabel("digital number")
+        plt.legend(['Identified Peaks', 'Spectra']); plt.xlabel("array index"); plt.ylabel("predicted wavelength (nm)")
         plt.show()
 
         # update the calibration files
@@ -256,10 +251,39 @@ class SettingsBuilderMixin():
                     xlabel="wavelength (nm)",ylabel="digital number",width=700,height=200,toolbar="below")
 
 
+    def fit_HgAr_lines(self,
+                       brightest_peaks:list = [435.833,546.074,763.511], # list of wavelength for the brightest peaks in spectral lines image
+                       top_k:int = 10,              # how many peaks to use in fit
+                       filter_window:int = 1,       # filter window for scipy.signal.savgol_filter. Needs to be odd.
+                       interactive_peak_id:bool = False, # flag to interactively confirm wavelength of peaks
+                       find_peaks_height:int = 10,  # anything above this value is free game for a peak
+                       prominence:float = 0.2,      # prominence for scipy.signal.find_peaks
+                       width:float = 1.5,           # peak width for scipy.signal.find_peaks
+                       distance:int = 10,           # distance for scipy.signal.find_peaks
+                       max_match_error:float = 2.0, # max diff between peak estimate wavelength and wavelength from line list
+                       verbose:bool = False,        # more detailed diagnostic messages
+                      ) -> "figure object":
+        """Finds the index to wavelength map given a spectra and a list of emission lines.
+        To filter the spectra, set `filter_window` to an odd number > 1."""
+
+        return self.fit_emission_lines(brightest_peaks = brightest_peaks,
+                                       emission_lines  = HgAr_lines,
+                                       top_k = top_k,
+                                       filter_window   = filter_window,
+                                       interactive_peak_id = interactive_peak_id,
+                                       find_peaks_height = find_peaks_height,
+                                       prominence      = prominence,
+                                       width           = width,
+                                       distance        = distance,
+                                       max_match_error = max_match_error,
+                                       verbose         = verbose)
+
+
     def update_intsphere_fit(self,
-                             spec_rad_ref_data = "assets/112704-1-1_1nm_data.csv",
-                             spec_rad_ref_luminance:int = 52_020,
-                             showplot = True) -> "figure object  or nothing":
+                             spec_rad_ref_data:str = "assets/112704-1-1_1nm_data.csv", # path to integrating sphere cal file
+                             spec_rad_ref_luminance:int = 52_020,                      # reference luminance for integrating sphere
+                             show:bool = True,                                         # flag to show plot
+                            ) -> "figure object  or nothing":
 
         cal_data=np.genfromtxt(spec_rad_ref_data, delimiter=',', skip_header=1)
         wavelen=cal_data[:,0]
@@ -269,8 +293,7 @@ class SettingsBuilderMixin():
 
         self.calibration["sfit"] = interp1d(wavelen, spec_rad, kind='cubic')
 
-        if showplot:
-            # plot
+        if show:
             wavelen_arr = np.linspace(np.min(wavelen),np.max(wavelen),num=200)
             spec_rad_ref = np.float64(self.calibration["sfit"](self.calibration["wavelengths"]))
 
@@ -284,23 +307,25 @@ class SettingsBuilderMixin():
             ax.legend()
             ax.axvspan(np.min(self.calibration["wavelengths"]), np.max(self.calibration["wavelengths"]), alpha=0.3, color="gray")
             ax.axis([np.min(self.calibration["wavelengths"])-50,2500,0,200])
-            ax.text(410, 190, "OpenHSI Wavelengths", fontsize=11)
+            #ax.text(410, 190, "OpenHSI Wavelengths", fontsize=11)
             ax.minorticks_on()
             return fig
 
 
     def update_window_across_track(self, crop_buffer) -> "figure object":
+        """not implemented"""
         pass
 
     def update_window_along_track(self, crop_buffer) -> "figure object":
+        """not implemented"""
         pass
 
     def update_intsphere_cube(self,
-                              exposures:List,
-                              luminances:List,
-                              nframes:int = 10,
-                              lum_chg_func:Callable = print,
-                              interactive:bool = False,
+                              exposures:List,   # exposure times for the camera to iterate over
+                              luminances:List,  # luminance values for the integrating sphere to iterate over
+                              nframes:int = 10, # how many frames to average over
+                              lum_chg_func:Callable = print, # called on each luminance value before collection starts
+                              interactive:bool = False, # if you want to manually press enter each luminance iteration
                               ):
         shape = (np.ptp(self.settings["row_slice"]), self.settings["resolution"][1], len(exposures), len(luminances))
 
