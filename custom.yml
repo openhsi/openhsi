@@ -1,0 +1,22 @@
+project:
+  type: website
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+website:
+  twitter-card: false
+  open-graph: true
+  repo-actions: [issue]
+  favicon: nbs/assets/favicon.ico
+  navbar:
+    logo: nbs/assets/openhsi_logo.png
+    background: primary
+    search: true
+  sidebar:
+    style: floating
+
+metadata-files: [nbdev.yml, sidebar.yml]

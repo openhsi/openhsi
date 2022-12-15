@@ -1,0 +1,23 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - quick_start.ipynb
+      - section: api
+        contents:
+          - api/atmos.ipynb
+          - api/calibrate.ipynb
+          - api/cameras.ipynb
+          - api/capture.ipynb
+          - api/data.ipynb
+          - api/geometry.ipynb
+          - api/metadata.ipynb
+          - api/sensors.ipynb
+          - api/shared.ipynb
+          - api/snr.ipynb
+      - section: tutorials
+        contents:
+          - tutorials/calibrate_steps.ipynb
+          - tutorials/custom_pipeline.ipynb
+          - tutorials/linux_install.ipynb
+          - tutorials/windows_install.ipynb

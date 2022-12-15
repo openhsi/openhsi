@@ -1,0 +1,44 @@
+project:
+  type: website
+  preview:
+    port: 3000
+    browser: false
+
+format:
+  html:
+    #theme: cosmo
+    theme:
+      light: flatly
+      dark: darkly
+    css: styles.css
+    toc: true
+
+website:
+  google-analytics: "UA-61578211-4"
+  twitter-card: true
+    creator: "@ewaymao"
+    site: "@ewaymao"
+  open-graph: true
+  repo-actions: [issue]
+  navbar:
+    background: primary
+    search: true
+  favicon: favicon.ico
+  sidebar:
+    style: floating
+    background: "dark"
+    contents:
+      - auto: "/*.ipynb"
+      - section: Tutorials
+        contents: *tutorials*
+      - section: API
+        contents: *api*
+  left:
+    - text: "Get Started"
+      href: index.ipynb
+  right:
+    - icon: github
+      href: "https://github.com/openhsi/openhsi"
+
+
+metadata-files: [nbdev.yml, sidebar.yml]

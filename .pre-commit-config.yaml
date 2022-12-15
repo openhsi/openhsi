@@ -1,0 +1,6 @@
+repos:
+- repo: https://github.com/YiweiMao/openhsi
+  rev: 2.2.10
+  hooks:
+  - id: nbdev_clean
+  - id: nbdev_export
