@@ -33,6 +33,7 @@ runs:
           pip install -Uq nbdev
         fi
         pip install versioned-hdf5
+        sudo apt-get install libhdf5-dev
         pip install -e ".[dev]"
         echo "SHOULD BE ALREADY TO GO"
         pwd
