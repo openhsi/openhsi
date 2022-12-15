@@ -8,10 +8,12 @@ format:
     toc: true
 
 website:
-  twitter-card: true
+  twitter-card: false
   open-graph: true
   repo-actions: [issue]
+  favicon: nbs/assets/favicon.ico
   navbar:
+    logo: nbs/assets/openhsi_logo.png
     background: primary
     search: true
   sidebar:

@@ -3,7 +3,7 @@ project:
 
 website:
   title: "openhsi"
-  site-url: "https://openhsi.github.io/openhsi"
+  site-url: "https://YiweiMao.github.io/openhsi"
   description: "Library to calibrate, trigger and capture data cubes for the open source hyperspectral camera."
   repo-branch: master
-  repo-url: "https://github.com/openhsi/openhsi"
+  repo-url: "https://github.com/YiweiMao/openhsi"
