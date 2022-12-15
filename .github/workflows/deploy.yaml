@@ -13,8 +13,7 @@ jobs:
     - name: Install the OpenHSI
       shell: bash -l {0}
       run: |
-         pip install --upgrade pip
-         pip install --upgrade setuptools wheel
+         pip install --upgrade pip setuptools wheel
          git clone https://github.com/YiweiMao/openhsi.git
          cd openhsi
          pip install -e .

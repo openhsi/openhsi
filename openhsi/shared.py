@@ -24,7 +24,7 @@ from .data import *
 from ctypes import c_int32, c_uint32, c_float
 from multiprocessing import Process, Queue, Array
 
-# %% ../nbs/api/shared.ipynb 8
+# %% ../nbs/api/shared.ipynb 7
 class SharedCircArrayBuffer(CircArrayBuffer):
     """Circular FIFO Buffer implementation on multiprocessing.Array. Each put/get is a (n-1)darray."""
     
@@ -48,7 +48,7 @@ class SharedCircArrayBuffer(CircArrayBuffer):
         self.show_func = show_func
 
 
-# %% ../nbs/api/shared.ipynb 9
+# %% ../nbs/api/shared.ipynb 8
 @delegates()
 class SharedDataCube(CameraProperties):
     """Facilitates the collection, viewing, and saving of hyperspectral datacubes using
@@ -85,7 +85,7 @@ class SharedDataCube(CameraProperties):
         self.timestamps.update()
         self.dc.put( self.pipeline(x) )
 
-# %% ../nbs/api/shared.ipynb 10
+# %% ../nbs/api/shared.ipynb 9
 @patch
 def save(self:SharedDataCube, 
          save_dir:str, # path to save directory
@@ -130,7 +130,7 @@ def save(self:SharedDataCube,
         self.cam_temperatures = self.cam_temps_swaps[self.current_swap]
     return p
 
-# %% ../nbs/api/shared.ipynb 11
+# %% ../nbs/api/shared.ipynb 10
 @patch
 def show(self:SharedDataCube,
          plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
@@ -191,7 +191,7 @@ def show(self:SharedDataCube,
         return rgb_hv.opts(fig_inches=22).opts(
             xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 
-# %% ../nbs/api/shared.ipynb 12
+# %% ../nbs/api/shared.ipynb 11
 def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
                          shared_array:Array, # multiprocessing.Array shared array 
                          c_dtype:type,       # numpy data type
@@ -249,7 +249,7 @@ def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
     fig.savefig(fname+".png",bbox_inches='tight', pad_inches=0)
     
 
-# %% ../nbs/api/shared.ipynb 14
+# %% ../nbs/api/shared.ipynb 13
 @delegates()
 class SharedOpenHSI(SharedDataCube):
     """Base Class for the OpenHSI Camera."""
@@ -290,7 +290,7 @@ class SharedOpenHSI(SharedDataCube):
         self.stop_cam()
         return np.mean(data,axis=2)
 
-# %% ../nbs/api/shared.ipynb 19
+# %% ../nbs/api/shared.ipynb 18
 @delegates()
 class SharedFlirCamera(SharedOpenHSI):
     """Interface for FLIR camera"""
@@ -347,10 +347,10 @@ class SharedFlirCamera(SharedOpenHSI):
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
         
 
-# %% ../nbs/api/shared.ipynb 21
+# %% ../nbs/api/shared.ipynb 20
 from PIL import Image
 
-# %% ../nbs/api/shared.ipynb 23
+# %% ../nbs/api/shared.ipynb 22
 @delegates()
 class SharedSimulatedCamera(SharedOpenHSI):
     """Simulated camera using an RGB image as an input. Hyperspectral data is produced using CIE XYZ matching functions."""

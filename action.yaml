@@ -32,7 +32,7 @@ runs:
         else
           pip install -Uq nbdev
         fi
-        pip install --upgrade setuptools wheel
+        pip install versioned-hdf5
         pip install -e ".[dev]"
         echo "SHOULD BE ALREADY TO GO"
         pwd
