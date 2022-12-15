@@ -2,8 +2,8 @@
 
 d = { 'settings': { 'branch': 'master',
                 'doc_baseurl': '/openhsi',
-                'doc_host': 'https://YiweiMao.github.io',
-                'git_url': 'https://github.com/YiweiMao/openhsi',
+                'doc_host': 'https://openhsi.github.io',
+                'git_url': 'https://github.com/openhsi/openhsi',
                 'lib_path': 'openhsi'},
   'syms': { 'openhsi.atmos': { 'openhsi.atmos.DataCubeViewer': ('api/atmos.html#datacubeviewer', 'openhsi/atmos.py'),
                                'openhsi.atmos.DataCubeViewer.__call__': ('api/atmos.html#datacubeviewer.__call__', 'openhsi/atmos.py'),
