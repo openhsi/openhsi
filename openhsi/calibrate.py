@@ -34,7 +34,7 @@ from .data import *
 from .capture import *
 from .cameras import *
 
-# %% ../nbs/api/calibrate.ipynb 8
+# %% ../nbs/api/calibrate.ipynb 7
 HgAr_lines = np.array([404.656,407.783,435.833,546.074,576.960,579.066,696.543,706.722,727.294,738.393,
                            750.387,763.511,772.376,794.818,800.616,811.531,826.452,842.465,912.297])
 
@@ -51,7 +51,7 @@ def sum_gaussians(x:np.array, # indicies
     return np.array( [A[i] * np.exp( - np.square( (x - mu[i])/sigma[i] ) ) 
                         for i in range(len(A))] ).sum(axis=0) + c
 
-# %% ../nbs/api/calibrate.ipynb 9
+# %% ../nbs/api/calibrate.ipynb 8
 class SettingsBuilderMixin():
         
     def retake_flat_field(self,
@@ -357,7 +357,7 @@ class SettingsBuilderMixin():
                                                           exposure=(["exposure"],exposures),
                                                           luminance=(["luminance"],luminances)), attrs={}).datacube
 
-# %% ../nbs/api/calibrate.ipynb 10
+# %% ../nbs/api/calibrate.ipynb 9
 class SettingsBuilderMetaclass(type):
     def __new__(cls, clsname:str, cam_class, attrs) -> "SettingsBuilder Class":
         """Create a SettingsBuilder class based on your chosen `CameraClass`."""
@@ -372,7 +372,7 @@ def create_settings_builder(clsname:str,
     
     
 
-# %% ../nbs/api/calibrate.ipynb 41
+# %% ../nbs/api/calibrate.ipynb 40
 import collections
 import math
 import socket
@@ -387,7 +387,7 @@ else:
     def playAlert():
         winsound.MessageBeep(type=winsound.MB_ICONHAND)
 
-# %% ../nbs/api/calibrate.ipynb 42
+# %% ../nbs/api/calibrate.ipynb 41
 class SpectraPTController():
     def __init__(self, 
                  lum_preset_dict:Dict[int,int]={0:1, 1_000:2, 
