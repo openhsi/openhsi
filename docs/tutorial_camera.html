@@ -70,102 +70,104 @@ nb_path: "nbs/09_tutorial_camera.ipynb"
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Processing-levels">Processing levels<a class="anchor-link" href="#Processing-levels"> </a></h2><p>The library comes with some predefined recipes you can use to output a datacube with the desired level of processing. Depending on your use case, you may want to use save raw data, or choose a faster binning scheme. The available options are listed below.</p>
 <table>
-<thead><tr>
-<th style="text-align:right"><code>processing_lvl</code></th>
-<th>Description</th>
+<thead>
+<tr>
+  <th style="text-align:right"><code>processing_lvl</code></th>
+  <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:right">-1</td>
-<td>do not apply any transforms (<strong>default</strong>)</td>
+  <td style="text-align:right">-1</td>
+  <td>do not apply any transforms (<strong>default</strong>)</td>
 </tr>
 <tr>
-<td style="text-align:right">0</td>
-<td>raw digital numbers cropped to useable sensor area</td>
+  <td style="text-align:right">0</td>
+  <td>raw digital numbers cropped to useable sensor area</td>
 </tr>
 <tr>
-<td style="text-align:right">1</td>
-<td>crop + fast smile</td>
+  <td style="text-align:right">1</td>
+  <td>crop + fast smile</td>
 </tr>
 <tr>
-<td style="text-align:right">2</td>
-<td>crop + fast smile + fast binning</td>
+  <td style="text-align:right">2</td>
+  <td>crop + fast smile + fast binning</td>
 </tr>
 <tr>
-<td style="text-align:right">3</td>
-<td>crop + fast smile + slow binning</td>
+  <td style="text-align:right">3</td>
+  <td>crop + fast smile + slow binning</td>
 </tr>
 <tr>
-<td style="text-align:right">4</td>
-<td>crop + fast smile + fast binning + conversion to radiance in units of uW/cm^2/sr/nm</td>
+  <td style="text-align:right">4</td>
+  <td>crop + fast smile + fast binning + conversion to radiance in units of uW/cm^2/sr/nm</td>
 </tr>
 <tr>
-<td style="text-align:right">5</td>
-<td>crop + fast smile + radiance + fast binning</td>
+  <td style="text-align:right">5</td>
+  <td>crop + fast smile + radiance + fast binning</td>
 </tr>
 <tr>
-<td style="text-align:right">6</td>
-<td>crop + fast smile + fast binning + radiance + reflectance</td>
+  <td style="text-align:right">6</td>
+  <td>crop + fast smile + fast binning + radiance + reflectance</td>
 </tr>
 <tr>
-<td style="text-align:right">7</td>
-<td>crop + fast smile + radiance + slow binning</td>
+  <td style="text-align:right">7</td>
+  <td>crop + fast smile + radiance + slow binning</td>
 </tr>
 <tr>
-<td style="text-align:right">8</td>
-<td>crop + fast smile + radiance + slow binning + reflectance</td>
+  <td style="text-align:right">8</td>
+  <td>crop + fast smile + radiance + slow binning + reflectance</td>
 </tr>
 </tbody>
 </table>
 <p>Main difference between these is the order the transforms are used in the pipeline. This summaries the binning procedure and output:</p>
 <table>
-<thead><tr>
-<th style="text-align:right"><code>processing_lvl</code></th>
-<th>Binning</th>
-<th>Output</th>
+<thead>
+<tr>
+  <th style="text-align:right"><code>processing_lvl</code></th>
+  <th>Binning</th>
+  <th>Output</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:right">-1,0,1</td>
-<td>None</td>
-<td>Digital Numbers</td>
+  <td style="text-align:right">-1,0,1</td>
+  <td>None</td>
+  <td>Digital Numbers</td>
 </tr>
 <tr>
-<td style="text-align:right">2</td>
-<td>Fast</td>
-<td>Digital Numbers</td>
+  <td style="text-align:right">2</td>
+  <td>Fast</td>
+  <td>Digital Numbers</td>
 </tr>
 <tr>
-<td style="text-align:right">3</td>
-<td>Slow</td>
-<td>Digital Numbers</td>
+  <td style="text-align:right">3</td>
+  <td>Slow</td>
+  <td>Digital Numbers</td>
 </tr>
 <tr>
-<td style="text-align:right">4,5</td>
-<td>Fast</td>
-<td>Radiance (uW/cm^2/sr/nm)</td>
+  <td style="text-align:right">4,5</td>
+  <td>Fast</td>
+  <td>Radiance (uW/cm^2/sr/nm)</td>
 </tr>
 <tr>
-<td style="text-align:right">6</td>
-<td>Fast</td>
-<td>Reflectance</td>
+  <td style="text-align:right">6</td>
+  <td>Fast</td>
+  <td>Reflectance</td>
 </tr>
 <tr>
-<td style="text-align:right">7</td>
-<td>Slow</td>
-<td>Radiance (uW/cm^2/sr/nm)</td>
+  <td style="text-align:right">7</td>
+  <td>Slow</td>
+  <td>Radiance (uW/cm^2/sr/nm)</td>
 </tr>
 <tr>
-<td style="text-align:right">8</td>
-<td>Slow</td>
-<td>Reflectance</td>
+  <td style="text-align:right">8</td>
+  <td>Slow</td>
+  <td>Reflectance</td>
 </tr>
 </tbody>
 </table>
 <p>Alternatively, you can supply a custom pipeline of transforms to 
-<a href="/openhsi/cameras.html#LucidCamera.set_processing_lvl(custom_tfms = List[Callable[[np.ndarray],np.ndarray]]"><code>LucidCamera.set_processing_lvl(custom_tfms = List[Callable[[np.ndarray],np.ndarray]] )</code></a>).</p>
+[<code>LucidCamera.set_processing_lvl(custom_tfms = List[Callable[[np.ndarray],np.ndarray]] )</code>](/openhsi/cameras.html#LucidCamera.set_processing_lvl(custom_tfms = List[Callable[[np.ndarray],np.ndarray]] )).</p>
 <h3 id="A-note-on-binning-schemes">A note on binning schemes<a class="anchor-link" href="#A-note-on-binning-schemes"> </a></h3><p>We provide a fast binning scheme that only involves one memory allocation to speed things up and it assumes that the wavelength profile along the spectral axis is linear. In practice, it is not exacly linear so we also provide a slow binning scheme that does it properly at the cost of requiring more memory allocations. We found that the extra time needed was around 2 ms on a Jetson Xavier board.</p>
 <h3 id="Post-processing-Datacubes">Post-processing Datacubes<a class="anchor-link" href="#Post-processing-Datacubes"> </a></h3><p>If you are collecting raw data and want to post-process them into radiance or reflectance, you can use <a href="/openhsi/capture.html#ProcessDatacube"><code>ProcessDatacube</code></a> from the <a href="https://openhsi.github.io/openhsi/capture.html#ProcessDatacube">capture</a> module. 
 For example, we have a datacube of digital numbers and we want to convert them to radiance. We need to pass a <code>processing_lvl</code> that includes the radiance conversion (so the the <code>dn2rad</code> method is initialised). Then we can pass in a list of transforms to <code>load_next_tfms</code> which will be applied to the whole datacube.</p>
@@ -190,9 +192,9 @@ For example, we have a datacube of digital numbers and we want to convert them t
 <p>You may find that the contrast is low because of some outlier pixels from, for instance, specular reflection. To increase the contrast, we provide two options:</p>
 <ul>
 <li><code>robust</code>: rescale colours to the 2--98% percentile</li>
-<li><code>hist_eq</code>: apply histogram equalisation
-{% include note.html content='Default behaviour is no contrast adjustments.' %}</li>
+<li><code>hist_eq</code>: apply histogram equalisation</li>
 </ul>
+<p>{% include note.html content='Default behaviour is no contrast adjustments.' %}</p>
 <p>If you just want to view a datacube without any cameras attached. You can do so using:</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.data</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="n">dc</span> <span class="o">=</span> <span class="n">DataCube</span><span class="p">()</span>
@@ -213,14 +215,14 @@ For example, we have a datacube of digital numbers and we want to convert them t
 <h2 id="Saving-datacubes">Saving datacubes<a class="anchor-link" href="#Saving-datacubes"> </a></h2><p>To save the datacube to NetCDF format (alongside an RGB picture), use <a href="/openhsi/cameras.html#LucidCamera.save"><code>LucidCamera.save</code></a>. For example:</p>
 <div class="highlight"><pre><span></span><span class="n">cam</span><span class="o">.</span><span class="n">save</span><span class="p">(</span> <span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;beach_data&quot;</span> <span class="p">)</span>
 </pre></div>
-<p>will save a NetCDF file as f"beach_data/{current_date}/{current_datetime}.nc" <em>and also an RGB image</em> alongside. The save function also allows you to customise the file prefix and suffix. Preconfigured metadata can also be indicated to be saved into the NetCDF file. The camera temperature (in Celcius) and datatime for each camera frame is automatically included.</p>
+<p>will save a NetCDF file as f&quot;beach_data/{current_date}/{current_datetime}.nc&quot; <em>and also an RGB image</em> alongside. The save function also allows you to customise the file prefix and suffix. Preconfigured metadata can also be indicated to be saved into the NetCDF file. The camera temperature (in Celcius) and datatime for each camera frame is automatically included.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Getting-surface-reflectance">Getting surface reflectance<a class="anchor-link" href="#Getting-surface-reflectance"> </a></h2><p>Generally, processing to radiance is recommended. To process to reflectance in real-time, one requires knowledge of the atmospheric conditions at the time of collect. While this is facilitated by setting the <code>processing_lvl</code> to 6, internally, the algorithm relies on the pre-computed at sensor radiance saved in the calibration .pkl file (in the Python dictionary, "rad_fit" is the key). The other option is to use Empirical Line Calibration (see "Atmospheric Correction" in the sidebar).</p>
+<h2 id="Getting-surface-reflectance">Getting surface reflectance<a class="anchor-link" href="#Getting-surface-reflectance"> </a></h2><p>Generally, processing to radiance is recommended. To process to reflectance in real-time, one requires knowledge of the atmospheric conditions at the time of collect. While this is facilitated by setting the <code>processing_lvl</code> to 6, internally, the algorithm relies on the pre-computed at sensor radiance saved in the calibration .pkl file (in the Python dictionary, &quot;rad_fit&quot; is the key). The other option is to use Empirical Line Calibration (see &quot;Atmospheric Correction&quot; in the sidebar).</p>
 
 </div>
 </div>
@@ -277,12 +279,12 @@ For example, we have a datacube of digital numbers and we want to convert them t
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Usage-Tips">Usage Tips<a class="anchor-link" href="#Usage-Tips"> </a></h2><p>Here are some tips from those who have used this library and camera in the field.</p>
 <ul>
-<li>Running the camera collect software from Jupyter Notebooks will impose some delays and slow down the frame rate. For best performance, run the camera collect from a script. </li>
+<li>Running the camera collect software from Jupyter Notebooks will impose some delays and slow down the frame rate. For best performance, run the camera collect from a script.</li>
 </ul>
 
 </div>
 </div>
 </div>
 </div>
- 
+
 

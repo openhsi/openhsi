@@ -34,10 +34,9 @@ nb_path: "nbs/06_metadata.ipynb"
 
 
 
-<div id="f1265502-0009-4d7e-abc1-725368318458" class="output_subarea output_javascript ">
+<div id="77013f0b-1405-422b-894e-838e2c10bab9" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#f1265502-0009-4d7e-abc1-725368318458');
-
+var element = $('#77013f0b-1405-422b-894e-838e2c10bab9');
 (function(root) {
   function now() {
     return new Date();
@@ -109,13 +108,28 @@ var element = $('#f1265502-0009-4d7e-abc1-725368318458');
 
     var skip = [];
     if (window.requirejs) {
-      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
-      
-      root._bokeh_is_loading = css_urls.length + 0;
+      window.requirejs.config({'packages': {}, 'paths': {'gridstack': 'https://cdn.jsdelivr.net/npm/gridstack@4.2.5/dist/gridstack-h5', 'notyf': 'https://cdn.jsdelivr.net/npm/notyf@3/notyf.min'}, 'shim': {'gridstack': {'exports': 'GridStack'}}});
+      require(["gridstack"], function(GridStack) {
+	window.GridStack = GridStack
+	on_load()
+      })
+      require(["notyf"], function() {
+	on_load()
+      })
+      root._bokeh_is_loading = css_urls.length + 2;
     } else {
       root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
-    }
-    for (var i = 0; i < js_urls.length; i++) {
+    }    if (((window['GridStack'] !== undefined) && (!(window['GridStack'] instanceof HTMLElement))) || window.requirejs) {
+      var urls = ['https://cdn.holoviz.org/panel/0.14.3/dist/bundled/gridstack/gridstack@4.2.5/dist/gridstack-h5.js'];
+      for (var i = 0; i < urls.length; i++) {
+        skip.push(urls[i])
+      }
+    }    if (((window['Notyf'] !== undefined) && (!(window['Notyf'] instanceof HTMLElement))) || window.requirejs) {
+      var urls = ['https://cdn.holoviz.org/panel/0.14.3/dist/bundled/notificationarea/notyf@3/notyf.min.js'];
+      for (var i = 0; i < urls.length; i++) {
+        skip.push(urls[i])
+      }
+    }    for (var i = 0; i < js_urls.length; i++) {
       var url = js_urls[i];
       if (skip.indexOf(url) >= 0) {
 	if (!window.requirejs) {
@@ -159,17 +173,15 @@ var element = $('#f1265502-0009-4d7e-abc1-725368318458');
     document.body.appendChild(element);
   }
 
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js", "https://unpkg.com/@holoviz/panel@0.12.6/dist/panel.min.js"];
+  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.3.min.js", "https://unpkg.com/@holoviz/panel@0.14.3/dist/panel.min.js"];
   var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.6/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/dataframe.css"];
-  var inline_js = [
-    function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\");\n      max-height: 400px;\n    }\n    ");
-    },
-    function(Bokeh) {
+  var css_urls = ["https://cdn.holoviz.org/panel/0.14.3/dist/css/markdown.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/widgets.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/loading.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/json.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/alerts.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/debugger.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/dataframe.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/card.css"];
+  var inline_js = [    function(Bokeh) {
+      inject_raw_css("\n    .bk.pn-loading.arc:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJtYXJnaW46IGF1dG87IGJhY2tncm91bmQ6IG5vbmU7IGRpc3BsYXk6IGJsb2NrOyBzaGFwZS1yZW5kZXJpbmc6IGF1dG87IiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQiPiAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzNjM2MzIiBzdHJva2Utd2lkdGg9IjEwIiByPSIzNSIgc3Ryb2tlLWRhc2hhcnJheT0iMTY0LjkzMzYxNDMxMzQ2NDE1IDU2Ljk3Nzg3MTQzNzgyMTM4Ij4gICAgPGFuaW1hdGVUcmFuc2Zvcm0gYXR0cmlidXRlTmFtZT0idHJhbnNmb3JtIiB0eXBlPSJyb3RhdGUiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIiBkdXI9IjFzIiB2YWx1ZXM9IjAgNTAgNTA7MzYwIDUwIDUwIiBrZXlUaW1lcz0iMDsxIj48L2FuaW1hdGVUcmFuc2Zvcm0+ICA8L2NpcmNsZT48L3N2Zz4=\");\n      background-size: auto calc(min(50%, 400px));\n    }\n    ");
+    },    function(Bokeh) {
       Bokeh.set_log_level("info");
     },
-    function(Bokeh) {} // ensure no trailing comma for IE
+function(Bokeh) {} // ensure no trailing comma for IE
   ];
 
   function run_inline_js() {
@@ -204,9 +216,9 @@ var element = $('#f1265502-0009-4d7e-abc1-725368318458');
 
 
 
-<div id="eae9dada-2331-4bb0-9ee6-e599da3440f3" class="output_subarea output_javascript ">
+<div id="24acaa29-2f2b-4d53-8d5d-a2109e52def2" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#eae9dada-2331-4bb0-9ee6-e599da3440f3');
+var element = $('#24acaa29-2f2b-4d53-8d5d-a2109e52def2');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -449,6 +461,18 @@ if (window.Jupyter !== undefined) {
 
 </script>
 </div>
+
+</div>
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea "><style>.bk-root, .bk-root .bk:before, .bk-root .bk:after {
+  font-family: var(--jp-ui-font-size1);
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+}
+</style></div>
 
 </div>
 
@@ -461,7 +485,7 @@ if (window.Jupyter !== undefined) {
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>{% include tip.html content='This module can be imported using <code>from openhsi.metadata import *</code>' %}</p>
-<p>"As metadata are shared between National and International repositories, it is becoming increasing important to be able to unambiguously identify and refer to specific records. This is facilitated by including an identifier in the metadata. Some mechanism must exist for ensuring that these identifiers are unique. This is accomplished by specifying the naming authority or namespace for the identifier. It is the responsibility of the manager of the namespace to ensure that the identifiers in that namespace are unique. Identifying the Metadata Convention being used in the file and providing a link to more complete metadata, possibly using a different convention, are also important."</p>
+<p>&quot;As metadata are shared between National and International repositories, it is becoming increasing important to be able to unambiguously identify and refer to specific records. This is facilitated by including an identifier in the metadata. Some mechanism must exist for ensuring that these identifiers are unique. This is accomplished by specifying the naming authority or namespace for the identifier. It is the responsibility of the manager of the namespace to ensure that the identifiers in that namespace are unique. Identifying the Metadata Convention being used in the file and providing a link to more complete metadata, possibly using a different convention, are also important.&quot;</p>
 <p><a href="https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3">https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3</a></p>
 
 </div>
@@ -486,10 +510,9 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="b7c84f15-52c6-44c9-97b6-a9b4226c0b6b" class="output_subarea output_javascript ">
+<div id="713d835b-abd9-4328-9066-08cd56746eaa" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#b7c84f15-52c6-44c9-97b6-a9b4226c0b6b');
-
+var element = $('#713d835b-abd9-4328-9066-08cd56746eaa');
 (function(root) {
   function now() {
     return new Date();
@@ -561,13 +584,28 @@ var element = $('#b7c84f15-52c6-44c9-97b6-a9b4226c0b6b');
 
     var skip = [];
     if (window.requirejs) {
-      window.requirejs.config({'packages': {}, 'paths': {}, 'shim': {}});
-      
-      root._bokeh_is_loading = css_urls.length + 0;
+      window.requirejs.config({'packages': {}, 'paths': {'gridstack': 'https://cdn.jsdelivr.net/npm/gridstack@4.2.5/dist/gridstack-h5', 'notyf': 'https://cdn.jsdelivr.net/npm/notyf@3/notyf.min'}, 'shim': {'gridstack': {'exports': 'GridStack'}}});
+      require(["gridstack"], function(GridStack) {
+	window.GridStack = GridStack
+	on_load()
+      })
+      require(["notyf"], function() {
+	on_load()
+      })
+      root._bokeh_is_loading = css_urls.length + 2;
     } else {
       root._bokeh_is_loading = css_urls.length + js_urls.length + js_modules.length;
-    }
-    for (var i = 0; i < js_urls.length; i++) {
+    }    if (((window['GridStack'] !== undefined) && (!(window['GridStack'] instanceof HTMLElement))) || window.requirejs) {
+      var urls = ['https://cdn.holoviz.org/panel/0.14.3/dist/bundled/gridstack/gridstack@4.2.5/dist/gridstack-h5.js'];
+      for (var i = 0; i < urls.length; i++) {
+        skip.push(urls[i])
+      }
+    }    if (((window['Notyf'] !== undefined) && (!(window['Notyf'] instanceof HTMLElement))) || window.requirejs) {
+      var urls = ['https://cdn.holoviz.org/panel/0.14.3/dist/bundled/notificationarea/notyf@3/notyf.min.js'];
+      for (var i = 0; i < urls.length; i++) {
+        skip.push(urls[i])
+      }
+    }    for (var i = 0; i < js_urls.length; i++) {
       var url = js_urls[i];
       if (skip.indexOf(url) >= 0) {
 	if (!window.requirejs) {
@@ -611,17 +649,15 @@ var element = $('#b7c84f15-52c6-44c9-97b6-a9b4226c0b6b');
     document.body.appendChild(element);
   }
 
-  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.2.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.2.min.js", "https://unpkg.com/@holoviz/panel@0.12.6/dist/panel.min.js"];
+  var js_urls = ["https://cdn.bokeh.org/bokeh/release/bokeh-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-gl-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.3.min.js", "https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-2.4.3.min.js", "https://unpkg.com/@holoviz/panel@0.14.3/dist/panel.min.js"];
   var js_modules = [];
-  var css_urls = ["https://unpkg.com/@holoviz/panel@0.12.6/dist/css/alerts.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/card.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/widgets.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/markdown.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/json.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/loading.css", "https://unpkg.com/@holoviz/panel@0.12.6/dist/css/dataframe.css"];
-  var inline_js = [
-    function(Bokeh) {
-      inject_raw_css("\n    .bk.pn-loading.arcs:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiBzdHlsZT0ibWFyZ2luOiBhdXRvOyBiYWNrZ3JvdW5kOiBub25lOyBkaXNwbGF5OiBibG9jazsgc2hhcGUtcmVuZGVyaW5nOiBhdXRvOyIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaWRZTWlkIj4gIDxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjMyIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZT0iI2MzYzNjMyIgc3Ryb2tlLWRhc2hhcnJheT0iNTAuMjY1NDgyNDU3NDM2NjkgNTAuMjY1NDgyNDU3NDM2NjkiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+ICAgIDxhbmltYXRlVHJhbnNmb3JtIGF0dHJpYnV0ZU5hbWU9InRyYW5zZm9ybSIgdHlwZT0icm90YXRlIiByZXBlYXRDb3VudD0iaW5kZWZpbml0ZSIgZHVyPSIxcyIga2V5VGltZXM9IjA7MSIgdmFsdWVzPSIwIDUwIDUwOzM2MCA1MCA1MCI+PC9hbmltYXRlVHJhbnNmb3JtPiAgPC9jaXJjbGU+PC9zdmc+\");\n      max-height: 400px;\n    }\n    ");
-    },
-    function(Bokeh) {
+  var css_urls = ["https://cdn.holoviz.org/panel/0.14.3/dist/css/markdown.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/widgets.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/loading.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/json.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/alerts.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/debugger.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/dataframe.css", "https://cdn.holoviz.org/panel/0.14.3/dist/css/card.css"];
+  var inline_js = [    function(Bokeh) {
+      inject_raw_css("\n    .bk.pn-loading.arc:before {\n      background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJtYXJnaW46IGF1dG87IGJhY2tncm91bmQ6IG5vbmU7IGRpc3BsYXk6IGJsb2NrOyBzaGFwZS1yZW5kZXJpbmc6IGF1dG87IiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ieE1pZFlNaWQiPiAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYzNjM2MzIiBzdHJva2Utd2lkdGg9IjEwIiByPSIzNSIgc3Ryb2tlLWRhc2hhcnJheT0iMTY0LjkzMzYxNDMxMzQ2NDE1IDU2Ljk3Nzg3MTQzNzgyMTM4Ij4gICAgPGFuaW1hdGVUcmFuc2Zvcm0gYXR0cmlidXRlTmFtZT0idHJhbnNmb3JtIiB0eXBlPSJyb3RhdGUiIHJlcGVhdENvdW50PSJpbmRlZmluaXRlIiBkdXI9IjFzIiB2YWx1ZXM9IjAgNTAgNTA7MzYwIDUwIDUwIiBrZXlUaW1lcz0iMDsxIj48L2FuaW1hdGVUcmFuc2Zvcm0+ICA8L2NpcmNsZT48L3N2Zz4=\");\n      background-size: auto calc(min(50%, 400px));\n    }\n    ");
+    },    function(Bokeh) {
       Bokeh.set_log_level("info");
     },
-    function(Bokeh) {} // ensure no trailing comma for IE
+function(Bokeh) {} // ensure no trailing comma for IE
   ];
 
   function run_inline_js() {
@@ -656,9 +692,9 @@ var element = $('#b7c84f15-52c6-44c9-97b6-a9b4226c0b6b');
 
 
 
-<div id="1cb379de-c177-4d2b-afe4-0bbe015f2ab9" class="output_subarea output_javascript ">
+<div id="001cb8e3-fd95-4162-acb4-eec31bde23b5" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#1cb379de-c177-4d2b-afe4-0bbe015f2ab9');
+var element = $('#001cb8e3-fd95-4162-acb4-eec31bde23b5');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -904,6 +940,18 @@ if (window.Jupyter !== undefined) {
 
 </div>
 
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea "><style>.bk-root, .bk-root .bk:before, .bk-root .bk:after {
+  font-family: var(--jp-ui-font-size1);
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+}
+</style></div>
+
+</div>
+
 </div>
 </div>
 
@@ -912,7 +960,7 @@ if (window.Jupyter !== undefined) {
 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>"As metadata are shared between National and International repositories, it is becoming increasing important to be able to unambiguously identify and refer to specific records. This is facilitated by including an identifier in the metadata. Some mechanism must exist for ensuring that these identifiers are unique. This is accomplished by specifying the naming authority or namespace for the identifier. It is the responsibility of the manager of the namespace to ensure that the identifiers in that namespace are unique. Identifying the Metadata Convention being used in the file and providing a link to more complete metadata, possibly using a different convention, are also important."</p>
+<p>&quot;As metadata are shared between National and International repositories, it is becoming increasing important to be able to unambiguously identify and refer to specific records. This is facilitated by including an identifier in the metadata. Some mechanism must exist for ensuring that these identifiers are unique. This is accomplished by specifying the naming authority or namespace for the identifier. It is the responsibility of the manager of the namespace to ensure that the identifiers in that namespace are unique. Identifying the Metadata Convention being used in the file and providing a link to more complete metadata, possibly using a different convention, are also important.&quot;</p>
 <p><a href="https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3">https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3</a></p>
 
 </div>
@@ -935,11 +983,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="build_section_widgets" class="doc_header"><code>build_section_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L102" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>build_section_widgets</code>(<strong><code>section_name</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>fields</code></strong>:<code>List</code>[<code>dict</code>]=<em><code>[{}]</code></em>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
-</blockquote>
 
-<pre><code>Construct text input widgets and place them into `cols` columns</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="build_section_widgets" class="doc_header"><code>build_section_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L102" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>build_section_widgets</code>(<strong><code>section_name</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>fields</code></strong>:<code>List</code>[<code>dict</code>]=<em><code>[{}]</code></em>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
+</blockquote>
+<pre><code>Construct text input widgets and place them into `cols` columns
+</code></pre>
 
 </div>
 
@@ -976,11 +1027,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="build_variables_widgets" class="doc_header"><code>build_variables_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L124" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>build_variables_widgets</code>(<strong><code>ds</code></strong>:<code>Dataset</code>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
-</blockquote>
 
-<pre><code>search inside NetCDF coordinates for metadata. Layout widgets with specified `cols`.</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="build_variables_widgets" class="doc_header"><code>build_variables_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L124" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>build_variables_widgets</code>(<strong><code>ds</code></strong>:<code>Dataset</code>, <strong><code>cols</code></strong>:<code>int</code>=<em><code>3</code></em>)</p>
+</blockquote>
+<pre><code>search inside NetCDF coordinates for metadata. Layout widgets with specified `cols`.
+</code></pre>
 
 </div>
 
@@ -1009,11 +1063,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h2 id="MetadataEditor" class="doc_header"><code>class</code> <code>MetadataEditor</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L149" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>MetadataEditor</code>()</p>
-</blockquote>
 
-<pre><code>Interactive ISO 19115-2 Metadata Editor</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="MetadataEditor" class="doc_header"><code>class</code> <code>MetadataEditor</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L149" class="source_link" style="float:right">[source]</a></h2>
+<blockquote>
+<p><code>MetadataEditor</code>()</p>
+</blockquote>
+<pre><code>Interactive ISO 19115-2 Metadata Editor
+</code></pre>
 
 </div>
 
@@ -1042,11 +1099,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="MetadataEditor.__call__" class="doc_header"><code>MetadataEditor.__call__</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L167" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.__call__</code>()</p>
-</blockquote>
 
-<pre><code>provide the dashboard</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.__call__" class="doc_header"><code>MetadataEditor.__call__</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L167" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>MetadataEditor.<strong>call</strong></code>()</p>
+</blockquote>
+<pre><code>provide the dashboard
+</code></pre>
 
 </div>
 
@@ -1055,11 +1115,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="MetadataEditor.update_export" class="doc_header"><code>MetadataEditor.update_export</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L173" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.update_export</code>()</p>
-</blockquote>
 
-<pre><code>setup the json export button callback</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.update_export" class="doc_header"><code>MetadataEditor.update_export</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L173" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>MetadataEditor.update_export</code>()</p>
+</blockquote>
+<pre><code>setup the json export button callback
+</code></pre>
 
 </div>
 
@@ -1068,11 +1131,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="MetadataEditor.update_extract" class="doc_header"><code>MetadataEditor.update_extract</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L195" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.update_extract</code>()</p>
-</blockquote>
 
-<pre><code>setup the load file button callback</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.update_extract" class="doc_header"><code>MetadataEditor.update_extract</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L195" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>MetadataEditor.update_extract</code>()</p>
+</blockquote>
+<pre><code>setup the load file button callback
+</code></pre>
 
 </div>
 
@@ -1081,11 +1147,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="MetadataEditor.update_save" class="doc_header"><code>MetadataEditor.update_save</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L222" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.update_save</code>()</p>
-</blockquote>
 
-<pre><code>setup the in-place file update button callback</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.update_save" class="doc_header"><code>MetadataEditor.update_save</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L222" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>MetadataEditor.update_save</code>()</p>
+</blockquote>
+<pre><code>setup the in-place file update button callback
+</code></pre>
 
 </div>
 
@@ -1094,11 +1163,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="MetadataEditor.make_widgets" class="doc_header"><code>MetadataEditor.make_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L263" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>MetadataEditor.make_widgets</code>()</p>
-</blockquote>
 
-<pre><code>init widgets!</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="MetadataEditor.make_widgets" class="doc_header"><code>MetadataEditor.make_widgets</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/metadata.py#L263" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>MetadataEditor.make_widgets</code>()</p>
+</blockquote>
+<pre><code>init widgets!
+</code></pre>
 
 </div>
 
@@ -1187,5 +1259,5 @@ if (window.Jupyter !== undefined) {
     {% endraw %}
 
 </div>
- 
+
 

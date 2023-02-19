@@ -61,11 +61,14 @@ nb_path: "nbs/01_capture.ipynb"
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h2 id="OpenHSI" class="doc_header"><code>class</code> <code>OpenHSI</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L45" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>OpenHSI</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>warn_mem_use</code></strong>:<code>bool</code>=<em><code>True</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/data.html#DataCube"><code>DataCube</code></a></p>
-</blockquote>
 
-<pre><code>Base Class for the OpenHSI Camera.</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="OpenHSI" class="doc_header"><code>class</code> <code>OpenHSI</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L44" class="source_link" style="float:right">[source]</a></h2>
+<blockquote>
+<p><code>OpenHSI</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>warn_mem_use</code></strong>:<code>bool</code>=<em><code>True</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/data.html#DataCube"><code>DataCube</code></a></p>
+</blockquote>
+<pre><code>Base Class for the OpenHSI Camera.
+</code></pre>
 
 </div>
 
@@ -94,11 +97,14 @@ nb_path: "nbs/01_capture.ipynb"
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="OpenHSI.collect" class="doc_header"><code>OpenHSI.collect</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L62" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>OpenHSI.collect</code>()</p>
-</blockquote>
 
-<pre><code>Collect the hyperspectral datacube.</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="OpenHSI.collect" class="doc_header"><code>OpenHSI.collect</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L62" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>OpenHSI.collect</code>()</p>
+</blockquote>
+<pre><code>Collect the hyperspectral datacube.
+</code></pre>
 
 </div>
 
@@ -107,11 +113,14 @@ nb_path: "nbs/01_capture.ipynb"
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="OpenHSI.avgNimgs" class="doc_header"><code>OpenHSI.avgNimgs</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L72" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>OpenHSI.avgNimgs</code>(<strong><code>n</code></strong>)</p>
-</blockquote>
 
-<pre><code>Take `n` images and find the average</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="OpenHSI.avgNimgs" class="doc_header"><code>OpenHSI.avgNimgs</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L72" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>OpenHSI.avgNimgs</code>(<strong><code>n</code></strong>)</p>
+</blockquote>
+<pre><code>Take `n` images and find the average
+</code></pre>
 
 </div>
 
@@ -157,67 +166,77 @@ nb_path: "nbs/01_capture.ipynb"
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h2 id="SimulatedCamera" class="doc_header"><code>class</code> <code>SimulatedCamera</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L86" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SimulatedCamera</code>(<strong><code>img_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>mode</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>warn_mem_use</code></strong>:<code>bool</code>=<em><code>True</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/capture.html#OpenHSI"><code>OpenHSI</code></a></p>
-</blockquote>
 
-<pre><code>Simulated camera using an RGB image as an input. Hyperspectral data is produced using CIE XYZ matching functions.</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="SimulatedCamera" class="doc_header"><code>class</code> <code>SimulatedCamera</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L85" class="source_link" style="float:right">[source]</a></h2>
+<blockquote>
+<p><code>SimulatedCamera</code>(<strong><code>img_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>mode</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>warn_mem_use</code></strong>:<code>bool</code>=<em><code>True</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/capture.html#OpenHSI"><code>OpenHSI</code></a></p>
+</blockquote>
+<pre><code>Simulated camera using an RGB image as an input. Hyperspectral data is produced using CIE XYZ matching functions.
+</code></pre>
 <table>
-<thead><tr>
-<th></th>
-<th>Type</th>
-<th>Default</th>
-<th>Details</th>
+<thead>
+<tr>
+  <th></th>
+  <th>Type</th>
+  <th>Default</th>
+  <th>Details</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong><code>img_path</code></strong></td>
-<td><code>str</code></td>
-<td>``</td>
-<td>Path to an RGB image file</td>
+  <td><strong><code>img_path</code></strong></td>
+  <td><code>str</code></td>
+  <td><code>None</code></td>
+  <td>Path to an RGB image file</td>
 </tr>
 <tr>
-<td><strong><code>mode</code></strong></td>
-<td><code>str</code></td>
-<td>``</td>
-<td>Default is to generate lines from the RGB image. Other options are <code>HgAr</code> and <code>flat</code> to simulate the HgAr spectrum and a flat field respectively.</td>
+  <td><strong><code>mode</code></strong></td>
+  <td><code>str</code></td>
+  <td><code>None</code></td>
+  <td>Default is to generate lines from the RGB image. Other options are <code>HgAr</code> and <code>flat</code> to simulate the HgAr spectrum and a flat field respectively.</td>
 </tr>
 <tr>
-<td><strong><code>n_lines</code></strong></td>
-<td><code>int</code></td>
-<td><code>16</code></td>
-<td><em>No Content</em></td>
+  <td></td>
+  <td></td>
+  <td><strong>Valid Keyword Arguments</strong></td>
+  <td></td>
 </tr>
 <tr>
-<td><strong><code>processing_lvl</code></strong></td>
-<td><code>int</code></td>
-<td><code>-1</code></td>
-<td><em>No Content</em></td>
+  <td><strong><code>n_lines</code></strong></td>
+  <td><code>int</code></td>
+  <td><code>16</code></td>
+  <td>Argument passed to <a href="/openhsi/capture.html#OpenHSI.__init__"><code>OpenHSI.__init__</code></a></td>
 </tr>
 <tr>
-<td><strong><code>warn_mem_use</code></strong></td>
-<td><code>bool</code></td>
-<td><code>True</code></td>
-<td><em>No Content</em></td>
+  <td><strong><code>processing_lvl</code></strong></td>
+  <td><code>int</code></td>
+  <td><code>-1</code></td>
+  <td>Argument passed to <a href="/openhsi/capture.html#OpenHSI.__init__"><code>OpenHSI.__init__</code></a></td>
 </tr>
 <tr>
-<td><strong><code>json_path</code></strong></td>
-<td><code>str</code></td>
-<td>``</td>
-<td><em>No Content</em></td>
+  <td><strong><code>warn_mem_use</code></strong></td>
+  <td><code>bool</code></td>
+  <td><code>True</code></td>
+  <td>Argument passed to <a href="/openhsi/capture.html#OpenHSI.__init__"><code>OpenHSI.__init__</code></a></td>
 </tr>
 <tr>
-<td><strong><code>pkl_path</code></strong></td>
-<td><code>str</code></td>
-<td>``</td>
-<td><em>No Content</em></td>
+  <td><strong><code>json_path</code></strong></td>
+  <td><code>str</code></td>
+  <td><code>None</code></td>
+  <td>Argument passed to <a href="/openhsi/capture.html#OpenHSI.__init__"><code>OpenHSI.__init__</code></a></td>
 </tr>
 <tr>
-<td><strong><code>print_settings</code></strong></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td><em>No Content</em></td>
+  <td><strong><code>pkl_path</code></strong></td>
+  <td><code>str</code></td>
+  <td><code>None</code></td>
+  <td>Argument passed to <a href="/openhsi/capture.html#OpenHSI.__init__"><code>OpenHSI.__init__</code></a></td>
+</tr>
+<tr>
+  <td><strong><code>print_settings</code></strong></td>
+  <td><code>bool</code></td>
+  <td><code>False</code></td>
+  <td>Argument passed to <a href="/openhsi/capture.html#OpenHSI.__init__"><code>OpenHSI.__init__</code></a></td>
 </tr>
 </tbody>
 </table>
@@ -249,11 +268,14 @@ nb_path: "nbs/01_capture.ipynb"
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="SimulatedCamera.mode_change" class="doc_header"><code>SimulatedCamera.mode_change</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L136" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>SimulatedCamera.mode_change</code>(<strong><code>mode</code></strong>:<code>str</code>=<em><code>None</code></em>)</p>
-</blockquote>
 
-<pre><code>Switch between simulating HgAr, flat field, or neither.</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="SimulatedCamera.mode_change" class="doc_header"><code>SimulatedCamera.mode_change</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L136" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>SimulatedCamera.mode_change</code>(<strong><code>mode</code></strong>:<code>str</code>=<em><code>None</code></em>)</p>
+</blockquote>
+<pre><code>Switch between simulating HgAr, flat field, or neither.
+</code></pre>
 
 </div>
 
@@ -262,11 +284,14 @@ nb_path: "nbs/01_capture.ipynb"
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="SimulatedCamera.rgb2xyz_matching_funcs" class="doc_header"><code>SimulatedCamera.rgb2xyz_matching_funcs</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L145" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>SimulatedCamera.rgb2xyz_matching_funcs</code>(<strong><code>rgb</code></strong>:<code>ndarray</code>)</p>
-</blockquote>
 
-<pre><code>convert an RGB value to a pseudo-spectra with the CIE XYZ matching functions.</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="SimulatedCamera.rgb2xyz_matching_funcs" class="doc_header"><code>SimulatedCamera.rgb2xyz_matching_funcs</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L145" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>SimulatedCamera.rgb2xyz_matching_funcs</code>(<strong><code>rgb</code></strong>:<code>ndarray</code>)</p>
+</blockquote>
+<pre><code>convert an RGB value to a pseudo-spectra with the CIE XYZ matching functions.
+</code></pre>
 
 </div>
 
@@ -319,9 +344,9 @@ nb_path: "nbs/01_capture.ipynb"
 
 
 
-<div id="31feaed1-2a31-451f-ace5-23f2fed2686f" class="output_subarea output_javascript ">
+<div id="42fb43ce-d224-4129-aae5-1f9b32e0e435" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#31feaed1-2a31-451f-ace5-23f2fed2686f');
+var element = $('#42fb43ce-d224-4129-aae5-1f9b32e0e435');
 
 (function(root) {
   function now() {
@@ -1544,9 +1569,9 @@ var element = $('#31feaed1-2a31-451f-ace5-23f2fed2686f');
 
 
 
-<div id="0fdd2531-ab55-4b5f-b77c-236b8442dfed" class="output_subarea output_javascript ">
+<div id="5e4b6940-301f-4c0d-8e71-b40109f97e69" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#0fdd2531-ab55-4b5f-b77c-236b8442dfed');
+var element = $('#5e4b6940-301f-4c0d-8e71-b40109f97e69');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -1894,11 +1919,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="SimulatedCamera.gen_flat" class="doc_header"><code>SimulatedCamera.gen_flat</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L152" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>SimulatedCamera.gen_flat</code>()</p>
-</blockquote>
 
-<pre><code>simulated blackbody radiation</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="SimulatedCamera.gen_flat" class="doc_header"><code>SimulatedCamera.gen_flat</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L152" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>SimulatedCamera.gen_flat</code>()</p>
+</blockquote>
+<pre><code>simulated blackbody radiation
+</code></pre>
 
 </div>
 
@@ -1953,9 +1981,9 @@ if (window.Jupyter !== undefined) {
 
 
 
-<div id="2d4da48f-6c36-4e22-91bf-51660fbb13f6" class="output_subarea output_javascript ">
+<div id="3617f47c-65b1-483f-a36c-e8e6cb621d02" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#2d4da48f-6c36-4e22-91bf-51660fbb13f6');
+var element = $('#3617f47c-65b1-483f-a36c-e8e6cb621d02');
 
 (function(root) {
   function now() {
@@ -3178,9 +3206,9 @@ var element = $('#2d4da48f-6c36-4e22-91bf-51660fbb13f6');
 
 
 
-<div id="a437d2d9-f259-4a4f-9f89-12f9d9713bde" class="output_subarea output_javascript ">
+<div id="178363b7-0a8c-419d-b861-353da32cd523" class="output_subarea output_javascript ">
 <script type="text/javascript">
-var element = $('#a437d2d9-f259-4a4f-9f89-12f9d9713bde');
+var element = $('#178363b7-0a8c-419d-b861-353da32cd523');
 
 if ((window.PyViz === undefined) || (window.PyViz instanceof HTMLElement)) {
   window.PyViz = {comms: {}, comm_status:{}, kernels:{}, receivers: {}, plot_index: []}
@@ -3517,11 +3545,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="SimulatedCamera.gen_sim_spectra" class="doc_header"><code>SimulatedCamera.gen_sim_spectra</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L173" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>SimulatedCamera.gen_sim_spectra</code>()</p>
-</blockquote>
 
-<pre><code>simulated picture of a HgAr lamp</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="SimulatedCamera.gen_sim_spectra" class="doc_header"><code>SimulatedCamera.gen_sim_spectra</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L173" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>SimulatedCamera.gen_sim_spectra</code>()</p>
+</blockquote>
+<pre><code>simulated picture of a HgAr lamp
+</code></pre>
 
 </div>
 
@@ -3646,11 +3677,14 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h2 id="ProcessRawDatacube" class="doc_header"><code>class</code> <code>ProcessRawDatacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L213" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ProcessRawDatacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>processing_lvl</code></strong>:<code>int</code>, <strong><code>json_path</code></strong>:<code>str</code>, <strong><code>pkl_path</code></strong>:<code>str</code>, <strong><code>old_style</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/capture.html#OpenHSI"><code>OpenHSI</code></a></p>
-</blockquote>
 
-<pre><code>Post-process datacubes</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="ProcessRawDatacube" class="doc_header"><code>class</code> <code>ProcessRawDatacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L213" class="source_link" style="float:right">[source]</a></h2>
+<blockquote>
+<p><code>ProcessRawDatacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>processing_lvl</code></strong>:<code>int</code>, <strong><code>json_path</code></strong>:<code>str</code>, <strong><code>pkl_path</code></strong>:<code>str</code>, <strong><code>old_style</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/capture.html#OpenHSI"><code>OpenHSI</code></a></p>
+</blockquote>
+<pre><code>Post-process datacubes
+</code></pre>
 
 </div>
 
@@ -3679,12 +3713,15 @@ if (window.Jupyter !== undefined) {
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="ProcessRawDatacube.save" class="doc_header"><code>ProcessRawDatacube.save</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L236" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>ProcessRawDatacube.save</code>(<strong><code>save_dir</code></strong>:<code>str</code>, <strong><code>preconfig_meta_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>prefix</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>suffix</code></strong>:<code>str</code>=<em><code>''</code></em>)</p>
-</blockquote>
 
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="ProcessRawDatacube.save" class="doc_header"><code>ProcessRawDatacube.save</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L236" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>ProcessRawDatacube.save</code>(<strong><code>save_dir</code></strong>:<code>str</code>, <strong><code>preconfig_meta_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>prefix</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>suffix</code></strong>:<code>str</code>=<em><code>''</code></em>)</p>
+</blockquote>
 <pre><code>Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time.
-Override the processing buffer timestamps with the timestamps in original file, also for camera temperatures.</code></pre>
+Override the processing buffer timestamps with the timestamps in original file, also for camera temperatures.
+</code></pre>
 
 </div>
 
@@ -3729,11 +3766,14 @@ Override the processing buffer timestamps with the timestamps in original file, 
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h2 id="ProcessDatacube" class="doc_header"><code>class</code> <code>ProcessDatacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L252" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>ProcessDatacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>processing_lvl</code></strong>:<code>int</code>, <strong><code>json_path</code></strong>:<code>str</code>, <strong><code>pkl_path</code></strong>:<code>str</code>, <strong><code>old_style</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/capture.html#ProcessRawDatacube"><code>ProcessRawDatacube</code></a></p>
-</blockquote>
 
-<pre><code>Post-process datacubes</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="ProcessDatacube" class="doc_header"><code>class</code> <code>ProcessDatacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L251" class="source_link" style="float:right">[source]</a></h2>
+<blockquote>
+<p><code>ProcessDatacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>processing_lvl</code></strong>:<code>int</code>, <strong><code>json_path</code></strong>:<code>str</code>, <strong><code>pkl_path</code></strong>:<code>str</code>, <strong><code>old_style</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/capture.html#ProcessRawDatacube"><code>ProcessRawDatacube</code></a></p>
+</blockquote>
+<pre><code>Post-process datacubes
+</code></pre>
 
 </div>
 
@@ -3762,11 +3802,14 @@ Override the processing buffer timestamps with the timestamps in original file, 
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h4 id="ProcessDatacube.load_next_tfms" class="doc_header"><code>ProcessDatacube.load_next_tfms</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L258" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>ProcessDatacube.load_next_tfms</code>(<strong><code>next_tfms</code></strong>:<code>List</code>[ndarray]<code>\]=*</code>[]`*)</p>
-</blockquote>
 
-<pre><code>provide the transforms you want to apply to this dataset</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="ProcessDatacube.load_next_tfms" class="doc_header"><code>ProcessDatacube.load_next_tfms</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L258" class="source_link" style="float:right">[source]</a></h4>
+<blockquote>
+<p><code>ProcessDatacube.load_next_tfms</code>(<strong><code>next_tfms</code></strong>:<code>List</code>[<code>typing.Callable[[numpy.ndarray], numpy.ndarray]</code>]=<em><code>[]</code></em>)</p>
+</blockquote>
+<pre><code>provide the transforms you want to apply to this dataset
+</code></pre>
 
 </div>
 
@@ -3795,7 +3838,7 @@ Override the processing buffer timestamps with the timestamps in original file, 
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="Parallel-saving-of-datacubes-while-simulated-camera-is-continuously-running">Parallel saving of datacubes while simulated camera is continuously running<a class="anchor-link" href="#Parallel-saving-of-datacubes-while-simulated-camera-is-continuously-running"> </a></h2><p>Saving datacubes is a blocking operation but we want our camera to continue capturing while saving is taking place. This attempts to place the saving in another <code>multiprocessing.Process</code> and the underlying datacube is implemented as a shared <code>multiprocessing.Array</code>. 
-{% include warning.html content='Experimental! However, the below example works! I&#8217;m a genious. Well, at very least, I feel like one for wrestling with the Global Interpreter Lock and coming out on top. ' %}</p>
+{% include warning.html content='Experimental! However, the below example works! I’m a genious. Well, at very least, I feel like one for wrestling with the Global Interpreter Lock and coming out on top. ' %}</p>
 
 </div>
 </div>
@@ -3817,11 +3860,14 @@ Override the processing buffer timestamps with the timestamps in original file, 
 <div class="output_area">
 
 
-<div class="output_markdown rendered_html output_subarea ">
-<h2 id="SharedSimulatedCamera" class="doc_header"><code>class</code> <code>SharedSimulatedCamera</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L269" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedSimulatedCamera</code>(<strong><code>img_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>mode</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedOpenHSI"><code>SharedOpenHSI</code></a></p>
-</blockquote>
 
-<pre><code>Simulated camera using an RGB image as an input. Hyperspectral data is produced using CIE XYZ matching functions.</code></pre>
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="SharedSimulatedCamera" class="doc_header"><code>class</code> <code>SharedSimulatedCamera</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/capture.py#L268" class="source_link" style="float:right">[source]</a></h2>
+<blockquote>
+<p><code>SharedSimulatedCamera</code>(<strong><code>img_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>mode</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedOpenHSI"><code>SharedOpenHSI</code></a></p>
+</blockquote>
+<pre><code>Simulated camera using an RGB image as an input. Hyperspectral data is produced using CIE XYZ matching functions.
+</code></pre>
 
 </div>
 
@@ -3881,5 +3927,5 @@ Override the processing buffer timestamps with the timestamps in original file, 
 </div>
 </div>
 </div>
- 
+
 

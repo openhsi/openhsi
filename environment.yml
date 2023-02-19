@@ -1,4 +1,4 @@
-name: openhsi_tests
+name: openhsi_dev
 channels:
   - fastai
   - conda-forge
@@ -8,7 +8,7 @@ dependencies:
   - pandas
   - scipy
   - matplotlib
-  - fastai::nbdev
+  - fastai::nbdev = 1.2.11
   - fastai::fastcore 
   - fastai::fastprogress
   - h5py

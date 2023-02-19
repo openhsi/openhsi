@@ -54,15 +54,15 @@ nb_path: "nbs/13_tutorial_installing_windows.ipynb"
 <p>To install download and run the following:
 <a href="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe">https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Windows-x86_64.exe</a></p>
 <p>See <a href="https://github.com/conda-forge/miniforge">https://github.com/conda-forge/miniforge</a> for more information on miniforge.</p>
-<p>Once installed you shoudl have a link in your start menu or on your desktop for a "Miniforge Prompt". Use tis to get a command line with python.</p>
+<p>Once installed you shoudl have a link in your start menu or on your desktop for a &quot;Miniforge Prompt&quot;. Use tis to get a command line with python.</p>
 <h3 id="Install-Jupyter-Lab">Install Jupyter Lab<a class="anchor-link" href="#Install-Jupyter-Lab"> </a></h3><p>All the interactive tools in <code>openhsi</code> require Jupyter Notebooks because it uses web tools. 
 To install, follow the steps in <a href="https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html">https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html</a></p>
 <p>In short, it boils down to</p>
 <div class="highlight"><pre><span></span><span class="go">conda install -c conda-forge jupyterlab</span>
 </pre></div>
 <p>To run jupyterlab, use the below command when in the directory you want to work in. This will start jupyterlab and open a browser window to the workspace.</p>
-
-<pre><code>jupyter lab</code></pre>
+<pre><code>jupyter lab
+</code></pre>
 <p>You will also need some Jupyter Extensions. Navigate to the Jupyter Extensions tab and search for
 <code>jupyterlab-manager</code>, and <code>jupyter_bokeh</code>.</p>
 
@@ -72,11 +72,11 @@ To install, follow the steps in <a href="https://jupyterlab.readthedocs.io/en/st
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="2.-Install-OpenHSI">2. Install OpenHSI<a class="anchor-link" href="#2.-Install-OpenHSI"> </a></h2><h3 id="via-conda">via conda<a class="anchor-link" href="#via-conda"> </a></h3><p>Create a new environment and install OpenHSI (including python dependancies and 6SV, except for cameras). You can change python version as required as well.</p>
-<div class="highlight"><pre><span></span>conda create -n openhsi <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.8 openhsi
-conda activate openhsi
+<div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>openhsi<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.8<span class="w"> </span>openhsi
+conda<span class="w"> </span>activate<span class="w"> </span>openhsi
 </pre></div>
 <p>or using environment.yml in the main repo</p>
-<div class="highlight"><pre><span></span>conda env create -f environment.yml
+<div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
 </pre></div>
 <p>See CONTIRBUTE file in repo for examples of how to setup development mode if you want to mke chnages to OpenHSI code.</p>
 
@@ -90,7 +90,7 @@ conda activate openhsi
 <h4 id="Arena-Additional-Setup">Arena Additional Setup<a class="anchor-link" href="#Arena-Additional-Setup"> </a></h4><p>At the end of the innstaller click the option to show the Arena Getting Started Guide, which has some instructons for final setup. (the path to these will be somethink like this: <code>C:/Program Files/Lucid Vision Labs/Arena SDK/docs/html/arena_sdk_windows.html</code>)</p>
 <p>In the instructions you will be shown how setup the LUCID Lightweight Filter Driver for Windows and enable jumbo frames.</p>
 <h4 id="Install-Arean-Python-Library">Install Arean Python Library<a class="anchor-link" href="#Install-Arean-Python-Library"> </a></h4><p>And then install the arena python library (this is the same on a conda based or pip based python env):</p>
-<div class="highlight"><pre><span></span>pip install --no-deps arena_api-&lt;version&gt;-py3-none-any.whl
+<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>arena_api-&lt;version&gt;-py3-none-any.whl
 </pre></div>
 
 </div>
@@ -101,7 +101,7 @@ conda activate openhsi
 <h3 id="Install-Spinnaker-SDK-(FLIR-based-OpenHSI)">Install Spinnaker SDK (FLIR based OpenHSI)<a class="anchor-link" href="#Install-Spinnaker-SDK-(FLIR-based-OpenHSI)"> </a></h3><p>Download and install the Spinnaker SDK and python wheel. - <a href="https://www.flir.com.au/products/spinnaker-sdk/">https://www.flir.com.au/products/spinnaker-sdk/</a>
 {% include tip.html content='On an Intel/Amd, you want amd64/x86_64 version on raspi you want aarch64 or arm64.' %}
 Folow the Spinaker SDK install instructions and then install the python package:</p>
-<div class="highlight"><pre><span></span>pip install --no-deps spinnaker_python-&lt;your needed version&gt;.whl
+<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--no-deps<span class="w"> </span>spinnaker_python-&lt;your<span class="w"> </span>needed<span class="w"> </span>version&gt;.whl
 </pre></div>
 
 </div>
@@ -124,5 +124,5 @@ This will bring you to the page <a href="https://www.ximea.com/support/wiki/apis
 </div>
 </div>
 </div>
- 
+
 
