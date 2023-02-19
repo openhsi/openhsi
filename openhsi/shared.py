@@ -17,13 +17,12 @@ import xarray as xr
 
 # Cell
 
-from .data import *
+from .data import CameraProperties, CircArrayBuffer
 
 from ctypes import c_int32, c_uint32, c_float, c_uint16, c_uint8
 from multiprocessing import Process, Queue, Array
 
 # Cell
-
 
 class SharedCircArrayBuffer(CircArrayBuffer):
     """Circular FIFO Buffer implementation on multiprocessing.Array. Each put/get is a (n-1)darray."""

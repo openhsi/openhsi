@@ -22,7 +22,7 @@ import json
 import pickle
 
 # Cell
-from .data import *
+from .data import DataCube, CircArrayBuffer
 
 # Cell
 #hide
@@ -261,7 +261,7 @@ class ProcessDatacube(ProcessRawDatacube):
 
 
 # Cell
-from .shared import *
+from .shared import SharedOpenHSI
 
 # Cell
 

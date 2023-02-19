@@ -60,14 +60,11 @@ nb_path: "nbs/11_shared.ipynb"
 <div class="output_area">
 
 
-
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="SharedCircArrayBuffer" class="doc_header"><code>class</code> <code>SharedCircArrayBuffer</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L28" class="source_link" style="float:right">[source]</a></h2>
-<blockquote>
-<p><code>SharedCircArrayBuffer</code>(<strong><code>size</code></strong>:<code>tuple</code>=<em><code>(100, 100)</code></em>, <strong><code>axis</code></strong>:<code>int</code>=<em><code>0</code></em>, <strong><code>c_dtype</code></strong>:<code>type</code>=<em><code>c_ubyte</code></em>, <strong><code>show_func</code></strong>:<code>Callable</code>[<code>ndarray</code>, <code>ForwardRef('plot')</code>]=<em><code>None</code></em>) :: <a href="/openhsi/data.html#CircArrayBuffer"><code>CircArrayBuffer</code></a></p>
+<h2 id="SharedCircArrayBuffer" class="doc_header"><code>class</code> <code>SharedCircArrayBuffer</code><a href="openhsi/shared.py#L27" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedCircArrayBuffer</code>(<strong><code>size</code></strong>:<code>tuple</code>=<em><code>(100, 100)</code></em>, <strong><code>axis</code></strong>:<code>int</code>=<em><code>0</code></em>, <strong><code>c_dtype</code></strong>:<code>type</code>=<em><code>c_ubyte</code></em>, <strong><code>show_func</code></strong>:<code>Callable</code>[<code>ndarray</code>, <code>ForwardRef('plot')</code>]=<em><code>None</code></em>) :: <a href="/openhsi/data.html#CircArrayBuffer"><code>CircArrayBuffer</code></a></p>
 </blockquote>
-<pre><code>Circular FIFO Buffer implementation on multiprocessing.Array. Each put/get is a (n-1)darray.
-</code></pre>
+
+<pre><code>Circular FIFO Buffer implementation on multiprocessing.Array. Each put/get is a (n-1)darray.</code></pre>
 
 </div>
 
@@ -89,15 +86,12 @@ nb_path: "nbs/11_shared.ipynb"
 <div class="output_area">
 
 
-
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="SharedDataCube" class="doc_header"><code>class</code> <code>SharedDataCube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L45" class="source_link" style="float:right">[source]</a></h2>
-<blockquote>
-<p><code>SharedDataCube</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/data.html#CameraProperties"><code>CameraProperties</code></a></p>
+<h2 id="SharedDataCube" class="doc_header"><code>class</code> <code>SharedDataCube</code><a href="openhsi/shared.py#L44" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedDataCube</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/data.html#CameraProperties"><code>CameraProperties</code></a></p>
 </blockquote>
+
 <pre><code>Facilitates the collection, viewing, and saving of hyperspectral datacubes using
-two `SharedCircArrayBuffer`s that swap when save is called.
-</code></pre>
+two `SharedCircArrayBuffer`s that swap when save is called.</code></pre>
 
 </div>
 
@@ -119,15 +113,12 @@ two `SharedCircArrayBuffer`s that swap when save is called.
 <div class="output_area">
 
 
-
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="SharedDataCube.save" class="doc_header"><code>SharedDataCube.save</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L81" class="source_link" style="float:right">[source]</a></h4>
-<blockquote>
-<p><code>SharedDataCube.save</code>(<strong><code>save_dir</code></strong>:<code>str</code>, <strong><code>preconfig_meta_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>prefix</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>suffix</code></strong>:<code>str</code>=<em><code>''</code></em>)</p>
+<h4 id="SharedDataCube.save" class="doc_header"><code>SharedDataCube.save</code><a href="openhsi/shared.py#L80" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>SharedDataCube.save</code>(<strong><code>save_dir</code></strong>:<code>str</code>, <strong><code>preconfig_meta_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>prefix</code></strong>:<code>str</code>=<em><code>''</code></em>, <strong><code>suffix</code></strong>:<code>str</code>=<em><code>''</code></em>)</p>
 </blockquote>
+
 <pre><code>Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time.
-Save is done in a separate multiprocess.Process.
-</code></pre>
+Save is done in a separate multiprocess.Process.</code></pre>
 
 </div>
 
@@ -149,74 +140,70 @@ Save is done in a separate multiprocess.Process.
 <div class="output_area">
 
 
-
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="SharedDataCube.show" class="doc_header"><code>SharedDataCube.show</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L120" class="source_link" style="float:right">[source]</a></h4>
-<blockquote>
-<p><code>SharedDataCube.show</code>(<strong><code>plot_lib</code></strong>:<code>str</code>=<em><code>'bokeh'</code></em>, <strong><code>red_nm</code></strong>:<code>float</code>=<em><code>640.0</code></em>, <strong><code>green_nm</code></strong>:<code>float</code>=<em><code>550.0</code></em>, <strong><code>blue_nm</code></strong>:<code>float</code>=<em><code>470.0</code></em>, <strong><code>robust</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong><code>hist_eq</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong><code>quick_imshow</code></strong>:<code>bool</code>=<em><code>False</code></em>, ****<code>plot_kwargs</code>**)</p>
+<h4 id="SharedDataCube.show" class="doc_header"><code>SharedDataCube.show</code><a href="openhsi/shared.py#L119" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>SharedDataCube.show</code>(<strong><code>plot_lib</code></strong>:<code>str</code>=<em><code>'bokeh'</code></em>, <strong><code>red_nm</code></strong>:<code>float</code>=<em><code>640.0</code></em>, <strong><code>green_nm</code></strong>:<code>float</code>=<em><code>550.0</code></em>, <strong><code>blue_nm</code></strong>:<code>float</code>=<em><code>470.0</code></em>, <strong><code>robust</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong><code>hist_eq</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong><code>quick_imshow</code></strong>:<code>bool</code>=<em><code>False</code></em>, <strong>**<code>plot_kwargs</code></strong>)</p>
 </blockquote>
+
 <pre><code>Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options.
-The plotting backend can be specified by `plot_lib` and can be &quot;bokeh&quot; or &quot;matplotlib&quot;.
+The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib".
 Further customise your plot with `**plot_kwargs`. `quick_imshow` is used for saving figures quickly
-but cannot be used to make interactive plots. 
-</code></pre>
+but cannot be used to make interactive plots.</code></pre>
 <table>
-<thead>
-<tr>
-  <th></th>
-  <th>Type</th>
-  <th>Default</th>
-  <th>Details</th>
+<thead><tr>
+<th></th>
+<th>Type</th>
+<th>Default</th>
+<th>Details</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td><strong><code>plot_lib</code></strong></td>
-  <td><code>str</code></td>
-  <td><code>bokeh</code></td>
-  <td>Plotting backend. This can be 'bokeh' or 'matplotlib'</td>
+<td><strong><code>plot_lib</code></strong></td>
+<td><code>str</code></td>
+<td><code>bokeh</code></td>
+<td>Plotting backend. This can be 'bokeh' or 'matplotlib'</td>
 </tr>
 <tr>
-  <td><strong><code>red_nm</code></strong></td>
-  <td><code>float</code></td>
-  <td><code>640.0</code></td>
-  <td>Wavelength in nm to use as the red</td>
+<td><strong><code>red_nm</code></strong></td>
+<td><code>float</code></td>
+<td><code>640.0</code></td>
+<td>Wavelength in nm to use as the red</td>
 </tr>
 <tr>
-  <td><strong><code>green_nm</code></strong></td>
-  <td><code>float</code></td>
-  <td><code>550.0</code></td>
-  <td>Wavelength in nm to use as the green</td>
+<td><strong><code>green_nm</code></strong></td>
+<td><code>float</code></td>
+<td><code>550.0</code></td>
+<td>Wavelength in nm to use as the green</td>
 </tr>
 <tr>
-  <td><strong><code>blue_nm</code></strong></td>
-  <td><code>float</code></td>
-  <td><code>470.0</code></td>
-  <td>Wavelength in nm to use as the blue</td>
+<td><strong><code>blue_nm</code></strong></td>
+<td><code>float</code></td>
+<td><code>470.0</code></td>
+<td>Wavelength in nm to use as the blue</td>
 </tr>
 <tr>
-  <td><strong><code>robust</code></strong></td>
-  <td><code>bool</code></td>
-  <td><code>False</code></td>
-  <td>Choose to plot using the 2-98% percentile. Robust to outliers</td>
+<td><strong><code>robust</code></strong></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Choose to plot using the 2-98% percentile. Robust to outliers</td>
 </tr>
 <tr>
-  <td><strong><code>hist_eq</code></strong></td>
-  <td><code>bool</code></td>
-  <td><code>False</code></td>
-  <td>Choose to plot using histogram equilisation</td>
+<td><strong><code>hist_eq</code></strong></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Choose to plot using histogram equilisation</td>
 </tr>
 <tr>
-  <td><strong><code>quick_imshow</code></strong></td>
-  <td><code>bool</code></td>
-  <td><code>False</code></td>
-  <td>Used to skip holoviews and use matplotlib for a static plot</td>
+<td><strong><code>quick_imshow</code></strong></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Used to skip holoviews and use matplotlib for a static plot</td>
 </tr>
 <tr>
-  <td><strong><code>plot_kwargs</code></strong></td>
-  <td></td>
-  <td></td>
-  <td><em>No Content</em></td>
+<td><strong><code>plot_kwargs</code></strong></td>
+<td></td>
+<td></td>
+<td><em>No Content</em></td>
 </tr>
 </tbody>
 </table>
@@ -246,73 +233,69 @@ but cannot be used to make interactive plots.
 <div class="output">
 
 <div class="output_area">
-
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="save_shared_datacube" class="doc_header"><code>save_shared_datacube</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L184" class="source_link" style="float:right">[source]</a></h4>
-<blockquote>
-<p><code>save_shared_datacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>shared_array</code></strong>:<code>BaseContext.Array</code>, <strong><code>c_dtype</code></strong>:<code>type</code>, <strong><code>shape</code></strong>:<code>typing.Tuple</code>, <strong><code>coords_dict</code></strong>:<code>typing.Dict</code>, <strong><code>attrs_dict</code></strong>:<code>typing.Dict</code>, <strong><code>proc_lvl</code></strong>:<code>int</code>, <strong><code>savefig</code></strong>:<code>bool</code>=<em><code>False</code></em>)</p>
+<h4 id="save_shared_datacube" class="doc_header"><code>save_shared_datacube</code><a href="openhsi/shared.py#L183" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>save_shared_datacube</code>(<strong><code>fname</code></strong>:<code>str</code>, <strong><code>shared_array</code></strong>:<code>BaseContext.Array</code>, <strong><code>c_dtype</code></strong>:<code>type</code>, <strong><code>shape</code></strong>:<code>typing.Tuple</code>, <strong><code>coords_dict</code></strong>:<code>typing.Dict</code>, <strong><code>attrs_dict</code></strong>:<code>typing.Dict</code>, <strong><code>proc_lvl</code></strong>:<code>int</code>, <strong><code>savefig</code></strong>:<code>bool</code>=<em><code>False</code></em>)</p>
 </blockquote>
-<pre><code>Saves a NetCDF4 file given all the function parameters. Designed to be used with SharedOpenHSI which allocates a shared array.
-</code></pre>
+
+<pre><code>Saves a NetCDF4 file given all the function parameters. Designed to be used with SharedOpenHSI which allocates a shared array.</code></pre>
 <table>
-<thead>
-<tr>
-  <th></th>
-  <th>Type</th>
-  <th>Default</th>
-  <th>Details</th>
+<thead><tr>
+<th></th>
+<th>Type</th>
+<th>Default</th>
+<th>Details</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td><strong><code>fname</code></strong></td>
-  <td><code>str</code></td>
-  <td></td>
-  <td>NetCDF4 file name (without .nc)</td>
+<td><strong><code>fname</code></strong></td>
+<td><code>str</code></td>
+<td></td>
+<td>NetCDF4 file name (without .nc)</td>
 </tr>
 <tr>
-  <td><strong><code>shared_array</code></strong></td>
-  <td><code>BaseContext.Array</code></td>
-  <td></td>
-  <td>multiprocessing.Array shared array</td>
+<td><strong><code>shared_array</code></strong></td>
+<td><code>BaseContext.Array</code></td>
+<td></td>
+<td>multiprocessing.Array shared array</td>
 </tr>
 <tr>
-  <td><strong><code>c_dtype</code></strong></td>
-  <td><code>type</code></td>
-  <td></td>
-  <td>numpy data type</td>
+<td><strong><code>c_dtype</code></strong></td>
+<td><code>type</code></td>
+<td></td>
+<td>numpy data type</td>
 </tr>
 <tr>
-  <td><strong><code>shape</code></strong></td>
-  <td><code>typing.Tuple</code></td>
-  <td></td>
-  <td>datacube numpy shape</td>
+<td><strong><code>shape</code></strong></td>
+<td><code>typing.Tuple</code></td>
+<td></td>
+<td>datacube numpy shape</td>
 </tr>
 <tr>
-  <td><strong><code>coords_dict</code></strong></td>
-  <td><code>typing.Dict</code></td>
-  <td></td>
-  <td>coordinates dictionary</td>
+<td><strong><code>coords_dict</code></strong></td>
+<td><code>typing.Dict</code></td>
+<td></td>
+<td>coordinates dictionary</td>
 </tr>
 <tr>
-  <td><strong><code>attrs_dict</code></strong></td>
-  <td><code>typing.Dict</code></td>
-  <td></td>
-  <td>metadata dictionary</td>
+<td><strong><code>attrs_dict</code></strong></td>
+<td><code>typing.Dict</code></td>
+<td></td>
+<td>metadata dictionary</td>
 </tr>
 <tr>
-  <td><strong><code>proc_lvl</code></strong></td>
-  <td><code>int</code></td>
-  <td></td>
-  <td>processing level used</td>
+<td><strong><code>proc_lvl</code></strong></td>
+<td><code>int</code></td>
+<td></td>
+<td>processing level used</td>
 </tr>
 <tr>
-  <td><strong><code>savefig</code></strong></td>
-  <td><code>bool</code></td>
-  <td><code>False</code></td>
-  <td>save a preview figure of cube</td>
+<td><strong><code>savefig</code></strong></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>save a preview figure of cube</td>
 </tr>
 </tbody>
 </table>
@@ -330,29 +313,6 @@ but cannot be used to make interactive plots.
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_text output_error">
-<pre>
-<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-1-c7b02f2ba1c9&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
-<span class="ansi-green-intense-fg ansi-bold">      8</span>                          attrs_dict<span class="ansi-blue-fg">:</span>Dict<span class="ansi-blue-fg">,</span>    <span class="ansi-red-fg"># metadata dictionary</span>
-<span class="ansi-green-intense-fg ansi-bold">      9</span>                          proc_lvl<span class="ansi-blue-fg">:</span>int<span class="ansi-blue-fg">,</span>       <span class="ansi-red-fg"># processing level used</span>
-<span class="ansi-green-fg">---&gt; 10</span><span class="ansi-red-fg">                          </span>savefig<span class="ansi-blue-fg">:</span>bool<span class="ansi-blue-fg">=</span><span class="ansi-green-fg">False</span>  <span class="ansi-red-fg"># save a preview figure of cube</span>
-<span class="ansi-green-intense-fg ansi-bold">     11</span>                         ) -&gt; &#34;process object&#34;:
-<span class="ansi-green-intense-fg ansi-bold">     12</span>     <span class="ansi-blue-fg">&#34;&#34;&#34;Saves a NetCDF4 file given all the function parameters. Designed to be used with SharedOpenHSI which allocates a shared array.&#34;&#34;&#34;</span>
-
-<span class="ansi-red-fg">NameError</span>: name &#39;Array&#39; is not defined</pre>
-</div>
-</div>
-
-</div>
-</div>
 
 </div>
     {% endraw %}
@@ -374,14 +334,11 @@ but cannot be used to make interactive plots.
 <div class="output_area">
 
 
-
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="SharedOpenHSI" class="doc_header"><code>class</code> <code>SharedOpenHSI</code><a href="https://github.com/openhsi/openhsi/tree/master/openhsi/shared.py#L249" class="source_link" style="float:right">[source]</a></h2>
-<blockquote>
-<p><code>SharedOpenHSI</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedDataCube"><code>SharedDataCube</code></a></p>
+<h2 id="SharedOpenHSI" class="doc_header"><code>class</code> <code>SharedOpenHSI</code><a href="openhsi/shared.py#L248" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>SharedOpenHSI</code>(<strong><code>n_lines</code></strong>:<code>int</code>=<em><code>16</code></em>, <strong><code>processing_lvl</code></strong>:<code>int</code>=<em><code>-1</code></em>, <strong><code>json_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>pkl_path</code></strong>:<code>str</code>=<em><code>None</code></em>, <strong><code>print_settings</code></strong>:<code>bool</code>=<em><code>False</code></em>) :: <a href="/openhsi/shared.html#SharedDataCube"><code>SharedDataCube</code></a></p>
 </blockquote>
-<pre><code>Base Class for the OpenHSI Camera.
-</code></pre>
+
+<pre><code>Base Class for the OpenHSI Camera.</code></pre>
 
 </div>
 
@@ -409,27 +366,7 @@ but cannot be used to make interactive plots.
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Shared-Cameras">Shared Cameras<a class="anchor-link" href="#Shared-Cameras"> </a></h3><p>This should work just like <code>openhsi.cameras.FlirCamera</code>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.cameras</span> <span class="kn">import</span> <span class="n">XimeaCameraBase</span><span class="p">,</span> <span class="n">FlirCameraBase</span><span class="p">,</span> <span class="n">LucidCameraBase</span>
-
-<span class="nd">@delegates</span><span class="p">()</span>
-<span class="k">class</span> <span class="nc">SharedXimeaCamera</span><span class="p">(</span><span class="n">SharedOpenHSI</span><span class="p">,</span> <span class="n">XimeaCameraBase</span><span class="p">):</span>
-    <span class="k">pass</span>
-
-<span class="nd">@delegates</span><span class="p">()</span>
-<span class="k">class</span> <span class="nc">SharedFlirCamera</span><span class="p">(</span><span class="n">SharedOpenHSI</span><span class="p">,</span> <span class="n">FlirCameraBase</span><span class="p">):</span>
-    <span class="k">pass</span>
-
-<span class="nd">@delegates</span><span class="p">()</span>
-<span class="k">class</span> <span class="nc">SharedLucidCamera</span><span class="p">(</span><span class="n">SharedOpenHSI</span><span class="p">,</span> <span class="n">LucidCameraBase</span><span class="p">):</span>
-    <span class="k">pass</span>
-</pre></div>
+<h3 id="Shared-Cameras">Shared Cameras<a class="anchor-link" href="#Shared-Cameras"> </a></h3><p>These are exported by openhsi.cameras as <code>SharedXXXCamera</code> This should work just like standard <code>Camera</code>.</p>
 
 </div>
 </div>
@@ -441,7 +378,9 @@ but cannot be used to make interactive plots.
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">num_saved</span> <span class="o">=</span> <span class="mi">0</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">openhsi.cameras</span> <span class="kn">import</span> <span class="n">SharedXimeaCamera</span>
+
+<span class="n">num_saved</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="k">with</span> <span class="n">SharedXimeaCamera</span><span class="p">(</span><span class="n">n_lines</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">exposure_ms</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">processing_lvl</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">pkl_path</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">json_path</span><span class="o">=</span><span class="s1">&#39;assets/cam_settings_ximea.json&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">cam</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
@@ -461,33 +400,6 @@ but cannot be used to make interactive plots.
 </div>
     {% endraw %}
 
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>For example, this could be used like so</p>
-<div class="highlight"><pre><span></span><span class="n">num_saved</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">num2save</span>  <span class="o">=</span> <span class="mi">3</span> <span class="c1"># save 3 datacubes</span>
-
-<span class="n">json_path</span> <span class="o">=</span> <span class="s2">&quot;../calibration_files/cam_settings_flir.json&quot;</span>
-<span class="n">pkl_path</span>  <span class="o">=</span> <span class="s2">&quot;../calibration_files/cam_calibration_flir.pkl&quot;</span>
-
-<span class="k">with</span> <span class="n">SharedFlirCamera</span><span class="p">(</span><span class="n">n_lines</span><span class="o">=</span><span class="mi">1280</span><span class="p">,</span><span class="n">processing_lvl</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">json_path</span><span class="o">=</span><span class="n">json_path</span><span class="p">,</span><span class="n">pkl_path</span><span class="o">=</span><span class="n">pkl_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">cam</span><span class="p">:</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num2save</span><span class="p">):</span>
-
-        <span class="n">cam</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;collected from time: </span><span class="si">{</span><span class="n">cam</span><span class="o">.</span><span class="n">timestamps</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">cam</span><span class="o">.</span><span class="n">timestamps</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">num_saved</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span> <span class="c1"># wait for the last process to finish so we don&#39;t modify the data when it&#39;s being saved </span>
-            <span class="k">pass</span>
-
-        <span class="n">p</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;../hyperspectral_experiments/temp&quot;</span><span class="p">)</span>
-        <span class="n">num_saved</span> <span class="o">+=</span> <span class="mi">1</span>
-</pre></div>
-
 </div>
-</div>
-</div>
-</div>
-
+ 
 
