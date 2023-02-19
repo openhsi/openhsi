@@ -47,7 +47,7 @@ class CircArrayBuffer():
     def __init__(self,
                  size:tuple = (100,100), # Shape of n-dim circular buffer to preallocate
                  axis:int = 0,           # Which axis to traverse when filling the buffer
-                 dtype:type = np.int32,  # Buffer numpy data type
+                 dtype:type = np.uint16,  # Buffer numpy data type
                  show_func:Callable[[np.ndarray],"plot"] = None, # Custom plotting function if desired
                 ):
         """Preallocate a array of `size` and type `dtype` and init write/read pointer."""
@@ -169,7 +169,7 @@ class CameraProperties():
 @patch
 def tfm_setup(self:CameraProperties,
               more_setup:Callable[[CameraProperties],None] = None,
-              dtype:Union[np.int32,np.float32] = np.int32,
+              dtype:Union[np.uint16,np.float32] = np.uint16,
               lvl:int = 0):
     """Setup for transforms"""
     if self.fast_smile in self.tfm_list:
@@ -280,7 +280,7 @@ def slow_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
 # Cell
 
 @patch
-def dn2rad(self:CameraProperties, x:"Array['λ,x',np.int32]") -> "Array['λ,x',np.float32]":
+def dn2rad(self:CameraProperties, x:"Array['λ,x',np.uint16]") -> "Array['λ,x',np.float32]":
     """Converts digital numbers to radiance (uW/cm^2/sr/nm). Use after cropping to useable area."""
 
     return np.float32( (x - self.dark_current) * self.settings["luminance"]/self.ref_luminance  *  self.spec_rad_ref/self.calibration['spec_rad_ref_luminance'] )
@@ -341,8 +341,8 @@ def set_processing_lvl(self:CameraProperties, lvl:int = -1, custom_tfms:List[Cal
         self.tfm_list = listify(custom_tfms)
 
     # binning input/output types
-    self.dtype_in = np.int32
-    self.dtype_out = np.float32 if lvl in (4,5,6,7,8) else np.int32
+    self.dtype_in = np.uint16
+    self.dtype_out = np.float32 if lvl in (4,5,6,7,8) else np.uint16
     if len(self.tfm_list) > 0:
         self.tfm_setup(dtype=self.dtype_in, lvl=lvl)
         self.dc_shape = self.pipeline(self.calibration["flat_field_pic"]).shape
