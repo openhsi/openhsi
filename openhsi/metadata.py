@@ -93,7 +93,6 @@ instrument_fields = [{},{},{"camera_exposure_time":"Exposure time for each camer
                            "camera_row_slice":"Which rows are extracted from each camera frame",
                            "camera_fwhm":"Full Width Half Maximum for spectral bands"}]
 
-
 # %% ../nbs/api/metadata.ipynb 9
 def build_section_widgets(section_name:str = "", fields:List[dict] = [{}], cols:int = 3):
     """Construct text input widgets and place them into `cols` columns"""
@@ -135,7 +134,6 @@ def build_variables_widgets(ds:xr.Dataset, cols:int=3):
         wgts_layout.append( pn.Column(pn.pane.Markdown(f"*{n}:*"), pn.GridBox(*temp,ncols=cols) ) )
     
     return pn.Column(*wgts_layout), wgts
-
 
 
 # %% ../nbs/api/metadata.ipynb 12

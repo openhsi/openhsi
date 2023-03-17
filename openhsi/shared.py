@@ -47,7 +47,6 @@ class SharedCircArrayBuffer(CircArrayBuffer):
         self.slots_left = self.size[self.axis]
         self.show_func = show_func
 
-
 # %% ../nbs/api/shared.ipynb 8
 @delegates()
 class SharedDataCube(CameraProperties):

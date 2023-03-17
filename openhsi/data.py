@@ -421,7 +421,6 @@ class DataCube(CameraProperties):
         return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
 
 
-
 # %% ../nbs/api/data.ipynb 43
 @patch
 def put(self:DataCube, x:np.ndarray, # camera frame to run through the pipeline and add to datacube
@@ -429,7 +428,6 @@ def put(self:DataCube, x:np.ndarray, # camera frame to run through the pipeline 
     """Applies the composed tranforms and writes the 2D array into the data cube. Stores a timestamp for each push."""
     self.timestamps.update()
     self.dc.put( self.pipeline(x) )
-
 
 # %% ../nbs/api/data.ipynb 44
 @patch
@@ -536,7 +534,6 @@ def load_nc(self:DataCube,
             self.cam_temperatures.data = self.ds_temperatures
         self.binned_wavelengths = np.array(ds.wavelength)
         self.dc.slots_left      = 0 # indicate that the data buffer is full
-
 
 
 # %% ../nbs/api/data.ipynb 46

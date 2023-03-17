@@ -224,7 +224,6 @@ class ProcessRawDatacube(OpenHSI):
             self.cam_temperatures.data = self.buff.ds_temperatures
         super().save(save_dir=save_dir, **kwargs)
 
-
 # %% ../nbs/api/capture.ipynb 35
 @delegates()
 class ProcessDatacube(ProcessRawDatacube):

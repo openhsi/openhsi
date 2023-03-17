@@ -4,7 +4,7 @@
 __all__ = ['packet_labels', 'decode_packet', 'SensorStream', 'set_pps_cb', 'clear_pps_cb', 'collect_sim', 'interp2camera_times',
            'SensorDashboard']
 
-# %% ../nbs/api/sensors.ipynb 6
+# %% ../nbs/api/sensors.ipynb 5
 from fastcore.foundation import patch
 from fastcore.meta import delegates
 import numpy as np
@@ -24,21 +24,21 @@ import time
 import serial
 import datetime
 
-# %% ../nbs/api/sensors.ipynb 7
+# %% ../nbs/api/sensors.ipynb 6
 try: import RPi.GPIO as GPIO
 except ModuleNotFoundError:
     try: import Jetson.GPIO as GPIO
     except ModuleNotFoundError:
         print("No module named RPi or Jetson. Did you try `pip install RPi.GPIO` or `pip install Jetson.GPIO`?")
 
-# %% ../nbs/api/sensors.ipynb 9
+# %% ../nbs/api/sensors.ipynb 8
 packet_labels = ["rpi_time","rtc_status","imu_status","air_status","gps_status",
                 "rtc_time",
                 "air_offset","temp","pressure","humidity",
                 "imu_offset","imu_cal","quat_w","quat_x","quat_y","quat_z",
                 "gps_offset","latitude","longitude","altitude","num_sats","pDOP","footer"]
 
-# %% ../nbs/api/sensors.ipynb 11
+# %% ../nbs/api/sensors.ipynb 10
 def decode_packet(buff:str=None, # byte string
                  ) -> list: # decoded packet
     """Decode `buff` into a list of decoded variables"""
@@ -91,7 +91,7 @@ def decode_packet(buff:str=None, # byte string
     
     return contents
 
-# %% ../nbs/api/sensors.ipynb 13
+# %% ../nbs/api/sensors.ipynb 12
 class SensorStream():
     """Parses ancillary sensor data for saving"""
     def __init__(self, baudrate:int=921_600, # baud rate of serial port
@@ -254,7 +254,7 @@ class SensorStream():
         return new_df
     
 
-# %% ../nbs/api/sensors.ipynb 19
+# %% ../nbs/api/sensors.ipynb 18
 def set_pps_cb(
     gps_pin:int=19, # GPS pulse per second pin
     times_list:List[datetime.datetime]=[], # Any list to append system time when callback is called
@@ -273,7 +273,7 @@ def clear_pps_cb(
     """Clear the GPS pulse per second callback on `gps_pin`."""
     GPIO.remove_event_detect(gps_pin)
 
-# %% ../nbs/api/sensors.ipynb 21
+# %% ../nbs/api/sensors.ipynb 20
 def collect_sim(rtc_offset_ms:float=0) -> list:
     """Generate fake sensor packets for testing."""
     
@@ -313,7 +313,7 @@ def collect_sim(rtc_offset_ms:float=0) -> list:
     
     return contents
 
-# %% ../nbs/api/sensors.ipynb 29
+# %% ../nbs/api/sensors.ipynb 28
 def interp2camera_times(df:pd.DataFrame, ts:np.array) -> pd.DataFrame:
     """Interpolate the ancillary sensor data to the timestamps for when 
     each frame was taken with the camera."""
@@ -328,7 +328,7 @@ def interp2camera_times(df:pd.DataFrame, ts:np.array) -> pd.DataFrame:
     return df_with_cam
     
 
-# %% ../nbs/api/sensors.ipynb 31
+# %% ../nbs/api/sensors.ipynb 30
 import param
 import panel as pn
 import hvplot.pandas
@@ -341,7 +341,7 @@ from streamz.dataframe import PeriodicDataFrame
 hv.extension('bokeh',logo=False)
 from holoviews.streams import Pipe, Buffer
 
-# %% ../nbs/api/sensors.ipynb 32
+# %% ../nbs/api/sensors.ipynb 31
 class SensorDashboard():
     """A dashboard for viewing ancillary sensor status."""
     def __init__(self, baudrate=115_200, port="/dev/cu.usbserial-DN05TVTD",buff_len:int = 100):

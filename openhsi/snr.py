@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['Widget_SNR']
 
-# %% ../nbs/api/snr.ipynb 6
+# %% ../nbs/api/snr.ipynb 5
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -20,11 +20,11 @@ hv.extension('bokeh',logo=False)
 
 from Py6S import *
 
-# %% ../nbs/api/snr.ipynb 7
+# %% ../nbs/api/snr.ipynb 6
 from .data import *
 from .atmos import *
 
-# %% ../nbs/api/snr.ipynb 11
+# %% ../nbs/api/snr.ipynb 10
 @delegates()
 class Widget_SNR(param.Parameterized):
     """OpenHSI SNR calculator"""

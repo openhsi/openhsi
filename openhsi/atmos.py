@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['Model6SV', 'remap', 'SpectralLibrary', 'SpectralMatcher', 'ELC', 'DataCubeViewer']
 
-# %% ../nbs/api/atmos.ipynb 6
+# %% ../nbs/api/atmos.ipynb 5
 from fastcore.foundation import patch
 from fastcore.meta import delegates
 from fastcore.basics import num_cpus
@@ -31,10 +31,10 @@ hv.extension('bokeh',logo=False)
 
 from Py6S import *
 
-# %% ../nbs/api/atmos.ipynb 7
+# %% ../nbs/api/atmos.ipynb 6
 from .data import *
 
-# %% ../nbs/api/atmos.ipynb 10
+# %% ../nbs/api/atmos.ipynb 9
 class Model6SV(object):
     """Create a 6SV model using Py6S."""
     def __init__(self, 
@@ -111,7 +111,7 @@ class Model6SV(object):
         return hv.Curve( zip(self.wavelength_array*1e3,self.radiance/10), label="computed radiance").opts(
             xlabel="wavelength (nm)", ylabel="radiance (μW/cm$^2$/sr/nm)")
 
-# %% ../nbs/api/atmos.ipynb 16
+# %% ../nbs/api/atmos.ipynb 15
 @patch
 def _sixs_run_one_wavelength(self:Model6SV, wv:float, # wavelength in μm
                             ) -> float: # radiance in W/m^2/sr/μm
@@ -140,12 +140,12 @@ def run_wavelengths(self:Model6SV, wavelengths:np.array, # array of wavelengths 
     
     
 
-# %% ../nbs/api/atmos.ipynb 21
+# %% ../nbs/api/atmos.ipynb 20
 def remap(x:float, in_min:float, in_max:float, out_min:float, out_max:float) -> float:
     """convert `x` from between input range (`in_min`,`in_max`) to output range (`out_min`,`out_max`)."""
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-# %% ../nbs/api/atmos.ipynb 22
+# %% ../nbs/api/atmos.ipynb 21
 class SpectralLibrary():
     """Manages all the spectral library and interpolations as necessary."""
     def __init__(self,speclib_path:str=None, # path to spectral library (in the format of a pandas DataFrame)
@@ -231,7 +231,7 @@ class SpectralLibrary():
         
     
 
-# %% ../nbs/api/atmos.ipynb 29
+# %% ../nbs/api/atmos.ipynb 28
 @patch
 def import_USGS(self:SpectralLibrary,directory:str,sort:bool=False):
     """Import the ASD files from `directory` with optional names `sort`ed."""
@@ -256,7 +256,7 @@ def import_USGS(self:SpectralLibrary,directory:str,sort:bool=False):
     self.interp(self.wavelengths)
     print(f"Added folder of ASD spectra to spectral library")
 
-# %% ../nbs/api/atmos.ipynb 36
+# %% ../nbs/api/atmos.ipynb 35
 @delegates()
 class SpectralMatcher(SpectralLibrary):
     """Match OpenHSI spectra against spectral library using Spectral Angle Mapper algorithm. \
@@ -320,7 +320,7 @@ class SpectralMatcher(SpectralLibrary):
         self.sim_df = pd.DataFrame({"label":self.speclib.columns[self.topk_idx],"score":cosine_dist[self.topk_idx]})
         return self.sim_df
 
-# %% ../nbs/api/atmos.ipynb 42
+# %% ../nbs/api/atmos.ipynb 41
 @delegates()
 class ELC(SpectralMatcher):
     """Apply ELC for radiance datacubes"""
@@ -468,7 +468,7 @@ class ELC(SpectralMatcher):
 
         
 
-# %% ../nbs/api/atmos.ipynb 57
+# %% ../nbs/api/atmos.ipynb 56
 class DataCubeViewer():
     """Explore datacubes
         Optional key/val pair arguement overrides (**kwargs)

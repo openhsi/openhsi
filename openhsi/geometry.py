@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['GeorectifyDatacube']
 
-# %% ../nbs/api/geometry.ipynb 5
+# %% ../nbs/api/geometry.ipynb 4
 from fastcore.foundation import patch
 from fastcore.meta import delegates
 import numpy as np
@@ -15,11 +15,11 @@ from numpy.linalg import norm
 from functools import reduce
 import psutil
 
-# %% ../nbs/api/geometry.ipynb 6
+# %% ../nbs/api/geometry.ipynb 5
 from .data import *
 from .capture import ProcessDatacube
 
-# %% ../nbs/api/geometry.ipynb 8
+# %% ../nbs/api/geometry.ipynb 7
 class GeorectifyDatacube(ProcessDatacube):
     """Georectifify datacubes collected using the OpenHSI system."""
     def __init__(self, fname:str,   # path to a datacube

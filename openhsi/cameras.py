@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['WebCamera', 'XimeaCamera', 'LucidCamera', 'FlirCamera', 'switched_camera']
 
-# %% ../nbs/api/cameras.ipynb 6
+# %% ../nbs/api/cameras.ipynb 5
 from fastcore.foundation import patch
 from fastcore.meta import delegates
 import numpy as np
@@ -13,10 +13,10 @@ import warnings
 from tqdm import tqdm
 from functools import partial
 
-# %% ../nbs/api/cameras.ipynb 7
+# %% ../nbs/api/cameras.ipynb 6
 from .capture import OpenHSI
 
-# %% ../nbs/api/cameras.ipynb 10
+# %% ../nbs/api/cameras.ipynb 9
 @delegates()
 class WebCamera(OpenHSI):
     """Interface for webcam to test OpenHSI functionality"""
@@ -51,7 +51,7 @@ class WebCamera(OpenHSI):
     def get_temp(self) -> float:
         return 20.0
 
-# %% ../nbs/api/cameras.ipynb 15
+# %% ../nbs/api/cameras.ipynb 14
 @delegates()
 class XimeaCamera(OpenHSI):
         
@@ -111,7 +111,7 @@ class XimeaCamera(OpenHSI):
     def get_temp(self) -> float:
         return self.xicam.get_temp()
 
-# %% ../nbs/api/cameras.ipynb 18
+# %% ../nbs/api/cameras.ipynb 17
 @delegates()
 class LucidCamera(OpenHSI):
     """Core functionality for Lucid Vision Lab cameras
@@ -277,7 +277,7 @@ class LucidCamera(OpenHSI):
                          for a, b
                          in zip(*[iter('{:012x}'.format(cam.deviceSettings['GevMACAddress'].value))]*2)])
 
-# %% ../nbs/api/cameras.ipynb 22
+# %% ../nbs/api/cameras.ipynb 21
 @delegates()
 class FlirCamera(OpenHSI):
     """Interface for FLIR camera"""
@@ -331,7 +331,7 @@ class FlirCamera(OpenHSI):
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
         
 
-# %% ../nbs/api/cameras.ipynb 25
+# %% ../nbs/api/cameras.ipynb 24
 def switched_camera(
     cam_name:str       = "FlirCamera", # Camera Class Name from openhsi.cameras
     n_lines:int        = 128, # how many along-track pixels

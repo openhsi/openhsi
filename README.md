@@ -101,13 +101,9 @@ published in MDPI Remote Sensing and can be accessed at
 ### Taking a single hyperspectral datacube
 
 The example shown here uses a *simulated* camera for testing purposes.
-Replace
-[`SimulatedCamera`](https://YiweiMao.github.io/openhsi/api/capture.html#simulatedcamera)
-with the appropriate Python class for your own camera to work with real
-hardware. For example, use
-[`LucidCamera`](https://YiweiMao.github.io/openhsi/api/cameras.html#lucidcamera)
-imported from `openhsi.cameras` inplace of
-[`SimulatedCamera`](https://YiweiMao.github.io/openhsi/api/capture.html#simulatedcamera).
+Replace `SimulatedCamera` with the appropriate Python class for your own
+camera to work with real hardware. For example, use `LucidCamera`
+imported from `openhsi.cameras` inplace of `SimulatedCamera`.
 
 ``` python
 from openhsi.capture import *
@@ -149,11 +145,8 @@ incoming light into its component colours to be detected on the camera
 sensor (4).
 
 We have the following implementations in [`cameras`
-module](https://openhsi.github.io/openhsi/cameras.html): -
-[`WebCamera`](https://YiweiMao.github.io/openhsi/api/cameras.html#webcamera) -
-[`XimeaCamera`](https://YiweiMao.github.io/openhsi/api/cameras.html#ximeacamera) -
-[`LucidCamera`](https://YiweiMao.github.io/openhsi/api/cameras.html#lucidcamera) -
-[`FlirCamera`](https://YiweiMao.github.io/openhsi/api/cameras.html#flircamera)
+module](https://openhsi.github.io/openhsi/cameras.html): - `WebCamera` -
+`XimeaCamera` - `LucidCamera` - `FlirCamera`
 
 These all have the same interface so in principle, these OpenHSI cameras
 can be used interchangeably as long as you have the right calibration

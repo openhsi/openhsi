@@ -1,22 +1,14 @@
 name: Deploy to GitHub Pages
 
+permissions:
+  contents: write
+  pages: write
+
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: [ "main", "master", "yiweidev_chris"]
   workflow_dispatch:
-
 jobs:
   deploy:
-    name: Deploy to GitHub Pages
-    runs-on: ubuntu-22.04
-    steps:
-    - name: Install the OpenHSI
-      shell: bash -l {0}
-      run: |
-         pip install --upgrade pip setuptools wheel
-         git clone https://github.com/YiweiMao/openhsi.git
-         cd openhsi
-         pip install -e .
-    -  uses: openhsi/openhsi@yiweidev
-#    - uses: fastai/workflows/quarto-ghp@master
-#      with: {pre: 1} 
+    runs-on: ubuntu-latest
+    steps: [uses: fastai/workflows/quarto-ghp@master]
