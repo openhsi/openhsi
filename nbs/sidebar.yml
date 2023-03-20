@@ -1,0 +1,21 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_core.ipynb
+      - 00_data.ipynb
+      - 01_capture.ipynb
+      - 02_cameras.ipynb
+      - 03_atmos.ipynb
+      - 04_snr.ipynb
+      - 05_calibrate.ipynb
+      - 06_metadata.ipynb
+      - 07_sensors.ipynb
+      - 08_geometry.ipynb
+      - 09_tutorial_camera.ipynb
+      - 10_tutorial_calibrate.ipynb
+      - 11_shared.ipynb
+      - 12_tutorial_installing_linux.ipynb
+      - 13_tutorial_installing_windows.ipynb
+      - 14_tutorial_custom_pipeline.ipynb
+      - quick_start.ipynb
