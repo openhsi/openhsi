@@ -50,3 +50,10 @@ blockquote > pre {
 .quarto-figure-center > figure > figcaption {
   text-align: center;
 }
+
+.navbar-logo {
+  height: 125px !important;
+  width: 150px !important;
+  /* max-height: 75px */
+  max-height: unset;
+}

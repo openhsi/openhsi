@@ -2,20 +2,22 @@ website:
   sidebar:
     contents:
       - index.ipynb
-      - 00_core.ipynb
-      - 00_data.ipynb
-      - 01_capture.ipynb
-      - 02_cameras.ipynb
-      - 03_atmos.ipynb
-      - 04_snr.ipynb
-      - 05_calibrate.ipynb
-      - 06_metadata.ipynb
-      - 07_sensors.ipynb
-      - 08_geometry.ipynb
-      - 09_tutorial_camera.ipynb
-      - 10_tutorial_calibrate.ipynb
-      - 11_shared.ipynb
-      - 12_tutorial_installing_linux.ipynb
-      - 13_tutorial_installing_windows.ipynb
-      - 14_tutorial_custom_pipeline.ipynb
       - quick_start.ipynb
+      - section: api
+        contents:
+          - api/atmos.ipynb
+          - api/calibrate.ipynb
+          - api/cameras.ipynb
+          - api/capture.ipynb
+          - api/data.ipynb
+          - api/geometry.ipynb
+          - api/metadata.ipynb
+          - api/sensors.ipynb
+          - api/shared.ipynb
+          - api/snr.ipynb
+      - section: tutorials
+        contents:
+          - tutorials/calibrate_steps.ipynb
+          - tutorials/custom_pipeline.ipynb
+          - tutorials/installing_linux.ipynb
+          - tutorials/installing_windows.ipynb

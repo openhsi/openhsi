@@ -1,0 +1,27 @@
+{
+    "camera_id": "0",
+    "row_slice": [
+        16,
+        620
+    ],
+    "resolution": [
+        644,
+        800
+    ],
+    "fwhm_nm": 2,
+    "exposure_ms": 2,
+    "luminance": 10000,
+    "binxy": [
+        1,
+        1
+    ],
+    "win_offset": [
+        636,
+        552
+    ],
+    "win_resolution": [
+        644,
+        800
+    ],
+    "pixel_format": "XI_RAW16"
+}
