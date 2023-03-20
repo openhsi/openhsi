@@ -147,4 +147,7 @@ data/
 
 # deployment stuff
 token
- conda/
+conda/
+_docs/
+_proc/
+docs/
