@@ -16,7 +16,7 @@ from pathlib import Path
 import xarray as xr
 
 # %% ../nbs/api/shared.ipynb 5
-from .data import CameraProperties, CircArrayBuffer
+from .data import CameraProperties, CircArrayBuffer, DateTimeBuffer
 
 from ctypes import c_int32, c_uint32, c_float, c_uint16, c_uint8
 from multiprocessing import Process, Queue, Array
