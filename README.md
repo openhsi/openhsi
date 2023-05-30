@@ -74,7 +74,7 @@ PyPI/conda package was developed in Jupyter Notebooks using
 If OpenHSI has been useful for your research, please acknowledge the
 project in your academic publication. The OpenHSI paper has been
 published in MDPI Remote Sensing and can be accessed at
-<https://www.mdpi.com/2072-4292/14/9/2244>.
+<https://doi.org/10.3390/rs14092244>.
 
     @article{mao2022openhsi,
       title={OpenHSI: A Complete Open-Source Hyperspectral Imaging Solution for Everyone},
@@ -144,9 +144,12 @@ The hardware consists of a collimator tube with a slit (1) mounted in a
 incoming light into its component colours to be detected on the camera
 sensor (4).
 
-We have the following implementations in [`cameras`
-module](https://openhsi.github.io/openhsi/cameras.html): - `WebCamera` -
-`XimeaCamera` - `LucidCamera` - `FlirCamera`
+We have the following implementations in `openhsi.cameras`:
+
+- `WebCamera`
+- `XimeaCamera`
+- `LucidCamera`
+- `FlirCamera`
 
 These all have the same interface so in principle, these OpenHSI cameras
 can be used interchangeably as long as you have the right calibration
