@@ -3,6 +3,7 @@ website:
     contents:
       - index.ipynb
       - quick_start.ipynb
+      - contributing.ipynb
       - section: api
         contents:
           - api/atmos.ipynb
