@@ -174,7 +174,7 @@ def tfm_setup(self:CameraProperties,
         self.line_buff = CircArrayBuffer(self.smiled_size, axis=0, dtype=dtype)
     
         # for collapsing spectral pixels into bands
-        self.byte_sz = dtype(0).nbytes
+        self.byte_sz = dtype(0).nbytes 
         self.width = np.uint16(self.settings["fwhm_nm"]*self.settings["resolution"][1]/np.ptp(self.calibration["wavelengths_linear"]))
         self.bin_rows = np.ptp(self.settings["row_slice"])
         self.bin_cols = self.settings["resolution"][1] - np.max(self.calibration["smile_shifts"])
@@ -260,8 +260,9 @@ def fast_smile(self:CameraProperties, x:np.ndarray) -> np.ndarray:
 @patch
 def fast_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
     """Changes the view of the datacube so that everything that needs to be binned is in the last axis. The last axis is then binned."""
+    byte_sz=x.itemsize
     buff = np.lib.stride_tricks.as_strided(x, shape=self.reduced_shape,
-                        strides=(self.bin_cols*self.byte_sz,self.width*self.byte_sz,self.byte_sz))
+                        strides=(self.bin_cols*byte_sz,self.width*byte_sz,byte_sz))
     return buff.sum(axis=-1)
 
 # %% ../nbs/api/data.ipynb 27
@@ -433,7 +434,8 @@ def save(self:DataCube,
          preconfig_meta_path:str=None, # Path to a .json file that includes metadata fields to be saved inside datacube
          prefix:str="",                # Prepend a custom prefix to your file name
          suffix:str="",                # Append a custom suffix to your file name
-        ):
+         old_style:bool=False          # Order of axis
+        ):     
     """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time."""
     if preconfig_meta_path is not None:
         with open(preconfig_meta_path) as json_file:
@@ -456,11 +458,18 @@ def save(self:DataCube,
         self.coords = dict(wavelength=(["wavelength"],wavelengths),
                            x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
-                           time=(["time"],self.timestamps.data.astype(np.datetime64)))
+                           time=(["time"],self.timestamps.data.astype(np.datetime64))) # time coordinates can only be saved in np.datetime64 format
 
-    # time coordinates can only be saved in np.datetime64 format
-    self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
-                         coords=self.coords, attrs=attrs)  
+    
+    
+    if old_style: # cross-track, along-track, wavelength
+        self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], self.dc.data)),
+                             coords=self.coords, 
+                             attrs=attrs)  
+    else: # wavelength, cross-track, along-track
+        self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
+                             coords=self.coords, 
+                             attrs=attrs)
 
     """provide metadata to NetCDF coordinates"""
     self.nc.x.attrs["long_name"]   = "cross-track"

@@ -79,7 +79,7 @@ class SharedDataCube(CameraProperties):
 
 # %% ../nbs/api/shared.ipynb 8
 @patch
-def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str="") -> Process:
+def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str="", old_style:bool=True) -> Process:
     """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time.
     Save is done in a separate multiprocess.Process."""
     if preconfig_meta_path is not None:
@@ -106,7 +106,7 @@ def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix
         
     fname = f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}"
     
-    p = Process(target=save_shared_datacube, args=(fname,self.dc.shared_data,self.dtype_out,self.dc.size,self.coords,attrs,self.proc_lvl))
+    p = Process(target=save_shared_datacube, args=(fname,self.dc.shared_data,self.dtype_out,self.dc.size,self.coords,attrs,self.proc_lvl,old_style))
     p.start()
     print(f"Saving {fname} in another process.")
     
@@ -186,6 +186,7 @@ def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
                          coords_dict:Dict,   # coordinates dictionary
                          attrs_dict:Dict,    # metadata dictionary
                          proc_lvl:int,       # processing level used
+                         old_style:bool=True,# order of axis
                          savefig:bool=False  # save a preview figure of cube
                         ):
     """Saves a NetCDF4 file given all the function parameters. Designed to be used with SharedOpenHSI which allocates a shared array."""
@@ -198,7 +199,16 @@ def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
     
     nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], data)),
                     coords=coords_dict, 
-                    attrs=attrs_dict)  
+                    attrs=attrs_dict)
+    
+    if old_style: # cross-track, along-track, wavelength
+        self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], self.dc.data)),
+                             coords=coords_dict, 
+                             attrs=attrs_dict)  
+    else: # wavelength, cross-track, along-track
+        self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
+                             coords=coords_dict, 
+                             attrs=attrs_dict)
     
     """provide metadata to NetCDF coordinates"""
     nc.x.attrs["long_name"]   = "cross-track"
