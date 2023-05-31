@@ -24,17 +24,21 @@ or
 `conda install -c conda-forge openhsi`
 
 The source code can be found on
-[GitHub](https://github.com/openhsi/openhsi).
+[GitHub](https://github.com/openhsi/openhsi). To install a development
+version see [Contributing](contributing.html).
 
 ## Requirements
 
 - Python 3.7+
 
-Depending on your camera sensor, install: - Ximea SDK (See
-https://www.ximea.com/support/wiki/apis/Python) - FLIR Spinnaker SDK
-with the python package (See
-https://www.flir.com/products/spinnaker-sdk/) - LUCID SDK (See
-https://thinklucid.com/downloads-hub/)
+Depending on your camera sensor, install:
+
+- Ximea SDK (See https://www.ximea.com/support/wiki/apis/Python)
+
+- FLIR Spinnaker SDK with the python package (See
+  https://www.flir.com/products/spinnaker-sdk/)
+
+- LUCID SDK (See https://thinklucid.com/downloads-hub/)
 
 <div>
 
@@ -60,14 +64,11 @@ PyPI/conda package was developed in Jupyter Notebooks using
 
 </div>
 
-<div>
+<!-- :::{.callout-important}
 
-> **Important**
->
-> This library is under active development and new features are still
-> being added.
+This library is under active development and new features are still being added.
 
-</div>
+::: -->
 
 ## Citation
 

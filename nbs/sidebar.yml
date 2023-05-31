@@ -8,7 +8,6 @@ website:
         contents:
           - api/atmos.ipynb
           - api/calibrate.ipynb
-          - api/cameras.ipynb
           - api/capture.ipynb
           - api/data.ipynb
           - api/geometry.ipynb
@@ -16,6 +15,12 @@ website:
           - api/sensors.ipynb
           - api/shared.ipynb
           - api/snr.ipynb
+      - section: cameras
+        contents:
+          - api/cameras/cameras.ipynb
+          - api/cameras/lucidvision.ipynb
+          - api/cameras/flir.ipynb
+          - api/cameras/ximea.ipynb
       - section: tutorials
         contents:
           - tutorials/calibrate_steps.ipynb
