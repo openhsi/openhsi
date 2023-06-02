@@ -1,0 +1,32 @@
+{
+    "row_slice": [
+        8,
+        913
+    ],
+    "resolution": [
+        924,
+        1240
+    ],
+    "fwhm_nm": 4,
+    "exposure_ms": 10,
+    "luminance": 10000,
+    "longitude": -17.7,
+    "latitude": 146.1,
+    "datetime_str": "2021-05-26 04:30",
+    "altitude": 0.12,
+    "radiosonde_station_num": 94299,
+    "radiosonde_region": "pac",
+    "binxy": [
+        1,
+        1
+    ],
+    "win_offset": [
+        96,
+        200
+    ],
+    "win_resolution": [
+        924,
+        1240
+    ],
+    "pixel_format": "Mono8"
+}

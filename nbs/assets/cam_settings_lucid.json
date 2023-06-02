@@ -1,0 +1,35 @@
+{
+    "camera_id": "0",
+    "row_slice": [
+        0,
+        -1
+    ],
+    "resolution": [
+        1080,
+        1440
+    ],
+    "fwhm_nm": 4,
+    "exposure_ms": 10,
+    "luminance": 30000,
+    "longitude": -17.7,
+    "latitude": 146.1,
+    "datetime_str": "2021-05-26 03:26",
+    "altitude": 0.12,
+    "radiosonde_station_num": 94299,
+    "radiosonde_region": "pac",
+    "sixs_path": "../assets/6SV1.1/sixsV1.1",
+    "binxy": [
+        1,
+        1
+    ],
+    "win_offset": [
+        0,
+        0
+    ],
+    "win_resolution": [
+        0,
+        0
+    ],
+    "pixel_format":"Mono12Packed",
+    "mac_addr":"1c:0f:af:01:7b:a0"
+}

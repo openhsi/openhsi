@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "openhsi"
+  site-url: "https://openhsi.github.io/openhsi"
+  description: "Library to calibrate, trigger and capture data cubes for the open source hyperspectral camera."
+  repo-branch: master
+  repo-url: "https://github.com/openhsi/openhsi"

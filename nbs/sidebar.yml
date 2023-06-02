@@ -1,0 +1,29 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - quick_start.ipynb
+      - contributing.ipynb
+      - section: api
+        contents:
+          - api/atmos.ipynb
+          - api/calibrate.ipynb
+          - api/capture.ipynb
+          - api/data.ipynb
+          - api/geometry.ipynb
+          - api/metadata.ipynb
+          - api/sensors.ipynb
+          - api/shared.ipynb
+          - api/snr.ipynb
+      - section: cameras
+        contents:
+          - api/cameras/cameras.ipynb
+          - api/cameras/lucidvision.ipynb
+          - api/cameras/flir.ipynb
+          - api/cameras/ximea.ipynb
+      - section: tutorials
+        contents:
+          - tutorials/calibrate_steps.ipynb
+          - tutorials/custom_pipeline.ipynb
+          - tutorials/installing_linux.ipynb
+          - tutorials/installing_windows.ipynb

@@ -1,0 +1,44 @@
+project:
+  type: website
+
+format:
+  html:
+    theme: yeti
+    css: styles.css
+    toc: true
+
+website:
+  twitter-card: false
+  open-graph: true
+  repo-actions: [source, issue]
+  favicon: assets/favicon.ico
+  navbar:
+    title: "An Open Hyperspectral Imager Library"
+    logo: assets/openhsi_logo.png
+    logo-alt: "OpenHSI"
+    background: primary
+    right:
+      - icon: github
+        menu:
+          - text: Source Code
+            url:  https://github.com/openhsi/openhsi/
+          - text: Report a Bug
+            url:  https://github.com/openhsi/openhsi/issues/new
+    left:
+      - text: "Home"
+        file: index.html
+      - text: "Quick Start"
+        url: quick_start.html
+      - text: "About"
+        file: https://openhsi.github.io
+        
+  search: 
+    location: sidebar
+    type: textbox
+  sidebar:
+    style: "floating"
+    background: "dark"
+    search: true
+
+
+metadata-files: [nbdev.yml, sidebar.yml]
