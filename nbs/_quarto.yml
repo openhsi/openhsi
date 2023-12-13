@@ -8,7 +8,7 @@ format:
     toc: true
 
 website:
-  google-analytics: "GA4275811316"
+  google-analytics: "G-B4C25M06DT"
   twitter-card: false
   open-graph: true
   repo-actions: [source, issue]
