@@ -313,7 +313,7 @@ class LucidCameraBase():
                          in zip(*[iter('{:012x}'.format(cam.deviceSettings['GevMACAddress'].value))]*2)])
     
 @delegates()
-class LucidCamera(OpenHSI, LucidCameraBase):
+class LucidCamera(LucidCameraBase, OpenHSI):
     pass
         
 
