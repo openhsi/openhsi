@@ -1,4 +1,4 @@
-name: openhsi_fli
+name: openhsi_dev
 channels:
   - fastai
   - conda-forge
