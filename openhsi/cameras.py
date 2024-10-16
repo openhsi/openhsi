@@ -138,7 +138,7 @@ class FlirCameraBase():
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
         
 @delegates()
-class FlirCamera(OpenHSI, FlirCameraBase):
+class FlirCamera(FlirCameraBase, OpenHSI):
     pass
 
 # %% ../nbs/api/cameras/flir.ipynb 9
