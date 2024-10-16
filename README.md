@@ -5,7 +5,7 @@
 
 # Welcome to the Open Source DIY Hyperspectral Imager Library
 
-![](https://github.com/openhsi/openhsi/actions/workflows/main.yml/badge.svg)
+![](https://github.com/openhsi/openhsi/actions/workflows/test.yaml/badge.svg)
 
 This Python library is licensed under the [Apache v2
 License](https://www.apache.org/licenses/LICENSE-2.0). The documentation
@@ -88,9 +88,13 @@ published in MDPI Remote Sensing and can be accessed at
 ### Taking a single hyperspectral datacube
 
 The example shown here uses a *simulated* camera for testing purposes.
-Replace `SimulatedCamera` with the appropriate Python class for your own
-camera to work with real hardware. For example, use `LucidCamera`
-imported from `openhsi.cameras` inplace of `SimulatedCamera`.
+Replace
+[`SimulatedCamera`](https://openhsi.github.io/openhsi/api/capture.html#simulatedcamera)
+with the appropriate Python class for your own camera to work with real
+hardware. For example, use
+[`LucidCamera`](https://openhsi.github.io/openhsi/api/cameras/lucidvision.html#lucidcamera)
+imported from `openhsi.cameras` inplace of
+[`SimulatedCamera`](https://openhsi.github.io/openhsi/api/capture.html#simulatedcamera).
 
 ``` python
 from openhsi.capture import *
@@ -129,10 +133,10 @@ sensor (4).
 
 We have the following implementations in `openhsi.cameras`:
 
-- `WebCamera`
-- `XimeaCamera`
-- `LucidCamera`
-- `FlirCamera`
+- [`WebCamera`](https://openhsi.github.io/openhsi/api/cameras/cameras.html#webcamera)
+- [`XimeaCamera`](https://openhsi.github.io/openhsi/api/cameras/ximea.html#ximeacamera)
+- [`LucidCamera`](https://openhsi.github.io/openhsi/api/cameras/lucidvision.html#lucidcamera)
+- [`FlirCamera`](https://openhsi.github.io/openhsi/api/cameras/flir.html#flircamera)
 
 These all have the same interface so in principle, these OpenHSI cameras
 can be used interchangeably as long as you have the right calibration
