@@ -28,7 +28,6 @@ import holoviews as hv
 hv.extension("bokeh",logo=False)
 
 # %% ../nbs/api/data.ipynb 5
-#| include: false
 # numpy.ndarray type hints
 Shape = TypeVar("Shape"); DType = TypeVar("DType")
 class Array(np.ndarray, Generic[Shape, DType]):
