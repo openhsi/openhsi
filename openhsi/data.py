@@ -8,6 +8,7 @@ from fastcore.foundation import patch
 from fastcore.meta import delegates
 from fastcore.basics import listify
 from fastcore.xtras import *
+import os
 import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
@@ -116,12 +117,17 @@ class CameraProperties():
     """Save and load OpenHSI camera settings and calibration"""
     def __init__(self, 
                  json_path:str = None,  # Path to settings file
-                 pkl_path:str  = None,  # Path to calibration file
+                 cal_path:str  = None,  # Path to calibration file
                  print_settings:bool = False, # Print out settings file contents
                  **kwargs):
         """Load the settings and calibration files"""
         self.json_path = json_path
-        self.pkl_path = pkl_path
+        if 'pkl_path' in kwargs:
+            if cal_path is not None:
+                raise ValueError("Both 'pkl_path' and 'cal_path' cannot be provided. Please use only 'cal_path'.")
+            cal_path = kwargs['pkl_path']
+        
+        self.cal_path = cal_path
         
         if json_path:
             with open(self.json_path) as json_file:
@@ -129,9 +135,36 @@ class CameraProperties():
         else:
             self.settings = {}
 
-        if pkl_path:
-            with open(self.pkl_path,'rb') as handle:
-                self.calibration = pickle.load(handle)
+        if cal_path:
+            file_extension = os.path.splitext(cal_path)[-1].lower()
+
+            if file_extension in ('.pkl', '.pickle'):
+                warnings.warn(
+                    "Pickle calibration files are deprecated and will be removed in a "
+                    "future version. Please convert to .nc format using `.dump()` "
+                    "(which now saves to .nc by default).",
+                    DeprecationWarning,
+                    stacklevel=2
+                )
+                try:
+                    with open(cal_path, 'rb') as handle:
+                        self.calibration = pickle.load(handle)
+                    self.cal_path = cal_path[:-len(file_extension)]+'.nc'
+                    self.save_calibration_data_to_netcdf(self.cal_path)
+                    print(f"Updated calibration file saved at {self.cal_path}")
+                except (pickle.UnpicklingError, AttributeError, EOFError, ImportError) as e:
+                    raise type(e)(
+                        f"Failed to load object from {cal_path}: {e}. "
+                        "Issue likely due to changes in dependencies since the pickle file "
+                        "was saved. Likely issue is xarray not being 2022.3.0. "
+                        "Recommended fix is to install this version and convert to the new "
+                        "NetCDF-based calibration file using `.dump()`."
+                    ) from e
+
+            elif file_extension == '.nc':
+                self.load_calibration_data_from_netcdf(cal_path)
+            else:
+                raise ValueError(f"Unsupported file type: {file_extension}")
         else:
             self.calibration = {}
 
@@ -145,8 +178,9 @@ class CameraProperties():
             pprint.pprint(self.settings)
     
     def __repr__(self):
-        return "settings = \n" + self.settings.__repr__() + \
-               "\n\ncalibration = \n" + self.calibration.__repr__()
+        from pprint import pformat
+        return "settings = \n" + pformat(self.settings) + \
+               "\n\ncalibration = \n" + pformat(self.calibration)
     
     def __enter__(self):
         return self
@@ -154,12 +188,90 @@ class CameraProperties():
     def __exit__(self, exc_type, exc_value, traceback):
         pass
 
-    def dump(self, json_path:str = None, pkl_path:str = None):
+    def dump(self, json_path:str = None, cal_path:str = None, use_pickle:bool = False):
         """Save the settings and calibration files"""
-        with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
-            json.dump(self.settings, outfile,indent=4,)
-        with open(self.pkl_path[:-4]+"_updated.pkl" if pkl_path is None else pkl_path,'wb') as handle:
-            pickle.dump(self.calibration,handle,protocol=4)
+        # with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
+        #     json.dump(self.settings, outfile,indent=4,)
+        if use_pickle: # must provide filename for pickle.
+            with open(cal_path,'wb') as handle:
+                pickle.dump(self.calibration,handle,protocol=4)
+        else:
+            self.save_calibration_data_to_netcdf(self.cal_path[:-3]+"_updated.nc" if cal_path is None else cal_path)
+
+    def save_calibration_data_to_netcdf(self, filename):
+        """
+        Save the calibration data dictionary to a NetCDF file using xarray. Intended to be more portable then pickle.
+
+        Parameters:
+            filename (str): The filename to save to (NetCDF format).
+        """
+
+        attrs = {}
+        ds_dict = {}
+
+        for key, value in self.calibration.items():
+            if isinstance(value, (int, float, str)):  # Handle attributes
+                attrs[key] = value
+            elif isinstance(value, xr.DataArray):  # Handle DataArrays
+                ds_dict[key] = value
+            elif isinstance(value, interp1d):  # Handle interp1d objects
+                ds_dict[f'{key}_x'] = ((f'{key}_dim'), value.x)
+                ds_dict[f'{key}_y'] = ((f'{key}_dim'), value.y)
+            elif isinstance(value, np.ndarray):  # Handle numpy arrays
+                if value.ndim == 1:
+                    ds_dict[key] = ((f'{key}_dim'), value)
+                elif value.ndim == 2:
+                    ds_dict[key] = ((f'{key}_dim_x', f'{key}_dim_y'), value)
+                else:
+                    raise ValueError(f"Unsupported numpy array dimension: {value.ndim} for key: {key}")
+            else:
+                raise ValueError(f"Unsupported data type: {type(value)} for key: {key}")
+
+        # Create the xarray.Dataset
+        ds = xr.Dataset(ds_dict, attrs=attrs)
+
+        # Save to NetCDF with compression (adjust encoding if needed)
+        encoding = {key: {'zlib': True, 'complevel': 4} for key in ds_dict if isinstance(ds_dict[key], xr.DataArray)}
+        ds.to_netcdf(filename, mode='w', encoding=encoding)
+
+    def load_calibration_data_from_netcdf(self, filename):
+        """
+        Load the calibration data dictionary from a NetCDF file using xarray.
+
+        Parameters:
+            filename (str): The filename to load from (NetCDF format).
+
+        Returns:
+            dict: The loaded calibration data dictionary.
+        """
+
+        ds = xr.open_dataset(filename)
+        data_dict = {}
+
+        # Load attributes
+        data_dict.update(ds.attrs)
+
+        # Load data variables
+        for key, value in ds.items():
+            if isinstance(value, xr.DataArray):
+                if value.ndim == 1:
+                    # Check if it's an interp1d object
+                    if f'{key[:-5]}fit_y' in ds:  # Check for corresponding _y data
+                        data_dict[key[:-2]] = interp1d(
+                            ds[f'{key[:-2]}_x'].values,
+                            ds[f'{key[:-2]}_y'].values,
+                            kind='cubic'
+                        )
+                    else:  # Otherwise, it's a regular 1D array
+                        data_dict[key] = value.values
+                elif value.ndim == 2:
+                    data_dict[key] = value.values
+                else:  # Handle any dimension > 2, assume xarray
+                    data_dict[key] = value
+
+        self.calibration=data_dict
+        ds.close()
+
 
 # %% ../nbs/api/data.ipynb 23
 @patch
