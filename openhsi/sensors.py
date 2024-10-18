@@ -200,7 +200,7 @@ class SensorStream():
                     n_lines:int        = 128,  # how many along-track pixels
                     processing_lvl:int = 0,    # desired processing done in real time
                     json_path:str      = None, # path to settings file
-                    pkl_path:str       = None, # path to calibration file
+                    cal_path:str       = None, # path to calibration file
                     preconfig_meta:str = None, # path to metadata file
                     ssd_dir:str        = None, # path to SSD
                    ):
@@ -219,7 +219,7 @@ class SensorStream():
                     if self.cam_class:
                         from openhsi.cameras import switched_camera
                         self.p = Process(target=switched_camera, args=(self.cam_class, n_lines, processing_lvl, json_path,
-                                                                           pkl_path, preconfig_meta, ssd_dir, self.toggle_interface))
+                                                                           cal_path, preconfig_meta, ssd_dir, self.toggle_interface))
                         self.p.start()
 
                 while self.ser.in_waiting > 0:

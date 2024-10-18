@@ -358,7 +358,7 @@ class SettingsBuilderMixin():
 
 # %% ../nbs/api/calibrate.ipynb 10
 class SettingsBuilderMetaclass(type):
-    def __new__(cls, clsname:str, cam_class, attrs) -> "SettingsBuilder Class":
+    def __new__(cls, clsname:str, cam_class, attrs) -> type: #"SettingsBuilder Class":
         """Create a SettingsBuilder class based on your chosen `CameraClass`."""
         return super(SettingsBuilderMetaclass, cls).__new__(cls, clsname, (cam_class,SettingsBuilderMixin), attrs)
     
