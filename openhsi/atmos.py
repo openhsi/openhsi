@@ -253,13 +253,13 @@ def import_USGS(self:SpectralLibrary,directory:str,sort:bool=False):
 class SpectralMatcher(SpectralLibrary):
     """Match OpenHSI spectra against spectral library using Spectral Angle Mapper algorithm. \
     Requires calibration pkl file with the saved 6SV model."""
-    def __init__(self,pkl_path:str, # path to spectral library (pandas DataFrame)
+    def __init__(self,cal_path:str, # path to spectral library (pandas DataFrame)
                  **kwargs):
         """Prepare arrays for spectral matching in radiance. 
-        `pkl_path` is needed to get the openhsi wavelengths and precomputed 6SV radiance fit."""
+        `cal_path` is needed to get the openhsi wavelengths and precomputed 6SV radiance fit."""
         super().__init__(**kwargs)
         
-        with open(pkl_path,'rb') as handle:
+        with open(cal_path,'rb') as handle:
             self.calibration = pickle.load(handle)
         self.interp(self.calibration["wavelengths"])
         

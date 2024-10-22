@@ -13,6 +13,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: fastai/workflows/quarto-ghp@master
-        with:
-          version: "3.8"
+
     
