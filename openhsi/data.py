@@ -193,6 +193,13 @@ class CameraProperties():
         # with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
         #     json.dump(self.settings, outfile,indent=4,)
         if use_pickle: # must provide filename for pickle.
+            warnings.warn(
+                "Pickle calibration files are deprecated and will be removed in a "
+                "future version. We sugesting using the .nc format using `.dump()` "
+                "(which now saves to .nc by default).",
+                DeprecationWarning,
+                stacklevel=2
+            )
             with open(cal_path,'wb') as handle:
                 pickle.dump(self.calibration,handle,protocol=4)
         else:
