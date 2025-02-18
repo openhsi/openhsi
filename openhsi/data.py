@@ -48,7 +48,7 @@ class CircArrayBuffer():
     def __init__(self, 
                  size:tuple = (100,100), # Shape of n-dim circular buffer to preallocate
                  axis:int = 0,           # Which axis to traverse when filling the buffer
-                 dtype:type = np.uint16,  # Buffer numpy data type
+                 dtype:type = np.uint8,  # Buffer numpy data type
                  show_func:Callable[[np.ndarray],"plot"] = None, # Custom plotting function if desired
                 ):
         """Preallocate a array of `size` and type `dtype` and init write/read pointer."""
@@ -166,7 +166,7 @@ class CameraProperties():
 @patch
 def tfm_setup(self:CameraProperties, 
               more_setup:Callable[[CameraProperties],None] = None, 
-              dtype:Union[np.uint16,np.float32] = np.uint16, 
+              dtype:Union[np.uint8,np.uint16,np.float32] = np.uint16, 
               lvl:int = 0):
     """Setup for transforms"""
     if self.fast_smile in self.tfm_list:
@@ -227,13 +227,13 @@ def tfm_setup(self:CameraProperties,
         self.ref_luminance = np.float32(self.fast_smile(self.ref_luminance))
     
     if hasattr(self,"need_rad_after_fast_bin"):
-        self.dark_current = self.fast_bin(self.dark_current)
-        self.ref_luminance = self.fast_bin(self.ref_luminance)
+        self.dark_current = np.float32(self.fast_bin(self.dark_current))
+        self.ref_luminance = np.float32(self.fast_bin(self.ref_luminance))
         self.spec_rad_ref = np.float32(self.calibration["sfit"]( self.binned_wavelengths ))
         
     if hasattr(self,"need_rad_after_slow_bin"):
-        self.dark_current = self.slow_bin(self.dark_current)
-        self.ref_luminance = self.slow_bin(self.ref_luminance)
+        self.dark_current = np.float32(self.slow_bin(self.dark_current))
+        self.ref_luminance = np.float32(self.slow_bin(self.ref_luminance))
         self.spec_rad_ref = np.float32(self.calibration["sfit"]( self.binned_wavelengths ))
     
     if self.rad2ref_6SV in self.tfm_list:
@@ -269,15 +269,15 @@ def fast_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
 def slow_bin(self:CameraProperties, x:np.ndarray) -> np.ndarray:
     """Bins spectral bands accounting for the slight nonlinearity in the index-wavelength map"""
     for i in range(len(self.bin_idxs)-1):
-        self.bin_buff.put( x[:,self.bin_idxs[i]:self.bin_idxs[i+1]].sum(axis=1) )
+        self.bin_buff.put( np.float32(x[:,self.bin_idxs[i]:self.bin_idxs[i+1]]).sum(axis=1) )
     return self.bin_buff.data
 
 # %% ../nbs/api/data.ipynb 28
 @patch
 def dn2rad(self:CameraProperties, x:"Array['λ,x',np.uint16]") -> "Array['λ,x',np.float32]":
     """Converts digital numbers to radiance (uW/cm^2/sr/nm). Use after cropping to useable area."""
-        
-    return np.float32( (x - self.dark_current) * self.settings["luminance"]/self.ref_luminance  *  self.spec_rad_ref/self.calibration['spec_rad_ref_luminance'] )                                               
+    
+    return (np.float32(x) - self.dark_current) * self.settings["luminance"]/self.ref_luminance  *  self.spec_rad_ref/self.calibration['spec_rad_ref_luminance']                                               
 
 # %% ../nbs/api/data.ipynb 29
 @patch
@@ -334,9 +334,18 @@ def set_processing_lvl(self:CameraProperties, lvl:int = -1, custom_tfms:List[Cal
     if custom_tfms is not None:
         self.tfm_list = listify(custom_tfms)
     
-    # binning input/output types
-    self.dtype_in = np.uint16
-    self.dtype_out = np.float32 if lvl in (4,5,6,7,8) else np.uint16
+    # set input/output types
+    if "pixel_format" in self.settings:
+        if any([x in self.settings["pixel_format"] for x in ["Mono8", "8bit", "8"]]):
+            self.dtype_in = np.uint8
+        elif any([x in self.settings["pixel_format"] for x in ["Mono12", "12bit", "12", "Mono10", "10bit", "10","Mono16", "16bit", "16"]]):
+            self.dtype_in = np.uint16
+    else:
+        self.dtype_in = np.uint16
+    
+    self.dtype_out = np.float32 if lvl in (2,3,4,5,6,7,8) else self.dtype_in
+    
+    # init other parameters
     if len(self.tfm_list) > 0:
         self.tfm_setup(dtype=self.dtype_in, lvl=lvl)
         self.dc_shape = self.pipeline(self.calibration["flat_field_pic"]).shape
@@ -397,11 +406,12 @@ class DataCube(CameraProperties):
         
         self.timestamps = DateTimeBuffer(n_lines)
         self.dc_shape = (self.dc_shape[0],self.n_lines,self.dc_shape[1])
-        mem_sz = 4*reduce(lambda x,y: x*y, self.dc_shape)/2**20 # MB
+        
+        mem_sz = self.dtype_out(0).nbytes*reduce(lambda x,y: x*y, self.dc_shape)/2**20 # MB
         mem_thresh = 0.8*psutil.virtual_memory().available/2**20 # 80% of available memory in MB
         if warn_mem_use and mem_sz > mem_thresh and input(f"{mem_sz:.02f} MB of RAM will be allocated. You have {mem_thresh/.8:.2f} MB available. Continue? [y/n]") != "y":
             raise RuntimeError(f"""Datacube memory allocation ({mem_sz:.02f} MB) exceeded >80% available RAM ({mem_thresh/.8:.2f} MB). 
-            Halted by user (did not receive `y` at prompt). 
+            Halted by user (did not receive `y` at prompt).
             To proceed, you can let `warn_mem_use=False`, decrease `n_lines`, use a `processing_lvl`>=2 
             that includes binning, or continue anyway by entering `y` at the prompt.""")
         if self.dc_shape[0] > 1: print(f"Allocated {mem_sz:.02f} MB of RAM. There was {mem_thresh/.8:.2f} MB available.")

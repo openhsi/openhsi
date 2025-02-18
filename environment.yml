@@ -1,9 +1,10 @@
-name: openhsi_dev
+name: openhsi_fli
 channels:
   - fastai
   - conda-forge
   - nodefaults
 dependencies:
+  - python==3.8.15
   - numpy
   - pandas
   - scipy
@@ -12,7 +13,7 @@ dependencies:
   - fastai::fastcore 
   - fastai::fastprogress
   - h5py
-  - xarray
+  - xarray==2022.3.0
   - pillow
   - pandas
   - tqdm
@@ -28,3 +29,4 @@ dependencies:
   - datashader
   - psutil
   - pre-commit
+  - jupyterlab

@@ -16,7 +16,7 @@ from pathlib import Path
 import xarray as xr
 
 # %% ../nbs/api/shared.ipynb 5
-from .data import CameraProperties, CircArrayBuffer
+from .data import CameraProperties, CircArrayBuffer, DateTimeBuffer
 
 from ctypes import c_int32, c_uint32, c_float, c_uint16, c_uint8
 from multiprocessing import Process, Queue, Array
@@ -120,7 +120,7 @@ def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix
 # %% ../nbs/api/shared.ipynb 9
 @patch
 def show(self:SharedDataCube,
-         plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
+         plot_lib:str = "matplotlib", # Plotting backend. This can be 'bokeh' or 'matplotlib'
          red_nm:float = 640.,    # Wavelength in nm to use as the red
          green_nm:float = 550.,  # Wavelength in nm to use as the green
          blue_nm:float = 470.,   # Wavelength in nm to use as the blue
@@ -186,7 +186,7 @@ def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
                          coords_dict:Dict,   # coordinates dictionary
                          attrs_dict:Dict,    # metadata dictionary
                          proc_lvl:int,       # processing level used
-                         savefig:bool=False  # save a preview figure of cube
+                         savefig:bool=True  # save a preview figure of cube
                         ):
     """Saves a NetCDF4 file given all the function parameters. Designed to be used with SharedOpenHSI which allocates a shared array."""
     
