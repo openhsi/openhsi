@@ -27,10 +27,21 @@ from .data import DataCube, CircArrayBuffer
 class OpenHSI(DataCube):
     """Base Class for the OpenHSI Camera."""
     def __init__(self, **kwargs):
+        
         super().__init__(**kwargs)
         super().set_processing_lvl(self.proc_lvl)
         if callable(getattr(self,"get_temp",None)):
             self.cam_temperatures = CircArrayBuffer(size=(self.n_lines,),dtype=np.float32)
+        
+        self.settings.update(kwargs) #store all inputs, so they can be updated.
+
+    def reinitialise(self, **kwargs):
+        """
+        Reinitialize the SharedDataCube part of this instance with new parameters.
+        Only update parameters provided in kwargs; preserve those that are not changed.
+        """
+        self.settings.update(kwargs)
+        OpenHSI.__init__(self, **self.settings)
         
     def __enter__(self):
         return self

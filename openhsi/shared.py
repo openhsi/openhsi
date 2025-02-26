@@ -67,7 +67,7 @@ class SharedDataCube(CameraProperties):
         self.current_swap = 0
         self.timestamps   = self.timestamps_swaps[self.current_swap]
         self.dc           = self.dc_swaps[self.current_swap]
-    
+        
     def __repr__(self):
         return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
 
@@ -263,6 +263,16 @@ class SharedOpenHSI(SharedDataCube):
             self.cam_temps_swaps  = [CircArrayBuffer(size=(self.n_lines,),dtype=np.float32),
                                      CircArrayBuffer(size=(self.n_lines,),dtype=np.float32)]
             self.cam_temperatures = self.cam_temps_swaps[self.current_swap]
+
+        self.settings.update(kwargs) #store all inputs, so they can be updated.
+
+    def reinitialise(self, **kwargs):
+        """
+        Reinitialize the SharedDataCube part of this instance with new parameters.
+        Only update parameters provided in kwargs; preserve those that are not changed.
+        """
+        self.settings.update(kwargs)
+        SharedOpenHSI.__init__(self, **self.settings)
         
     def __enter__(self):
         return self
