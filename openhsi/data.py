@@ -190,8 +190,9 @@ class CameraProperties():
 
     def dump(self, json_path:str = None, cal_path:str = None, use_pickle:bool = False):
         """Save the settings and calibration files"""
-        # with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
-        #     json.dump(self.settings, outfile,indent=4,)
+        with open(self.json_path[:-5]+"_updated.json" if json_path is None else json_path, 'w') as outfile:
+            json.dump(self.settings, outfile,indent=4,)
+            
         if use_pickle: # must provide filename for pickle.
             warnings.warn(
                 "Pickle calibration files are deprecated and will be removed in a "
