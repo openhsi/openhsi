@@ -100,7 +100,7 @@ imported from `openhsi.cameras` inplace of
 from openhsi.capture import *
 
 with SimulatedCamera(img_path="assets/rocky_beach.png", n_lines=1024, processing_lvl = 3,
-                    json_path="assets/cam_settings.json",pkl_path="assets/cam_calibration.pkl") as cam:
+                    json_path="assets/cam_settings.json",cal_path="assets/cam_calibration.nc") as cam:
     cam.collect()
     fig = cam.show(plot_lib="matplotlib",robust=True)
 ```

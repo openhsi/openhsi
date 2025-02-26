@@ -27,10 +27,21 @@ from .data import DataCube, CircArrayBuffer
 class OpenHSI(DataCube):
     """Base Class for the OpenHSI Camera."""
     def __init__(self, **kwargs):
+        
         super().__init__(**kwargs)
         super().set_processing_lvl(self.proc_lvl)
         if callable(getattr(self,"get_temp",None)):
             self.cam_temperatures = CircArrayBuffer(size=(self.n_lines,),dtype=np.float32)
+        
+        self.settings.update(kwargs) #store all inputs, so they can be updated.
+
+    def reinitialise(self, **kwargs):
+        """
+        Reinitialize the SharedDataCube part of this instance with new parameters.
+        Only update parameters provided in kwargs; preserve those that are not changed.
+        """
+        self.settings.update(kwargs)
+        OpenHSI.__init__(self, **self.settings)
         
     def __enter__(self):
         return self
@@ -191,14 +202,14 @@ class SimulatedCamera(OpenHSI):
 # %% ../nbs/api/capture.ipynb 30
 class ProcessRawDatacube(OpenHSI):
     """Post-process datacubes"""
-    def __init__(self, fname:str, processing_lvl:int, json_path:str, pkl_path:str, old_style:bool=False):
+    def __init__(self, fname:str, processing_lvl:int, json_path:str, cal_path:str, old_style:bool=False):
         """Post-process datacubes"""
         self.fname = fname
         self.buff = DataCube()
         self.buff.load_nc(fname, old_style=old_style)
         if hasattr(self.buff,"ds_temperatures"):
             self.get_temp = lambda: -999 # this function needs to exist to create temperature buffer
-        super().__init__(n_lines=self.buff.dc.data.shape[1], processing_lvl=processing_lvl, json_path=json_path, pkl_path=pkl_path)
+        super().__init__(n_lines=self.buff.dc.data.shape[1], processing_lvl=processing_lvl, json_path=json_path, cal_path=cal_path)
     
     def start_cam(self):
         pass
@@ -227,7 +238,7 @@ class ProcessRawDatacube(OpenHSI):
 @delegates()
 class ProcessDatacube(ProcessRawDatacube):
     """Post-process datacubes"""
-    def __init__(self, fname:str, processing_lvl:int, json_path:str, pkl_path:str, old_style:bool=False, **kwargs):
+    def __init__(self, fname:str, processing_lvl:int, json_path:str, cal_path:str, old_style:bool=False, **kwargs):
         """Post-process datacubes further!"""
         super().__init__(**kwargs)
     

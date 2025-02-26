@@ -64,7 +64,7 @@ def switched_camera(
     n_lines:int        = 128, # how many along-track pixels
     processing_lvl:int = 0, # desired processing done in real time
     json_path:str      = "/media/pi/fastssd/cals/flir_settings.json", # path to settings file
-    pkl_path:str       = "/media/pi/fastssd/cals/flir_calibration.pkl", # path to calibration file
+    cal_path:str       = "/media/pi/fastssd/cals/flir_calibration.pkl", # path to calibration file
     preconfig_meta:str = "/media/pi/fastssd/cals/preconfig_metadata.json", # path to metadata file
     ssd_dir:str        = "/media/pi/fastssd", # path to SSD
     toggle_interface   = None, # toggle_interface that controls collection
@@ -73,7 +73,7 @@ def switched_camera(
         
     cam = cam_class(n_lines = n_lines, processing_lvl = processing_lvl, 
                      json_path = json_path, 
-                     pkl_path  = pkl_path)
+                     cal_path  = cal_path)
     cam.start_cam()
     while toggle_interface.status == True: # collect while go button is on.
         cam.collect()
@@ -129,12 +129,17 @@ class FlirCameraBase():
     
     def set_exposure(self, exposure_ms:float):
         """sets the FLIR camera exposure time to `exposure_ms`."""
+
+        if exposure_ms < self.flircam.ExposureMinAbsVal_Float/1000:
+            exposure_ms = self.flircam.ExposureMinAbsVal_Float/1000
+
         self.settings["exposure_ms"] = exposure_ms
         
         self.flircam.AcquisitionFrameRateAuto = 'Off'
         self.flircam.AcquisitionFrameRateEnabled = True
         self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
         self.flircam.ExposureAuto = 'Off'
+
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
         
 @delegates()
