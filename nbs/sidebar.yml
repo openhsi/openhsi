@@ -23,6 +23,7 @@ website:
           - api/cameras/ximea.ipynb
       - section: tutorials
         contents:
+          - tutorials/convert_calibrations.ipynb
           - tutorials/calibrate_steps.ipynb
           - tutorials/custom_pipeline.ipynb
           - tutorials/installing_linux.ipynb
