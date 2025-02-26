@@ -278,8 +278,8 @@ class SettingsBuilderMixin():
     
     def update_intsphere_fit(self,
                              spec_rad_ref_data:str = "../assets/112704-1-1_1nm_data.csv", # path to integrating sphere cal file
-                             spec_rad_ref_luminance:int = 52_020,                      # reference luminance for integrating sphere
-                             show:bool = True,                                         # flag to show plot
+                             spec_rad_ref_luminance:float = 52_020.0,                     # reference luminance for integrating sphere
+                             show:bool = True,                                            # flag to show plot
                             ) -> hv.Curve:
 
         cal_data=np.genfromtxt(spec_rad_ref_data, delimiter=',', skip_header=1)
@@ -401,42 +401,67 @@ class SpectraPTController():
         self.lum_preset_dict=lum_preset_dict
         self.host=host
         self.port=port
+        self.socket = None
+        # self.connect()
+    
+    def connect(self):
+        """Establish a persistent socket connection."""
+        if self.socket is None:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.connect((self.host, self.port))
+    
+    def disconnect(self):
+        """Close the socket connection."""
+        if self.socket is not None:
+            self.socket.close()
+            self.socket = None
 
     # address and port of the SPECTRA PT-1000 S
     def client(self, msg:str) -> str:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.connect((self.host, self.port))
+        if self.socket is None:
+            raise ConnectionError("Client is not connected. Call connect() first.")
 
-            data = bytes.fromhex(hex(len(msg))[2:].zfill(8)) + msg.encode()
-            sock.sendall(data)
-            # print("[+] Sending {} to {}:{}".format(data, host, port))
+        data = bytes.fromhex(hex(len(msg))[2:].zfill(8)) + msg.encode()
+        self.socket.sendall(data)
+        # print("[+] Sending {} to {}:{}".format(data, host, port))
 
-            response1 = sock.recv(4096)
-            response2 = sock.recv(4096)
+        response1 = self.socket.recv(4096)
+        response2 = self.socket.recv(4096)
 
-            # print("[+] Received", repr(response2.decode('utf-8')))
+        # print("[+] Received", repr(response2.decode('utf-8')))
 
-            return response2.split(b";")[2]
+        return response2.split(b";")[2]
 
     def selectPreset(self, lumtarget:float) -> float:
+        self.connect()
         self.client(f"main:1:pre {self.lum_preset_dict[lumtarget]}")
         time.sleep(2)
         lum=collections.deque(maxlen=100)
 
         for i in range(100):
             lum.append(float(self.client("det:1:sca?")))
+            # print(f"Lum Rec: {lum}")
             time.sleep(0.01)
 
         while np.abs((np.mean(lum)-lumtarget)) > lumtarget*0.0025:
             lum.append(float(self.client("det:1:sca?")))
+            # print(f"Lum Rec: {lum}")
             time.sleep(0.1)
         
         playAlert()
-
+        self.disconnect()
         return np.abs((np.mean(lum)-lumtarget))
 
     def turnOnLamp(self):
+        self.connect()
         response=self.client("ps:1:out 1")
+        self.disconnect()
 
     def turnOffLamp(self):
+        self.connect()
         response=self.client("ps:1:out 0")
+        self.disconnect()
+
+    def __del__(self):
+        """Automatically disconnect the socket when the object is destroyed."""
+        self.disconnect()
