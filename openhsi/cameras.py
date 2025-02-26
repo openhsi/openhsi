@@ -129,12 +129,17 @@ class FlirCameraBase():
     
     def set_exposure(self, exposure_ms:float):
         """sets the FLIR camera exposure time to `exposure_ms`."""
+
+        if exposure_ms < self.flircam.ExposureMinAbsVal_Float/1000:
+            exposure_ms = self.flircam.ExposureMinAbsVal_Float/1000
+
         self.settings["exposure_ms"] = exposure_ms
         
         self.flircam.AcquisitionFrameRateAuto = 'Off'
         self.flircam.AcquisitionFrameRateEnabled = True
         self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
         self.flircam.ExposureAuto = 'Off'
+
         self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
         
 @delegates()
