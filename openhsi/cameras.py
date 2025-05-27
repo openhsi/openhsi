@@ -84,69 +84,191 @@ def switched_camera(
         
     cam.stop_cam()
 
-# %% ../nbs/api/cameras/flir.ipynb 6
+# %% ../nbs/api/cameras/flir.ipynb 7
+def set_camera_attribute(camera, attribute_name, value, alternatives=None, required=True):
+    """
+    Set a camera attribute with support for alternative attribute names.
+
+    FLIR cameras with different models or firmware versions may use slightly different
+    property names for the same functionality. This function attempts to set an attribute
+    using the primary name first, then falls back to alternative names if provided.
+
+    Args:
+        camera: Camera object
+        attribute_name: Primary attribute name to try
+        value: Value to set
+        alternatives: List of alternative attribute names to try if primary fails
+        required: If True, raise an error if none of the attributes exist
+
+    Returns:
+        bool: True if attribute was set successfully
+    """
+    attributes_to_try = [attribute_name]
+    if alternatives:
+        attributes_to_try.extend(alternatives)
+
+    for attr in attributes_to_try:
+        try:
+            if hasattr(camera, attr):
+                setattr(camera, attr, value)
+                return True
+        except Exception as e:
+            # Continue to next alternative
+            pass
+
+    if required:
+        # If we couldn't set the attribute but it's required, provide a helpful error
+        # message with possible matches to help users debug camera compatibility issues
+        available_attrs = dir(camera)
+        possible_matches = [attr for attr in available_attrs
+                           if any(alt.lower() in attr.lower()
+                                 for alt in attributes_to_try)]
+
+        if possible_matches:
+            msg = f"Failed to set {attribute_name}. Similar attributes: {possible_matches}"
+        else:
+            msg = f"Failed to set {attribute_name}. No similar attributes found."
+
+        raise AttributeError(msg)
+
+    return False
+
+def get_min_exposure(camera):
+    """
+    Get minimum exposure time in microseconds with graceful fallback.
+
+    Different FLIR camera models expose the minimum exposure time through different
+    property names. This function tries several known property names and provides
+    a reasonable default if none are found.
+
+    Args:
+        camera: Camera object
+
+    Returns:
+        float: Minimum exposure time in microseconds
+    """
+    # Different camera models may use any of these property names for minimum exposure
+    possible_attrs = ["ExposureMinAbsVal_Float", "ExposureMin", "ExposureTime.Min"]
+
+    for attr in possible_attrs:
+        try:
+            # Handle nested attributes like 'ExposureTime.Min'
+            if '.' in attr:
+                parts = attr.split('.')
+                obj = camera
+                for part in parts:
+                    obj = getattr(obj, part)
+                return obj
+            elif hasattr(camera, attr):
+                return getattr(camera, attr)
+        except Exception:
+            continue
+
+    # Fallback to a reasonable default if we can't find the min exposure
+    return 1.0  # 1 microsecond as a safe default
+
+
+# %% ../nbs/api/cameras/flir.ipynb 8
 @delegates()
 class FlirCameraBase():
-    """Interface for FLIR camera"""
-    
+    """Interface for FLIR camera
+
+        Any keyword-value pair arguments must match the those avaliable in settings file. FlirCamera expects the ones listed below:
+
+        - `win_resolution`: size of area on detector to readout (width, height)
+        - `win_offset`: offsets (x,y) from edge of detector for a selective
+        - `exposure_ms`: is the camera exposure time to use
+        - `pixel_format`: format of pixels readout sensor, ie Mono8, Mono10, Mono10p, Mono10Packed, Mono12, Mono12p, Mono12Packed, Mono16
+    """
+
     def __init__(self, **kwargs):
         """Initialise FLIR camera"""
         super().__init__(**kwargs)
-        
+
         from simple_pyspin import Camera
-        
+
         self.flircam = Camera()
         self.flircam.init()
-        self.flircam.GainAuto = 'Off'
-        self.flircam.Gain = 0
-        self.flircam.AcquisitionFrameRateAuto = 'Off'
-        self.flircam.AcquisitionFrameRateEnabled = True
-        self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
-    
-        self.flircam.ExposureAuto = 'Off'
-        self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
-        self.flircam.GammaEnabled = False
-        
-        self.flircam.Width = self.flircam.SensorWidth if self.settings["win_resolution"][1] == 0 else self.settings["win_resolution"][1]
-        self.flircam.Height = self.flircam.SensorHeight if self.settings["win_resolution"][0] == 0 else self.settings["win_resolution"][0]
-        self.flircam.OffsetY, self.flircam.OffsetX = self.settings["win_offset"]
 
-    
+        # Set gain settings
+        set_camera_attribute(self.flircam, "GainAuto", 'Off')
+        set_camera_attribute(self.flircam, "Gain", 0)
+
+        # Set frame rate settings
+        # Some cameras don't have AcquisitionFrameRateAuto, so we mark it as not required
+        set_camera_attribute(self.flircam, "AcquisitionFrameRateAuto", 'Off', required=False)
+
+        # Handle different naming conventions across camera models:
+        # - GS3 cameras use "AcquisitionFrameRateEnabled"
+        # - BFS cameras use "AcquisitionFrameRateEnable"
+        set_camera_attribute(self.flircam, "AcquisitionFrameRateEnabled", True,
+                            alternatives=["AcquisitionFrameRateEnable"])
+        set_camera_attribute(self.flircam, "AcquisitionFrameRate",
+                            int(min(1_000/(self.settings["exposure_ms"]+1), 120)))
+
+        # Set exposure settings
+        set_camera_attribute(self.flircam, "ExposureAuto", 'Off')
+        set_camera_attribute(self.flircam, "ExposureTime", self.settings["exposure_ms"]*1e3)
+
+        # Set gamma settings - another property with naming variations across models
+        # - GS3 cameras use "GammaEnabled"
+        # - BFS cameras use "GammaEnable"
+        set_camera_attribute(self.flircam, "GammaEnabled", False,
+                            alternatives=["GammaEnable"], required=False)
+
+        # Set window settings
+        width = self.flircam.SensorWidth if self.settings["win_resolution"][1] == 0 else self.settings["win_resolution"][1]
+        height = self.flircam.SensorHeight if self.settings["win_resolution"][0] == 0 else self.settings["win_resolution"][0]
+
+        set_camera_attribute(self.flircam, "Width", width)
+        set_camera_attribute(self.flircam, "Height", height)
+
+        offset_y, offset_x = self.settings["win_offset"]
+        set_camera_attribute(self.flircam, "OffsetY", offset_y)
+        set_camera_attribute(self.flircam, "OffsetX", offset_x)
+
     def start_cam(self):
         self.flircam.start()
-    
+
     def stop_cam(self):
         self.flircam.stop()
-        
+
     def __close__(self):
         self.flircam.close()
-    
+
     def get_img(self) -> np.ndarray:
         return self.flircam.get_array()
-    
+
     def get_temp(self) -> float:
         return self.flircam.DeviceTemperature
-    
+
     def set_exposure(self, exposure_ms:float):
         """sets the FLIR camera exposure time to `exposure_ms`."""
 
-        if exposure_ms < self.flircam.ExposureMinAbsVal_Float/1000:
-            exposure_ms = self.flircam.ExposureMinAbsVal_Float/1000
+        # Get minimum exposure in ms using our helper function that works across camera models
+        min_exposure_ms = get_min_exposure(self.flircam) / 1000
+
+        if exposure_ms < min_exposure_ms:
+            exposure_ms = min_exposure_ms
 
         self.settings["exposure_ms"] = exposure_ms
-        
-        self.flircam.AcquisitionFrameRateAuto = 'Off'
-        self.flircam.AcquisitionFrameRateEnabled = True
-        self.flircam.AcquisitionFrameRate = int( min(1_000/(self.settings["exposure_ms"]+1),120) )
-        self.flircam.ExposureAuto = 'Off'
 
-        self.flircam.ExposureTime = self.settings["exposure_ms"]*1e3 # convert to us
-        
+        # Update frame rate settings with model-agnostic approach
+        set_camera_attribute(self.flircam, "AcquisitionFrameRateAuto", 'Off', required=False)
+        set_camera_attribute(self.flircam, "AcquisitionFrameRateEnabled", True,
+                            alternatives=["AcquisitionFrameRateEnable"])
+        set_camera_attribute(self.flircam, "AcquisitionFrameRate",
+                            int(min(1_000/(self.settings["exposure_ms"]+1), 120)))
+
+        # Update exposure settings
+        set_camera_attribute(self.flircam, "ExposureAuto", 'Off')
+        set_camera_attribute(self.flircam, "ExposureTime", self.settings["exposure_ms"]*1e3)
+
 @delegates()
 class FlirCamera(FlirCameraBase, OpenHSI):
     pass
 
-# %% ../nbs/api/cameras/flir.ipynb 9
+# %% ../nbs/api/cameras/flir.ipynb 12
 @delegates()
 class SharedFlirCamera(FlirCameraBase, SharedOpenHSI):
     pass
