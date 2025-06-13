@@ -21,6 +21,7 @@ from typing import Iterable, Union, Callable, List, TypeVar, Generic, Tuple, Opt
 import json
 import pickle
 from datetime import datetime, timezone, timedelta
+import time
 from pathlib import Path
 import warnings
 import pprint
@@ -483,26 +484,50 @@ def pipeline(self:CameraProperties, x:np.ndarray) -> np.ndarray:
     return x
 
 # %% ../nbs/api/data.ipynb 36
-class DateTimeBuffer():
-    """Records timestamps in UTC time."""
-    def __init__(self, n:int = 16):
-        """Initialise a nx1 array and write index"""
-        self.data = np.arange(n).astype(datetime)
+class DateTimeBuffer:
+    """Records timestamps in UTC time as datetime64[ns] for efficient storage and conversion."""
+    
+    def __init__(self, n: int = 16):
+        """Initialize buffer for n timestamps stored as datetime64[ns]."""
+        self.data = np.arange(0,n,1,dtype='datetime64[ns]')
         self.n = n
         self.write_pos = 0
-        
-    def __getitem__(self, key:slice) -> datetime:
-        return self.data[key]
-
+        self.count = 0  # Track how many timestamps we've recorded
+    
+    def __getitem__(self, key) -> Union[datetime, np.ndarray]:
+        """Access timestamps as Python datetime objects (for strftime compatibility)."""
+        if isinstance(key, int):
+            # Single index - return datetime object
+            if key >= self.count or key < -self.count:
+                raise IndexError(f"Index {key} out of range")
+            
+            if key < 0:
+                key = self.count + key  # Handle negative indexing
+                
+            dt64 = self.data[key]
+            dt_us = dt64.astype('datetime64[us]')
+            return dt_us.astype(datetime).replace(tzinfo=timezone.utc)
+        else:
+            # Slice or array access - return array of datetime objects
+            slice_data = self.data[key]
+            if slice_data.ndim == 0:  # Single element from fancy indexing
+                dt_us = slice_data.astype('datetime64[us]')
+                return dt_us.astype(datetime).replace(tzinfo=timezone.utc)
+            else:
+                # Multiple elements
+                return np.array([
+                    dt64.astype('datetime64[us]').astype(datetime).replace(tzinfo=timezone.utc)
+                    for dt64 in slice_data
+                ])
+    
     def update(self):
-        """Stores current UTC time in an internal buffer when this method is called."""
-        ts = datetime.timestamp(datetime.now())
-        self.data[self.write_pos] = datetime.fromtimestamp(ts, tz=timezone.utc)
-        self.write_pos += 1
-
-        # Loop back if buffer is full
-        if self.write_pos == self.n:
-            self.write_pos = 0
+        """Store current UTC time with nanosecond precision."""
+        # Convert nanoseconds to datetime64[ns] directly
+        ns_timestamp = time.time_ns()
+        self.data[self.write_pos] = np.datetime64(ns_timestamp, 'ns')
+        self.write_pos = (self.write_pos + 1) % self.n
+        if self.count < self.n:
+            self.count += 1
             
 
 # %% ../nbs/api/data.ipynb 40
@@ -571,16 +596,14 @@ def save(self:DataCube,
         self.coords = dict(wavelength=(["wavelength"],wavelengths),
                            x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
-                           time=(["time"],self.timestamps.data.astype(np.datetime64)),
+                           time=(["time"],self.timestamps.data),
                            temperature=(["temperature"],self.cam_temperatures.data))
     else:
         self.coords = dict(wavelength=(["wavelength"],wavelengths),
                            x=(["x"],np.arange(self.dc.data.shape[0])),
                            y=(["y"],np.arange(self.dc.data.shape[1])),
-                           time=(["time"],self.timestamps.data.astype(np.datetime64))) # time coordinates can only be saved in np.datetime64 format
+                           time=(["time"],self.timestamps.data)) # time coordinates can only be saved in np.datetime64 format
 
-    
-    
     if old_style: # cross-track, along-track, wavelength
         self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], self.dc.data)),
                              coords=self.coords, 
@@ -644,12 +667,13 @@ def load_nc(self:DataCube,
             self.dc.data = np.moveaxis(np.array(ds.datacube), 0, -1)
         print(f"Allocated {mem_sz:.02f} MB of RAM for the load buffer. There was {mem_thresh/.8:.2f} MB available.")
 
-        self.ds_timestamps = ds.time.to_numpy() # type is np.datetime64. convert to datetime.datetime
-        unix_epoch = np.datetime64(0, 's')
-        one_second = np.timedelta64(1, 's')
-        seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
-        self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
-        self.timestamps.data = self.ds_timestamps
+        # self.ds_timestamps = ds.time.to_numpy() # type is np.datetime64. convert to datetime.datetime
+        # unix_epoch = np.datetime64(0, 's')
+        # one_second = np.timedelta64(1, 's')
+        # seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
+        # self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
+        # self.timestamps.data = self.ds_timestamps
+        self.timestamps.data=ds.time.to_numpy()
         self.ds_metadata = ds.attrs
 
         if hasattr(ds,"temperature"):
