@@ -110,16 +110,19 @@ def set_camera_attribute(camera, attribute_name, value, alternatives=None, requi
     for attr in attributes_to_try:
         try:
             if hasattr(camera, attr):
+                # print(f"{attr} set to {value}")
                 setattr(camera, attr, value)
+                
                 return True
         except Exception as e:
             # Continue to next alternative
+            print(f"Error:  {e}")
             pass
 
     if required:
         # If we couldn't set the attribute but it's required, provide a helpful error
         # message with possible matches to help users debug camera compatibility issues
-        available_attrs = dir(camera)
+        available_attrs=camera.camera_node_types.keys()
         possible_matches = [attr for attr in available_attrs
                            if any(alt.lower() in attr.lower()
                                  for alt in attributes_to_try)]
@@ -133,6 +136,7 @@ def set_camera_attribute(camera, attribute_name, value, alternatives=None, requi
 
     return False
 
+# %% ../nbs/api/cameras/flir.ipynb 9
 def get_min_exposure(camera):
     """
     Get minimum exposure time in microseconds with graceful fallback.
@@ -167,8 +171,7 @@ def get_min_exposure(camera):
     # Fallback to a reasonable default if we can't find the min exposure
     return 1.0  # 1 microsecond as a safe default
 
-
-# %% ../nbs/api/cameras/flir.ipynb 8
+# %% ../nbs/api/cameras/flir.ipynb 11
 @delegates()
 class FlirCameraBase():
     """Interface for FLIR camera
@@ -189,6 +192,9 @@ class FlirCameraBase():
 
         self.flircam = Camera()
         self.flircam.init()
+
+        while not self.flircam.initialized:
+            sleep(0.1)
 
         # Set gain settings
         set_camera_attribute(self.flircam, "GainAuto", 'Off')
@@ -268,7 +274,7 @@ class FlirCameraBase():
 class FlirCamera(FlirCameraBase, OpenHSI):
     pass
 
-# %% ../nbs/api/cameras/flir.ipynb 12
+# %% ../nbs/api/cameras/flir.ipynb 15
 @delegates()
 class SharedFlirCamera(FlirCameraBase, SharedOpenHSI):
     pass
