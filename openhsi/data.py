@@ -564,14 +564,14 @@ class DataCube(CameraProperties):
     def __repr__(self):
         return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
 
-# %% ../nbs/api/data.ipynb 42
+# %% ../nbs/api/data.ipynb 43
 @patch
 def put(self:DataCube, x:np.ndarray):
     """Applies the composed tranforms and writes the 2D array into the data cube. Stores a timestamp for each push."""
     self.timestamps.update()
     self.dc.put( self.pipeline(x) )
 
-# %% ../nbs/api/data.ipynb 43
+# %% ../nbs/api/data.ipynb 44
 @patch
 def to_xarray(self:DataCube, 
               metadata:dict = None,      # Optional metadata dictionary to include as attrs
@@ -675,7 +675,7 @@ def save(self:DataCube,
     
     return (nc_save_path, png_save_path)
 
-# %% ../nbs/api/data.ipynb 47
+# %% ../nbs/api/data.ipynb 46
 @patch
 def show(self:DataCube, 
          plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
@@ -747,7 +747,7 @@ def show(self:DataCube,
         return rgb_hv.opts(fig_inches=22).opts(
             xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 
-# %% ../nbs/api/data.ipynb 50
+# %% ../nbs/api/data.ipynb 47
 @patch
 def load_nc(self:DataCube, 
             nc_path:str,            # Path to a NetCDF4 file
