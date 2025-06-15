@@ -573,13 +573,86 @@ def put(self:DataCube, x:np.ndarray):
 
 # %% ../nbs/api/data.ipynb 43
 @patch
+def to_xarray(self:DataCube, 
+              metadata:dict = None,      # Optional metadata dictionary to include as attrs
+              old_style:bool = False     # Order of axis: True for (cross-track, along-track, wavelength), False for (wavelength, cross-track, along-track)
+             ) -> xr.Dataset:
+    """Convert DataCube data to xarray Dataset format and stores at DataCube.nc, also returns the Dataset instead"""
+    
+    # Handle metadata - use provided metadata, or existing ds_metadata, or empty dict
+    if metadata is not None:
+        attrs = metadata.copy()
+    elif hasattr(self, "ds_metadata"):
+        attrs = self.ds_metadata.copy()
+    else:
+        attrs = {}
+
+    # Get wavelengths - use binned_wavelengths if available, otherwise create indices
+    wavelengths = self.binned_wavelengths if hasattr(self, "binned_wavelengths") else np.arange(self.dc.data.shape[2])
+
+    # Create coordinates dictionary
+    if hasattr(self, "cam_temperatures"):
+        coords = dict(wavelength=(["wavelength"], wavelengths),
+                     x=(["x"], np.arange(self.dc.data.shape[0])),
+                     y=(["y"], np.arange(self.dc.data.shape[1])),
+                     time=(["time"], self.timestamps.data),
+                     temperature=(["temperature"], self.cam_temperatures.data))
+    else:
+        coords = dict(wavelength=(["wavelength"], wavelengths),
+                     x=(["x"], np.arange(self.dc.data.shape[0])),
+                     y=(["y"], np.arange(self.dc.data.shape[1])),
+                     time=(["time"], self.timestamps.data))
+
+    # Create Dataset with appropriate axis order
+    if old_style:  # cross-track, along-track, wavelength
+        ds = xr.Dataset(data_vars=dict(datacube=(["x", "y", "wavelength"], self.dc.data)),
+                       coords=coords, 
+                       attrs=attrs)
+    else:  # wavelength, cross-track, along-track (default)
+        ds = xr.Dataset(data_vars=dict(datacube=(["wavelength", "x", "y"], np.moveaxis(self.dc.data, -1, 0))),
+                       coords=coords, 
+                       attrs=attrs)
+
+    # Add coordinate metadata
+    ds.x.attrs["long_name"] = "cross-track"
+    ds.x.attrs["units"] = "pixels"
+    ds.x.attrs["description"] = "cross-track spatial coordinates"
+    ds.y.attrs["long_name"] = "along-track"
+    ds.y.attrs["units"] = "pixels"
+    ds.y.attrs["description"] = "along-track spatial coordinates"
+    ds.time.attrs["long_name"] = "along-track"
+    ds.time.attrs["description"] = "along-track spatial coordinates"
+    ds.wavelength.attrs["long_name"] = "wavelength_nm"
+    ds.wavelength.attrs["units"] = "nanometers"
+    ds.wavelength.attrs["description"] = "wavelength in nanometers."
+    
+    if hasattr(self, "cam_temperatures"):
+        ds.temperature.attrs["long_name"] = "camera temperature"
+        ds.temperature.attrs["units"] = "degrees Celsius"
+        ds.temperature.attrs["description"] = "temperature of sensor at time of image capture"
+
+    # Add datacube variable metadata
+    ds.datacube.attrs["long_name"] = "hyperspectral datacube"
+    ds.datacube.attrs["units"] = "digital number"
+    if self.proc_lvl in (4, 5, 7):
+        ds.datacube.attrs["units"] = "uW/cm^2/sr/nm"
+    elif self.proc_lvl in (6, 8):
+        ds.datacube.attrs["units"] = "percentage reflectance"
+    ds.datacube.attrs["description"] = "hyperspectral datacube"
+
+    self.nc=ds
+
+    return self.nc
+
+# %% ../nbs/api/data.ipynb 45
+@patch
 def save(self:DataCube, 
          save_dir:str,                 # Path to folder where all datacubes will be saved at
          preconfig_meta_path:str=None, # Path to a .json file that includes metadata fields to be saved inside datacube
          prefix:str="",                # Prepend a custom prefix to your file name
          suffix:str="",                # Append a custom suffix to your file name
-         old_style:bool=False          # Order of axis
-        ):     
+         old_style:bool=False          # Order of axis: True for (cross-track, along-track, wavelength), False for (wavelength, cross-track, along-track)
+        ) -> Tuple[str, str]:     
     """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time."""
     if preconfig_meta_path is not None:
         with open(preconfig_meta_path) as json_file:
@@ -590,59 +663,91 @@ def save(self:DataCube,
     self.directory = Path(f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}/").mkdir(parents=True, exist_ok=True)
     self.directory = f"{save_dir}/{self.timestamps[0].strftime('%Y_%m_%d')}"
 
-    wavelengths = self.binned_wavelengths if hasattr(self, "binned_wavelengths") else np.arange(self.dc.data.shape[2])
-
-    if hasattr(self,"cam_temperatures"):
-        self.coords = dict(wavelength=(["wavelength"],wavelengths),
-                           x=(["x"],np.arange(self.dc.data.shape[0])),
-                           y=(["y"],np.arange(self.dc.data.shape[1])),
-                           time=(["time"],self.timestamps.data),
-                           temperature=(["temperature"],self.cam_temperatures.data))
-    else:
-        self.coords = dict(wavelength=(["wavelength"],wavelengths),
-                           x=(["x"],np.arange(self.dc.data.shape[0])),
-                           y=(["y"],np.arange(self.dc.data.shape[1])),
-                           time=(["time"],self.timestamps.data)) # time coordinates can only be saved in np.datetime64 format
-
-    if old_style: # cross-track, along-track, wavelength
-        self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], self.dc.data)),
-                             coords=self.coords, 
-                             attrs=attrs)  
-    else: # wavelength, cross-track, along-track
-        self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
-                             coords=self.coords, 
-                             attrs=attrs)
-
-    """provide metadata to NetCDF coordinates"""
-    self.nc.x.attrs["long_name"]   = "cross-track"
-    self.nc.x.attrs["units"]       = "pixels"
-    self.nc.x.attrs["description"] = "cross-track spatial coordinates"
-    self.nc.y.attrs["long_name"]   = "along-track"
-    self.nc.y.attrs["units"]       = "pixels"
-    self.nc.y.attrs["description"] = "along-track spatial coordinates"
-    self.nc.time.attrs["long_name"]   = "along-track"
-    self.nc.time.attrs["description"] = "along-track spatial coordinates"
-    self.nc.wavelength.attrs["long_name"]   = "wavelength_nm"
-    self.nc.wavelength.attrs["units"]       = "nanometers"
-    self.nc.wavelength.attrs["description"] = "wavelength in nanometers."
-    if hasattr(self,"cam_temperatures"):
-        self.nc.temperature.attrs["long_name"] = "camera temperature"
-        self.nc.temperature.attrs["units"] = "degrees Celsius"
-        self.nc.temperature.attrs["description"] = "temperature of sensor at time of image capture"
-
-    self.nc.datacube.attrs["long_name"]   = "hyperspectral datacube"
-    self.nc.datacube.attrs["units"]       = "digital number"
-    if self.proc_lvl in (4,5,7): self.nc.datacube.attrs["units"] = "uW/cm^2/sr/nm"
-    elif self.proc_lvl in (6,8): self.nc.datacube.attrs["units"] = "percentage reflectance"
-    self.nc.datacube.attrs["description"] = "hyperspectral datacube"
-
-    self.nc.to_netcdf(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc")
+    self.to_xarray(metadata=preconfig_meta_path, old_style=old_style)
+    
+    nc_save_path=f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.nc"
+    self.nc.to_netcdf(nc_save_path)
 
     fig = self.show("matplotlib",hist_eq=True,quick_imshow=True)
-    fig.savefig(f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png",
-               bbox_inches='tight', pad_inches=0)
 
-# %% ../nbs/api/data.ipynb 44
+    png_save_path=f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png"
+    fig.savefig(png_save_path, bbox_inches='tight', pad_inches=0)
+    
+    return (nc_save_path, png_save_path)
+
+# %% ../nbs/api/data.ipynb 47
+@patch
+def show(self:DataCube, 
+         plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
+         red_nm:Tuple[float, float] = (640, 670),    # Wavelength band in nm to use as the red channel (start, end)
+         green_nm:Tuple[float, float] = (530, 590),  # Wavelength band in nm to use as the green channel (start, end)
+         blue_nm:Tuple[float, float] = (450, 510),   # Wavelength band in nm to use as the blue channel (start, end)
+         robust:Union[bool,int] = False, # Saturated linear stretch. E.g. setting `robust` to 2 will show the 2-98% percentile. Setting to `True` will default to `robust`=2. Robust to outliers
+         hist_eq:bool = False,   # Choose to plot using histogram equilisation
+         quick_imshow:bool = False, # Used to skip holoviews and use matplotlib for a static plot
+        ) -> "Image": # a bokeh or matplotlib plot
+    """Generate an RGB image from chosen RGB wavelength bands with histogram equalisation or percentile options. 
+    RGB channels are created by averaging over specified wavelength ranges rather than single wavelengths for better SNR.
+    The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib". 
+    `quick_imshow` is used for saving figures quickly but cannot be used to make interactive plots. 
+    Automatically creates xarray Dataset if not already available via to_xarray() method."""
+    
+    # Ensure xarray Dataset is available
+    if getattr(self, 'nc', None) is not None:
+        pass
+    else:
+        self.to_xarray()
+
+    rgb = np.zeros( (*self.nc.datacube.shape[1:3],3), dtype=np.float32)
+    if hasattr(self, "binned_wavelengths"):
+        # Use wavelength band averaging for each RGB channel
+        rgb[...,0]  = self.nc.datacube.sel(wavelength=slice(*red_nm)).mean(dim='wavelength')
+        rgb[...,1]  = self.nc.datacube.sel(wavelength=slice(*green_nm)).mean(dim='wavelength')
+        rgb[...,2]  = self.nc.datacube.sel(wavelength=slice(*blue_nm)).mean(dim='wavelength')   
+    else:
+        # Fallback to grayscale if no wavelength calibration
+        rgb[...,0] = self.nc.datacube.mean(dim='wavelength')
+        rgb[...,1] = rgb[...,0]
+        rgb[...,2] = rgb[...,0]
+
+    if robust and not hist_eq: # scale everything to the a saturated percentile
+        if type(robust) is bool: robust = 2
+        vmax = np.nanpercentile(rgb, 100-robust)
+        vmin = np.nanpercentile(rgb, robust)
+        rgb = ((rgb.astype("f8") - vmin) / (vmax - vmin)).astype("f4")
+        rgb = np.minimum(np.maximum(rgb, 0), 1)
+    elif hist_eq and not robust:
+        img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
+        cdf = img_hist.cumsum() # cumulative distribution function
+        cdf = 1. * cdf / cdf[-1] # normalize
+        img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
+        rgb = img_eq.reshape(rgb.shape)
+    elif robust and hist_eq:
+        warnings.warn("Cannot mix robust with histogram equalisation. No RGB adjustments will be made.",stacklevel=2)
+        rgb /= np.max(rgb)
+    else:
+        rgb /= np.max(rgb)
+    
+    if quick_imshow:
+        # Improved aspect ratio calculation for quick matplotlib plots
+        fig, ax = plt.subplots(figsize=(3,3*rgb.shape[0]/rgb.shape[1]))
+        ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
+        return fig
+
+    import holoviews as hv
+    hv.extension(plot_lib,logo=False)
+    rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
+                     rgb[:,:,0],rgb[:,:,1],rgb[:,:,2]))
+
+    if plot_lib == "bokeh":
+        # Improved aspect ratio handling for bokeh plots
+        return rgb_hv.opts(width=500,height=round(250*rgb.shape[0]/rgb.shape[1]),frame_height=round(250*rgb.shape[0]/rgb.shape[1])).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+    else: # plot_lib == "matplotlib"
+        return rgb_hv.opts(fig_inches=22).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+
+# %% ../nbs/api/data.ipynb 50
 @patch
 def load_nc(self:DataCube, 
             nc_path:str,            # Path to a NetCDF4 file
@@ -682,63 +787,3 @@ def load_nc(self:DataCube,
             self.cam_temperatures.data = self.ds_temperatures
         self.binned_wavelengths = np.array(ds.wavelength)
         self.dc.slots_left      = 0 # indicate that the data buffer is full
-
-# %% ../nbs/api/data.ipynb 45
-@patch
-def show(self:DataCube, 
-         plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
-         red_nm:float = 640.,    # Wavelength in nm to use as the red
-         green_nm:float = 550.,  # Wavelength in nm to use as the green
-         blue_nm:float = 470.,   # Wavelength in nm to use as the blue
-         robust:Union[bool,int] = False, # Saturated linear stretch. E.g. setting `robust` to 2 will show the 2-98% percentile. Setting to `True` will default to `robust`=2. Robust to outliers
-         hist_eq:bool = False,   # Choose to plot using histogram equilisation
-         quick_imshow:bool = False, # Used to skip holoviews and use matplotlib for a static plot
-        ) -> "Image": # a bokeh or matplotlib plot
-    """Generate an RGB image from chosen RGB wavelengths with histogram equalisation or percentile options. 
-    The plotting backend can be specified by `plot_lib` and can be "bokeh" or "matplotlib". 
-    `quick_imshow` is used for saving figures quickly but cannot be used to make interactive plots. """
-
-    rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
-    if hasattr(self, "binned_wavelengths"):
-        rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]
-        rgb[...,1] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-green_nm))]
-        rgb[...,2] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-blue_nm))]
-    else:
-        rgb[...,0] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-        rgb[...,1] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-        rgb[...,2] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-
-    if robust and not hist_eq: # scale everything to the a saturated percentile
-        if type(robust) is bool: robust = 2
-        vmax = np.nanpercentile(rgb, 100-robust)
-        vmin = np.nanpercentile(rgb, robust)
-        rgb = ((rgb.astype("f8") - vmin) / (vmax - vmin)).astype("f4")
-        rgb = np.minimum(np.maximum(rgb, 0), 1)
-    elif hist_eq and not robust:
-        img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
-        cdf = img_hist.cumsum() # cumulative distribution function
-        cdf = 1. * cdf / cdf[-1] # normalize
-        img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
-        rgb = img_eq.reshape(rgb.shape)
-    elif robust and hist_eq:
-        warnings.warn("Cannot mix robust with histogram equalisation. No RGB adjustments will be made.",stacklevel=2)
-        rgb /= np.max(rgb)
-    else:
-        rgb /= np.max(rgb)
-
-    if quick_imshow:
-        fig, ax = plt.subplots(figsize=(12,3))
-        ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
-        return fig
-
-    import holoviews as hv
-    hv.extension(plot_lib,logo=False)
-    rgb_hv = hv.RGB((np.arange(rgb.shape[1]),np.arange(rgb.shape[0]),
-                     rgb[:,:,0],rgb[:,:,1],rgb[:,:,2]))
-
-    if plot_lib == "bokeh":
-        return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(
-            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
-    else: # plot_lib == "matplotlib"
-        return rgb_hv.opts(fig_inches=22).opts(
-            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
