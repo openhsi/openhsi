@@ -18,6 +18,7 @@ website:
       - section: cameras
         contents:
           - api/cameras/cameras.ipynb
+          - api/cameras/simulated.ipynb
           - api/cameras/lucidvision.ipynb
           - api/cameras/flir.ipynb
           - api/cameras/ximea.ipynb
