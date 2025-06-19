@@ -741,8 +741,8 @@ def show(self:DataCube,
 
     if plot_lib == "bokeh":
         # Improved aspect ratio handling for bokeh plots
-        return rgb_hv.opts(width=500,height=round(250*rgb.shape[0]/rgb.shape[1]),frame_height=round(250*rgb.shape[0]/rgb.shape[1])).opts(
-            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+        return rgb_hv.opts(width=500,height=round(500*rgb.shape[0]/rgb.shape[1])).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True) #frame_height=round(250*rgb.shape[0]/rgb.shape[1])
     else: # plot_lib == "matplotlib"
         return rgb_hv.opts(fig_inches=22).opts(
             xlabel="along-track",ylabel="cross-track",invert_yaxis=True)

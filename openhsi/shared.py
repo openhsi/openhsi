@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['SharedCircArrayBuffer', 'SharedDataCube', 'save_shared_datacube', 'SharedOpenHSI']
 
-# %% ../nbs/api/shared.ipynb 4
+# %% ../nbs/api/shared.ipynb 3
 from fastcore.foundation import patch
 from fastcore.meta import delegates
 import numpy as np
@@ -15,13 +15,13 @@ from functools import reduce
 from pathlib import Path
 import xarray as xr
 
-# %% ../nbs/api/shared.ipynb 5
-from .data import CameraProperties, CircArrayBuffer, DateTimeBuffer
+# %% ../nbs/api/shared.ipynb 4
+from .data import CameraProperties, CircArrayBuffer, DateTimeBuffer, DataCube
 
 from ctypes import c_int32, c_uint32, c_float, c_uint16, c_uint8
 from multiprocessing import Process, Queue, Array
 
-# %% ../nbs/api/shared.ipynb 6
+# %% ../nbs/api/shared.ipynb 5
 class SharedCircArrayBuffer(CircArrayBuffer):
     """Circular FIFO Buffer implementation on multiprocessing.Array. Each put/get is a (n-1)darray."""
     
@@ -39,7 +39,7 @@ class SharedCircArrayBuffer(CircArrayBuffer):
         self.slots_left = self.size[self.axis]
         self.show_func = show_func
 
-# %% ../nbs/api/shared.ipynb 7
+# %% ../nbs/api/shared.ipynb 6
 @delegates()
 class SharedDataCube(CameraProperties):
     """Facilitates the collection, viewing, and saving of hyperspectral datacubes using
@@ -69,7 +69,7 @@ class SharedDataCube(CameraProperties):
         self.dc           = self.dc_swaps[self.current_swap]
         
     def __repr__(self):
-        return f"DataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
+        return f"SharedDataCube: shape = {self.dc_shape}, Processing level = {self.proc_lvl}\n"
 
     def put(self, x:np.ndarray):
         """Applies the composed tranforms and writes the 2D array into the data cube. Stores a timestamp for each push."""
@@ -77,9 +77,9 @@ class SharedDataCube(CameraProperties):
         self.dc.put( self.pipeline(x) )
  
 
-# %% ../nbs/api/shared.ipynb 8
+# %% ../nbs/api/shared.ipynb 7
 @patch
-def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str="", old_style:bool=True) -> Process:
+def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix:str="", suffix:str="", old_style:bool=True, savefig:bool=False) -> Process:
     """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time.
     Save is done in a separate multiprocess.Process."""
     if preconfig_meta_path is not None:
@@ -106,7 +106,7 @@ def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix
         
     fname = f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}"
     
-    p = Process(target=save_shared_datacube, args=(fname,self.dc.shared_data,self.dtype_out,self.dc.size,self.coords,attrs,self.proc_lvl,old_style))
+    p = Process(target=save_shared_datacube, args=(fname,self.dc.shared_data,self.dtype_out,self.dc.size,self.coords,attrs,self.proc_lvl,old_style,savefig))
     p.start()
     print(f"Saving {fname} in another process.")
     
@@ -117,7 +117,7 @@ def save(self:SharedDataCube, save_dir:str, preconfig_meta_path:str=None, prefix
         self.cam_temperatures = self.cam_temps_swaps[self.current_swap]
     return p
 
-# %% ../nbs/api/shared.ipynb 9
+# %% ../nbs/api/shared.ipynb 8
 @patch
 def show(self:SharedDataCube,
          plot_lib:str = "bokeh", # Plotting backend. This can be 'bokeh' or 'matplotlib'
@@ -135,14 +135,11 @@ def show(self:SharedDataCube,
     but cannot be used to make interactive plots. """
 
     rgb = np.zeros( (*self.dc.data.shape[:2],3), dtype=np.float32)
-    if hasattr(self, "binned_wavelengths"):
-        rgb[...,0] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-red_nm))]
-        rgb[...,1] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-green_nm))]
-        rgb[...,2] = self.dc.data[:,:,np.argmin(np.abs(self.binned_wavelengths-blue_nm))]
-    else:
-        rgb[...,0] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-        rgb[...,1] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
-        rgb[...,2] = self.dc.data[:,:,int(self.dc.data.shape[2] / 2)]
+    
+    # keep simple for SharedDataCube, no real RGB
+    rgb[...,0] = np.mean(self.dc.data,2)
+    rgb[...,1] = rgb[...,0]
+    rgb[...,2] = rgb[...,0]
 
     if robust and not hist_eq: # scale everything to the 2% and 98% percentile
         vmax = np.nanpercentile(rgb, 98)
@@ -172,13 +169,14 @@ def show(self:SharedDataCube,
                      rgb[:,:,0],rgb[:,:,1],rgb[:,:,2]))
 
     if plot_lib == "bokeh":
-        return rgb_hv.opts(width=1000,height=250,frame_height=int(rgb.shape[0]//3)).opts(**plot_kwargs).opts(
+        # Improved aspect ratio handling for bokeh plots
+        return rgb_hv.opts(width=500,height=round(250*rgb.shape[0]/rgb.shape[1]),frame_height=round(250*rgb.shape[0]/rgb.shape[1])).opts(
             xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
     else: # plot_lib == "matplotlib"
-        return rgb_hv.opts(fig_inches=22).opts(**plot_kwargs).opts(
+        return rgb_hv.opts(fig_inches=22).opts(
             xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
 
-# %% ../nbs/api/shared.ipynb 10
+# %% ../nbs/api/shared.ipynb 9
 def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
                          shared_array:Array, # multiprocessing.Array shared array 
                          c_dtype:type,       # numpy data type
@@ -194,21 +192,13 @@ def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
     data = np.frombuffer(shared_array.get_obj(),dtype=c_dtype)
     data = data.reshape(shape)
 
-#     nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(data, -1, 0) )),
-#                          coords=coords_dict, attrs=attrs_dict)  
-    
-    nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], data)),
-                    coords=coords_dict, 
-                    attrs=attrs_dict)
-    
     if old_style: # cross-track, along-track, wavelength
-        self.nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], self.dc.data)),
-                             coords=coords_dict, 
-                             attrs=attrs_dict)  
+        nc = xr.Dataset(data_vars=dict(datacube=(["x","y","wavelength"], data)),
+                        coords=coords_dict, 
+                        attrs=attrs_dict)
     else: # wavelength, cross-track, along-track
-        self.nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(self.dc.data, -1, 0) )),
-                             coords=coords_dict, 
-                             attrs=attrs_dict)
+        nc = xr.Dataset(data_vars=dict(datacube=(["wavelength","x","y"],np.moveaxis(data, -1, 0) )),
+                         coords=coords_dict, attrs=attrs_dict)
     
     """provide metadata to NetCDF coordinates"""
     nc.x.attrs["long_name"]   = "cross-track"
@@ -235,24 +225,32 @@ def save_shared_datacube(fname:str,          # NetCDF4 file name (without .nc)
     nc.datacube.attrs["description"] = "hyperspectral datacube"
     
     nc.to_netcdf(fname+".nc")
-    
+  
     if savefig:
-        # quick save the histogram equalised RGB
         rgb = np.zeros( (*shape[:2],3), dtype=np.float32)
-        rgb[...,0] = data[:,:,np.argmin(np.abs(coords_dict["wavelength"][1]-640.))]
-        rgb[...,1] = data[:,:,np.argmin(np.abs(coords_dict["wavelength"][1]-550.))]
-        rgb[...,2] = data[:,:,np.argmin(np.abs(coords_dict["wavelength"][1]-470.))]
-        img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
-        cdf = img_hist.cumsum() # cumulative distribution function
-        cdf = 1. * cdf / cdf[-1] # normalize
-        img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
-        rgb = img_eq.reshape(rgb.shape)
+        if proc_lvl>1:
+            # Use wavelength band averaging for each RGB channel
+            rgb[...,0]  = nc.datacube.sel(wavelength=slice(640, 670)).mean(dim='wavelength')
+            rgb[...,1]  = nc.datacube.sel(wavelength=slice(530, 590)).mean(dim='wavelength')
+            rgb[...,2]  = nc.datacube.sel(wavelength=slice(450, 510)).mean(dim='wavelength')   
+        else:
+            # Fallback to grayscale if no wavelength calibration
+            rgb[...,0] = nc.datacube.mean(dim='wavelength')
+            rgb[...,1] = rgb[...,0]
+            rgb[...,2] = rgb[...,0]
+        
+        # img_hist, bins = np.histogram(rgb.flatten(), 256, density=True)
+        # cdf = img_hist.cumsum() # cumulative distribution function
+        # cdf = 1. * cdf / cdf[-1] # normalize
+        # img_eq = np.interp(rgb.flatten(), bins[:-1], cdf) # find new pixel values from linear interpolation of cdf
+        # rgb = img_eq.reshape(rgb.shape)
+        rgb /= np.max(rgb)
         fig, ax = plt.subplots(figsize=(12,3))
         ax.imshow(rgb,aspect="equal"); ax.set_xlabel("along-track"); ax.set_ylabel("cross-track")
         fig.savefig(fname+".png",bbox_inches='tight', pad_inches=0)
     
 
-# %% ../nbs/api/shared.ipynb 12
+# %% ../nbs/api/shared.ipynb 11
 @delegates()
 class SharedOpenHSI(SharedDataCube):
     """Base Class for the OpenHSI Camera."""
