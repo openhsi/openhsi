@@ -4,6 +4,7 @@ website:
       - index.ipynb
       - quick_start.ipynb
       - contributing.ipynb
+      - architecture_overview.ipynb
       - section: api
         contents:
           - api/atmos.ipynb
