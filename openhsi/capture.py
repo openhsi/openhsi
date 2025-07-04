@@ -101,7 +101,8 @@ class ProcessRawDatacube(OpenHSI):
     def save(self,save_dir:str, **kwargs):
         """Saves to a NetCDF file (and RGB representation) to directory dir_path in folder given by date with file name given by UTC time.
         Override the processing buffer timestamps with the timestamps in original file, also for camera temperatures."""
-        self.timestamps.data = self.buff.ds_timestamps
+        # self.timestamps.data = self.buff.ds_timestamps
+        self.timestamps.data = self.buff.timestamps.data
         if hasattr(self.buff,"ds_metadata"):
             self.ds_metadata = self.buff.ds_metadata
         if hasattr(self.buff,"ds_temperatures"):

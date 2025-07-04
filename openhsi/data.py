@@ -672,6 +672,7 @@ def save(self:DataCube,
 
     png_save_path=f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png"
     fig.savefig(png_save_path, bbox_inches='tight', pad_inches=0)
+    close(fig)
     
     return (nc_save_path, png_save_path)
 
@@ -778,7 +779,7 @@ def load_nc(self:DataCube,
         # seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
         # self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
         # self.timestamps.data = self.ds_timestamps
-        self.timestamps.data=ds.time.to_numpy()
+        self.timestamps.data = ds.time.to_numpy()
         self.ds_metadata = ds.attrs
 
         if hasattr(ds,"temperature"):
