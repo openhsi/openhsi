@@ -603,15 +603,14 @@ def to_xarray(self:DataCube,
                      y=(["y"], np.arange(self.dc.data.shape[1])),
                      time=(["time"], self.timestamps.data))
 
-    # Create Dataset with appropriate axis order
-    if old_style:  # cross-track, along-track, wavelength
-        ds = xr.Dataset(data_vars=dict(datacube=(["x", "y", "wavelength"], self.dc.data)),
-                       coords=coords, 
-                       attrs=attrs)
-    else:  # wavelength, cross-track, along-track (default)
-        ds = xr.Dataset(data_vars=dict(datacube=(["wavelength", "x", "y"], np.moveaxis(self.dc.data, -1, 0))),
-                       coords=coords, 
-                       attrs=attrs)
+    # Create Dataset 
+    ds = xr.Dataset(data_vars=dict(datacube=(["x", "y", "wavelength"], self.dc.data)),
+                coords=coords, 
+                attrs=attrs)
+
+    # Transpose to wavelength-first order unless old_style requested
+    if not old_style:
+        ds = ds.transpose("wavelength", "x", "y", ...)  # Lazy transpose operation
 
     # Add coordinate metadata
     ds.x.attrs["long_name"] = "cross-track"
@@ -672,7 +671,7 @@ def save(self:DataCube,
 
     png_save_path=f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png"
     fig.savefig(png_save_path, bbox_inches='tight', pad_inches=0)
-    close(fig)
+    plt.close(fig)
     
     return (nc_save_path, png_save_path)
 
