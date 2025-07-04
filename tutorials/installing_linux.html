@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="A tutorial on installing the openhsi library and camera SDKs on Ubuntu and Rasberry Pi OS machines.">
+
+<title>Installing OpenHSI on Linux – openhsi</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../assets/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-1fc47fd2b758d68637102512913e2c86.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-B4C25M06DT"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-B4C25M06DT', { 'anonymize_ip': true});
+</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Installing OpenHSI on Linux – openhsi">
+<meta property="og:description" content="A tutorial on installing the openhsi library and camera SDKs on Ubuntu and Rasberry Pi OS machines.">
+<meta property="og:site_name" content="openhsi">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/openhsi_logo.png" alt="OpenHSI" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">An Open Hyperspectral Imager Library</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../quick_start.html"> 
+<span class="menu-text">Quick Start</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://openhsi.github.io"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/openhsi/openhsi/">
+ <span class="dropdown-text">Source Code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/openhsi/openhsi/issues/new">
+ <span class="dropdown-text">Report a Bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../tutorials/convert_calibrations.html">tutorials</a></li><li class="breadcrumb-item"><a href="../tutorials/installing_linux.html">Installing OpenHSI on Linux</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../quick_start.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Quick Start Guide</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../contributing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contributing</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../architecture_overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OpenHSI Architecture Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">api</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/atmos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">atmos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/calibrate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">calibrate</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/capture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">capture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/geometry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">geometry</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/metadata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">metadata</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/sensors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sensors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/shared.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">shared</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/snr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">snr</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">cameras</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/cameras.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Common and Webcam</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/simulated.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simulated Camera</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/lucidvision.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lucid Vision Cameras</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/flir.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FLIR</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/ximea.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ximea</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/convert_calibrations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convert .pkl calibration to new .nc format</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/calibrate_steps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generating Calibration Files</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/custom_pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Customising the OpenHSI Processing Pipeline</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/installing_linux.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Installing OpenHSI on Linux</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/installing_windows.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installing OpenHSI on Windows</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link active" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#python-environment" id="toc-python-environment" class="nav-link" data-scroll-target="#python-environment">1. Python Environment</a>
+  <ul class="collapse">
+  <li><a href="#miniforge-with-pyenv" id="toc-miniforge-with-pyenv" class="nav-link" data-scroll-target="#miniforge-with-pyenv">Miniforge with pyenv</a></li>
+  <li><a href="#cpython-with-pyenv" id="toc-cpython-with-pyenv" class="nav-link" data-scroll-target="#cpython-with-pyenv">cpython with pyenv</a></li>
+  <li><a href="#install-jupyter-lab" id="toc-install-jupyter-lab" class="nav-link" data-scroll-target="#install-jupyter-lab">Install Jupyter Lab</a></li>
+  </ul></li>
+  <li><a href="#install-openhsi" id="toc-install-openhsi" class="nav-link" data-scroll-target="#install-openhsi">2. Install OpenHSI</a>
+  <ul class="collapse">
+  <li><a href="#via-conda" id="toc-via-conda" class="nav-link" data-scroll-target="#via-conda">via conda</a></li>
+  <li><a href="#via-pip" id="toc-via-pip" class="nav-link" data-scroll-target="#via-pip">via pip</a></li>
+  </ul></li>
+  <li><a href="#install-camera-sdk" id="toc-install-camera-sdk" class="nav-link" data-scroll-target="#install-camera-sdk">3. Install Camera SDK</a>
+  <ul class="collapse">
+  <li><a href="#install-lucid-vision-arena-sdk-sydney-photonicsrobonation-openhsi" id="toc-install-lucid-vision-arena-sdk-sydney-photonicsrobonation-openhsi" class="nav-link" data-scroll-target="#install-lucid-vision-arena-sdk-sydney-photonicsrobonation-openhsi">Install Lucid Vision Arena SDK (Sydney Photonics/Robonation OpenHSI)</a></li>
+  <li><a href="#install-spinnaker-sdk-flir-based-openhsi" id="toc-install-spinnaker-sdk-flir-based-openhsi" class="nav-link" data-scroll-target="#install-spinnaker-sdk-flir-based-openhsi">Install Spinnaker SDK (FLIR based OpenHSI)</a></li>
+  <li><a href="#install-ximea-sdk-ximea-based-openhsi" id="toc-install-ximea-sdk-ximea-based-openhsi" class="nav-link" data-scroll-target="#install-ximea-sdk-ximea-based-openhsi">Install Ximea SDK (Ximea based OpenHSI)</a></li>
+  </ul></li>
+  <li><a href="#additional-setup-for-sensor-package-on-raspberry-pi-optional" id="toc-additional-setup-for-sensor-package-on-raspberry-pi-optional" class="nav-link" data-scroll-target="#additional-setup-for-sensor-package-on-raspberry-pi-optional">4. Additional Setup for sensor package on Raspberry Pi (optional)</a>
+  <ul class="collapse">
+  <li><a href="#enable-i2c-and-uart" id="toc-enable-i2c-and-uart" class="nav-link" data-scroll-target="#enable-i2c-and-uart">4.1 Enable I2C and UART</a></li>
+  <li><a href="#disable-serial-login-shell" id="toc-disable-serial-login-shell" class="nav-link" data-scroll-target="#disable-serial-login-shell">4.2 Disable serial login shell</a></li>
+  <li><a href="#use-pi0uart-instead-of-miniuart" id="toc-use-pi0uart-instead-of-miniuart" class="nav-link" data-scroll-target="#use-pi0uart-instead-of-miniuart">4.3 Use PI0UART instead of miniUART</a></li>
+  <li><a href="#controlling-gpio-pins" id="toc-controlling-gpio-pins" class="nav-link" data-scroll-target="#controlling-gpio-pins">4.4 Controlling GPIO pins</a></li>
+  <li><a href="#installing-the-battery-hat-software" id="toc-installing-the-battery-hat-software" class="nav-link" data-scroll-target="#installing-the-battery-hat-software">4.5 Installing the Battery Hat software</a></li>
+  <li><a href="#mounting-ssd-without-sudo" id="toc-mounting-ssd-without-sudo" class="nav-link" data-scroll-target="#mounting-ssd-without-sudo">4.6 - Mounting SSD without sudo</a></li>
+  </ul></li>
+  <li><a href="#ready-to-go" id="toc-ready-to-go" class="nav-link" data-scroll-target="#ready-to-go">Ready to go!</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/openhsi/openhsi/blob/master/tutorials/installing_linux.ipynb" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/openhsi/openhsi/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../tutorials/convert_calibrations.html">tutorials</a></li><li class="breadcrumb-item"><a href="../tutorials/installing_linux.html">Installing OpenHSI on Linux</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Installing OpenHSI on Linux</h1>
+</div>
+
+<div>
+  <div class="description">
+    A tutorial on installing the <code>openhsi</code> library and camera SDKs on Ubuntu and Rasberry Pi OS machines.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This tutorial is a work in progress.</p>
+</div>
+</div>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<ul>
+<li>Raspberry Pi Running Raspberry Pi OS (Raspbian) or Ubuntu 18.04 (using full 64 bit versions).
+<ul>
+<li>A Raspberry Pi 4 with 8 GB RAM is recommended.</li>
+</ul></li>
+<li>Jetson development boards (E.g. Xavier) will also work. Some additional packages may be needed.</li>
+<li>Debian based system
+<ul>
+<li>recommended using Ubuntu 18.04 and 20.04</li>
+</ul></li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Using <code>openhsi</code> requires generating large datacubes which take up lots of RAM. It is recommended to get a Raspberry Pi 4 with as much RAM as possible, especially if you want to capture raw data. Otherwise, you will need to a <code>processing_lvl</code> that includes binning to reduce the datacube size.</p>
+</div>
+</div>
+<p>A Raspberry Pi does not have the same processing power as a typical laptop/computer and so expect the framerate to drop slightly. You want a lightweight operating system so the camera can run as fast as possible. If you have 8 GB of RAM, definitely get the Raspbian 64 bit OS so you can use &gt; 3 GB per process. Another benefit of running on ARM64 bit is that there are prebuilt OpenCV Python wheels - if your project requires <code>opencv-python</code>, then 64 bit is needed.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The latest 64 bit Rasberry Pi OS (formerly Raspbian) is based on Debian 11 Bullseye (equivalent to Ubuntu 21+) and so some packages may not be updated to this platform yet. Also <code>systemd</code> is used to run scripts on startup.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Tutorial assumes you have a working OS on your system.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hyperspectral datacubes are really large so best to save them to an external SSD.</p>
+</div>
+</div>
+</section>
+<section id="python-environment" class="level2">
+<h2 class="anchored" data-anchor-id="python-environment">1. Python Environment</h2>
+<section id="installing-pyenv" class="level4">
+<h4 class="anchored" data-anchor-id="installing-pyenv">Installing Pyenv</h4>
+<p>The system python (on raspi in particular) is not always the most user friendly if any packages are not available pre-compiled, so using an alternative environment is recommended. A good way to get a independent python environment is using <code>pyenv</code>. Of course any modern python install (py&gt;3.7) should work.</p>
+<p>To install pyenv you can use the following commands:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update<span class="kw">;</span> <span class="fu">sudo</span> apt-get install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> https://pyenv.run <span class="kw">|</span> <span class="fu">bash</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">'export PATH="$HOME/.pyenv/bin:$PATH"'</span> <span class="op">&gt;&gt;</span> ~/.bashrc</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">'eval "$(pyenv init -)"'</span> <span class="op">&gt;&gt;</span> ~/.bashrc</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">'eval "$(pyenv virtualenv-init -)"'</span> <span class="op">&gt;&gt;</span> ~/.bashrc</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"export PYENV_VIRTUALENV_DISABLE_PROMPT=1"</span> <span class="op">&gt;&gt;</span>~/.bashrc</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>With pyenv ready, you can easily install essentially any version of Python, from a vanilla cpython too miniforge too pypy. For OpenHSI, Miniforge is a good option as the base environment for minimal effort. You can also get it without pyenv if you prefer at https://github.com/conda-forge/miniforge.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>https://pythonspeed.com/articles/conda-vs-pip/ - some notes on conda vs pip.</p>
+</div>
+</div>
+</section>
+<section id="install-nodejs" class="level4">
+<h4 class="anchored" data-anchor-id="install-nodejs">Install NodeJS</h4>
+<p>The Bokeh plotting library depends on nodeJS and is used to run OpenHSI interactive tools in a web browser.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install nodejs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="miniforge-with-pyenv" class="level3">
+<h3 class="anchored" data-anchor-id="miniforge-with-pyenv">Miniforge with pyenv</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pyenv</span> install miniforge3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And then use conda later.</p>
+<section id="miniforge---manual" class="level4">
+<h4 class="anchored" data-anchor-id="miniforge---manual">Miniforge - Manual</h4>
+<p>Miniforge3 is great lightweight option to get a new python environment up and running that will not interfere with the system one. You can download this from here https://github.com/conda-forge/miniforge#download and then install follow instructions.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="st">"https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-</span><span class="va">$(</span><span class="fu">uname</span><span class="va">)</span><span class="st">-</span><span class="va">$(</span><span class="fu">uname</span> <span class="at">-m</span><span class="va">)</span><span class="st">.sh"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> Miniforge3-<span class="va">$(</span><span class="fu">uname</span><span class="va">)</span>-<span class="va">$(</span><span class="fu">uname</span> <span class="at">-m</span><span class="va">)</span>.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="cpython-with-pyenv" class="level3">
+<h3 class="anchored" data-anchor-id="cpython-with-pyenv">cpython with pyenv</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pyenv</span> install 3.8.12</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And the use pip later.</p>
+</section>
+<section id="install-jupyter-lab" class="level3">
+<h3 class="anchored" data-anchor-id="install-jupyter-lab">Install Jupyter Lab</h3>
+<p>All the interactive tools in <code>openhsi</code> require Jupyter Notebooks because it uses web tools. To install, follow the steps in https://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html</p>
+<p>In short, it boils down to <code>conda install -c conda-forge jupyterlab</code> or <code>pip install jupyterlab</code>.</p>
+<p>You will also need some Jupyter Extensions. Navigate to the Jupyter Extensions tab and search for <code>jupyterlab-manager</code>, and <code>jupyter_bokeh</code>.</p>
+</section>
+</section>
+<section id="install-openhsi" class="level2">
+<h2 class="anchored" data-anchor-id="install-openhsi">2. Install OpenHSI</h2>
+<section id="via-conda" class="level3">
+<h3 class="anchored" data-anchor-id="via-conda">via conda</h3>
+<p>Create a new environment and install OpenHSI (including python dependancies and 6SV, except for cameras). You can change python version as required as well.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pyenv</span> activate miniforge3</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-n</span> openhsi python=3.8 openhsi</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate openhsi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>or using environment.yml in the main repo</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env create <span class="at">-f</span> environment.yml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="via-pip" class="level3">
+<h3 class="anchored" data-anchor-id="via-pip">via pip</h3>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If using raspi system python, some dependencies need to be installed using <code>sudo apt install python-opencv</code> etc.</p>
+</div>
+</div>
+<p>To create a new environment and install OpenHSI.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pyenv</span> virtualenv 3.8.12 openhsi</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pyenv</span> activate openhsi</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install openhsi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="install-6sv-only-needed-for-pip-install" class="level4">
+<h4 class="anchored" data-anchor-id="install-6sv-only-needed-for-pip-install">Install 6SV (only needed for pip install)</h4>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/robintw/6S.git</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> 6S</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cmake</span> <span class="at">-D</span> CMAKE_INSTALL_PREFIX=/usr/local .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+</section>
+<section id="install-camera-sdk" class="level2">
+<h2 class="anchored" data-anchor-id="install-camera-sdk">3. Install Camera SDK</h2>
+<section id="install-lucid-vision-arena-sdk-sydney-photonicsrobonation-openhsi" class="level3">
+<h3 class="anchored" data-anchor-id="install-lucid-vision-arena-sdk-sydney-photonicsrobonation-openhsi">Install Lucid Vision Arena SDK (Sydney Photonics/Robonation OpenHSI)</h3>
+<p>The Robonation OpenHSI uses the detector from <a href="http://thinklucid.com">Lucid Vision Labs Inc</a>. Their full SDK is required to use the sensor with the OpenHSI libary. This can be acquired from https://thinklucid.com/downloads-hub/.</p>
+<p>To start the install, unzip the tar.gz package, i.e:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xf</span>  ArenaSDK_<span class="op">&lt;</span>version<span class="op">&gt;</span>_Linux_<span class="op">&lt;</span>platform<span class="op">&gt;</span>.tar.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And run this configiuration script/installer:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ArenaSDK_Linux_<span class="op">&lt;</span>platform<span class="op">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sh Arena_SDK_<span class="op">&lt;</span>platform<span class="op">&gt;</span>.conf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You must keep the SDK files in the same location that you ran this command, or re-run the configiuration script. No files are copied or moved, just locations recorded for the arena python api to find.</p>
+</div>
+</div>
+<p>And then install the arena python library (this is the same on a conda based or pip based python env):</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">--no-deps</span> arena_api-<span class="op">&lt;</span>version<span class="op">&gt;</span>-py3-none-any.whl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="enable-jumbo-packets" class="level4">
+<h4 class="anchored" data-anchor-id="enable-jumbo-packets">Enable Jumbo Packets</h4>
+<p>To ensure optimal performance you need to make sure your GigE link is setup for jumbo packets.</p>
+<p>On Ubuntu system this can be done using (you may want to set this up to occur on startup):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sudo</span> ip link set eth0 mtu 9000</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>eth0</code> should be the adapter name the camera is connected to, it may be different on your system.</p>
+</div>
+</div>
+</section>
+<section id="jumbo-packets-on-a-pi4" class="level4">
+<h4 class="anchored" data-anchor-id="jumbo-packets-on-a-pi4">Jumbo Packets on a Pi4</h4>
+<p>Using Raspberry Pi OS, some additional effort is required. <a href="https://support.thinklucid.com/knowledgebase/jumbo-frames-on-raspberry-pi/">https://support.thinklucid.com/knowledgebase/jumbo-frames-on-raspberry-pi/</a></p>
+</section>
+</section>
+<section id="install-spinnaker-sdk-flir-based-openhsi" class="level3">
+<h3 class="anchored" data-anchor-id="install-spinnaker-sdk-flir-based-openhsi">Install Spinnaker SDK (FLIR based OpenHSI)</h3>
+<p>Download and install the Spinnaker SDK and python wheel. - https://www.flir.com.au/products/spinnaker-sdk/</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>On an Intel/Amd, you want amd64/x86_64 version on raspi you want aarch64 or arm64.</p>
+</div>
+</div>
+<p>The 20.04 version has the follow dependancies:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libusb-1.0-0 libavcodec58 libavformat58 libswscale5 libswresample3 libavutil56 qt5-default</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and then installing the FLIR SDK.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> sh install_spinnaker.sh</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">--no-deps</span> spinnaker_python-<span class="op">&lt;</span>your needed version<span class="op">&gt;</span>.whl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>One of the prompts will ask you if you want to increase the USB buffer. Answer yes to this option.</p>
+<p>More information on getting the FLIR SDK on a Raspberry Pi and Jetson is here https://www.flir.com.au/support-center/iis/machine-vision/application-note/using-spinnaker-on-arm-and-embedded-systems/</p>
+<section id="on-raspbian-64-bit" class="level4">
+<h4 class="anchored" data-anchor-id="on-raspbian-64-bit">On Raspbian 64 bit</h4>
+<p>You will need to install Spinnaker however you’ll find that <code>spinview-qt</code> will not install because it is missing a dependency which we actually don’t require in <code>openhsi</code>. If you want to use a GUI called SpinView to view Camera output, then installing <code>spinview-qt</code> will let you use it but I haven’t yet figured out how on Raspbian 64 bit. It’s something to do with the QT5 package no longer being included in Debian 11+ package sources.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To proceed without <code>spinview-qt</code>, follow the hacks found in https://askubuntu.com/questions/1335184/qt5-default-not-in-ubuntu-21-04. You extract the offending package, change a line stating the dependency, then repackaged the files.</p>
+<p>More information on getting the FLIR SDK on a Raspberry Pi and Jetson is here https://www.flir.com.au/support-center/iis/machine-vision/application-note/using-spinnaker-on-arm-and-embedded-systems/</p>
+</section>
+</section>
+<section id="install-ximea-sdk-ximea-based-openhsi" class="level3">
+<h3 class="anchored" data-anchor-id="install-ximea-sdk-ximea-based-openhsi">Install Ximea SDK (Ximea based OpenHSI)</h3>
+<p>Navigate to https://www.ximea.com/support/wiki/apis/Python and click on the Linux installation instructions. This will bring you to the page https://www.ximea.com/support/wiki/apis/XIMEA_Linux_Software_Package#Installation which lists everything you need to install the Ximea API.</p>
+<p>A 64 bit OS is required to run the GUI called XIMEA CamTool</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.ximea.com/downloads/recent/XIMEA_Linux_SP.tgz</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> xzf XIMEA_Linux_SP.tgz</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> package</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./install</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#./install -pcie # -pcie flag needed for PCIE cameras</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If the build fails, try run the following first:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt-get install build-essential linux-headers-<span class="st">"</span><span class="va">$(</span><span class="fu">uname</span> <span class="at">-r</span><span class="va">)</span><span class="st">"</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="increase-usb-memory-limit" class="level4">
+<h4 class="anchored" data-anchor-id="increase-usb-memory-limit">Increase USB memory limit</h4>
+<p>This is from the XIMEA page https://www.ximea.com/support/wiki/apis/Raspberry_Pi_4_Benchmarks#Increase-USB-memory-limit</p>
+<p>The default memory limit for buffers allocated for USB devices (usually 16MB) is too low for XIMEA USB cameras.This can be changed permanently following these steps:</p>
+<ol type="1">
+<li>Open the file <code>/boot/firmware/cmdline.txt</code> in your preferred texteditor</li>
+<li>Append the following (in the same line): <code>usbcore.usbfs_memory_mb=0</code></li>
+<li>Reboot the system</li>
+<li>Check if the changes are applied. The following command should print <code>0</code>:</li>
+</ol>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /sys/module/usbcore/parameters/usbfs_memory_mb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+</section>
+<section id="additional-setup-for-sensor-package-on-raspberry-pi-optional" class="level2">
+<h2 class="anchored" data-anchor-id="additional-setup-for-sensor-package-on-raspberry-pi-optional">4. Additional Setup for sensor package on Raspberry Pi (optional)</h2>
+<section id="enable-i2c-and-uart" class="level3">
+<h3 class="anchored" data-anchor-id="enable-i2c-and-uart">4.1 Enable I2C and UART</h3>
+<p>Open the Raspberry Pi config tool.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> raspi-config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And enable I2C and UART. For more instructions see <a href="https://askubuntu.com/questions/1273700/enable-spi-and-i2c-on-ubuntu-20-04-raspberry-pi">https://askubuntu.com/questions/1273700/enable-spi-and-i2c-on-ubuntu-20-04-raspberry-pi</a>. After enabling them, add the user pi to the group.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">-a</span> <span class="at">-G</span> dialout pi</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> usermod <span class="at">-a</span> <span class="at">-G</span> i2c pi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now, to use UART at high speed, we need to change a few more settings documented here https://www.abelectronics.co.uk/kb/article/1035/serial-port-setup-in-raspberry-pi-os</p>
+</section>
+<section id="disable-serial-login-shell" class="level3">
+<h3 class="anchored" data-anchor-id="disable-serial-login-shell">4.2 Disable serial login shell</h3>
+<p>remove <code>console=serial0,115200</code> from /boot/cmdline.txt then reboot. This will allow us to run a higher baud rate.</p>
+</section>
+<section id="use-pi0uart-instead-of-miniuart" class="level3">
+<h3 class="anchored" data-anchor-id="use-pi0uart-instead-of-miniuart">4.3 Use PI0UART instead of miniUART</h3>
+<p>Add to end of file /boot/config.txt we need to add a configuration to <code>/boot/config.txt</code>.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> echo <span class="st">'dtoverlay=disable-bt'</span> <span class="op">&gt;&gt;</span> /boot/config.txt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then in the terminal</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> systemctl disable hciuart</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> reboot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The trade off with allowing higher baud rates is no bluetooth.</p>
+</div>
+</div>
+</section>
+<section id="controlling-gpio-pins" class="level3">
+<h3 class="anchored" data-anchor-id="controlling-gpio-pins">4.4 Controlling GPIO pins</h3>
+<p>If you are running this on a Raspberry Pi 4, you’ll need to install the GPIO library. <code>pip install RPi.GPIO</code></p>
+<p>If you are running this on a Jetson, you’ll need the corresponding Jetson version. <code>pip install Jetson.GPIO</code></p>
+</section>
+<section id="installing-the-battery-hat-software" class="level3">
+<h3 class="anchored" data-anchor-id="installing-the-battery-hat-software">4.5 Installing the Battery Hat software</h3>
+<p>To deploy the Raspberry Pi on a remote platform, it needs power. We use the X728 version 2.1 battery hat from Suptronics which lets us turn on and safe shutdown the Pi while indicating power left.</p>
+<p>Since we are using Debian 11, we need to use systemd to enable /etc/rc-local which the battery hat scripts use. Follow the steps in https://www.linuxbabe.com/linux-server/how-to-enable-etcrc-local-with-systemd</p>
+<p>The software for the battery hat can be found here: https://wiki.geekworm.com/X728-Software Be aware that you need to make some changes to get them to install Change <code>python-smbus</code> to <code>python3-smbus</code>.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt-get install python3-smbus</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install smbus</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Add PY_VERSION=3 on line 86 in x728-v2.1.sh to force the installer to use Python 3. Python 2 is deprecated so convert x728pld.py to Python 3 syntax. All the print statements need <code>(</code> and <code>)</code>.</p>
+</section>
+<section id="mounting-ssd-without-sudo" class="level3">
+<h3 class="anchored" data-anchor-id="mounting-ssd-without-sudo">4.6 - Mounting SSD without sudo</h3>
+<p>The reason why we want to mount the SSD without sudo is that we can then write to it without sudo.</p>
+<p>First, identify your SSD using <code>sudo fdisk -l</code> I followed the steps in https://blog.onetwentyseven001.com/mounting-without-sudo/index.html</p>
+</section>
+</section>
+<section id="ready-to-go" class="level2">
+<h2 class="anchored" data-anchor-id="ready-to-go">Ready to go!</h2>
+<p>Congratulations, you now have a system that can run your <code>openhsi</code>!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/openhsi\.github\.io\/openhsi");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/openhsi/openhsi/blob/master/tutorials/installing_linux.ipynb" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/openhsi/openhsi/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

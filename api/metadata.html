@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Edit your NetCDF file’s metadata">
+
+<title>metadata – openhsi</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../assets/favicon.ico" rel="icon">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-1fc47fd2b758d68637102512913e2c86.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-B4C25M06DT"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-B4C25M06DT', { 'anonymize_ip': true});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="metadata – openhsi">
+<meta property="og:description" content="Edit your NetCDF file’s metadata">
+<meta property="og:site_name" content="openhsi">
+</head>
+
+<body class="nav-sidebar floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../assets/openhsi_logo.png" alt="OpenHSI" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">An Open Hyperspectral Imager Library</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../quick_start.html"> 
+<span class="menu-text">Quick Start</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="https://openhsi.github.io"> 
+<span class="menu-text">About</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-bi-github" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="nav-menu-bi-github">    
+        <li>
+    <a class="dropdown-item" href="https://github.com/openhsi/openhsi/">
+ <span class="dropdown-text">Source Code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="https://github.com/openhsi/openhsi/issues/new">
+ <span class="dropdown-text">Report a Bug</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/atmos.html">api</a></li><li class="breadcrumb-item"><a href="../api/metadata.html">metadata</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting Started</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../quick_start.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Quick Start Guide</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../contributing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Contributing</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../architecture_overview.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OpenHSI Architecture Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">api</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/atmos.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">atmos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/calibrate.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">calibrate</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/capture.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">capture</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/geometry.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">geometry</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/metadata.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">metadata</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/sensors.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">sensors</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/shared.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">shared</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/snr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">snr</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">cameras</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/cameras.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Common and Webcam</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/simulated.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Simulated Camera</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/lucidvision.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lucid Vision Cameras</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/flir.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">FLIR</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/cameras/ximea.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ximea</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">tutorials</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/convert_calibrations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Convert .pkl calibration to new .nc format</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/calibrate_steps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generating Calibration Files</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/custom_pipeline.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Customising the OpenHSI Processing Pipeline</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/installing_linux.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installing OpenHSI on Linux</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../tutorials/installing_windows.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Installing OpenHSI on Windows</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#metadata-editor" id="toc-metadata-editor" class="nav-link active" data-scroll-target="#metadata-editor">Metadata Editor</a>
+  <ul class="collapse">
+  <li><a href="#build_section_widgets" id="toc-build_section_widgets" class="nav-link" data-scroll-target="#build_section_widgets">build_section_widgets</a></li>
+  <li><a href="#build_variables_widgets" id="toc-build_variables_widgets" class="nav-link" data-scroll-target="#build_variables_widgets">build_variables_widgets</a></li>
+  <li><a href="#metadataeditor" id="toc-metadataeditor" class="nav-link" data-scroll-target="#metadataeditor">MetadataEditor</a></li>
+  <li><a href="#metadataeditor.__call__" id="toc-metadataeditor.__call__" class="nav-link" data-scroll-target="#metadataeditor.__call__">MetadataEditor.__call__</a></li>
+  <li><a href="#metadataeditor.update_export" id="toc-metadataeditor.update_export" class="nav-link" data-scroll-target="#metadataeditor.update_export">MetadataEditor.update_export</a></li>
+  <li><a href="#metadataeditor.update_extract" id="toc-metadataeditor.update_extract" class="nav-link" data-scroll-target="#metadataeditor.update_extract">MetadataEditor.update_extract</a></li>
+  <li><a href="#metadataeditor.update_save" id="toc-metadataeditor.update_save" class="nav-link" data-scroll-target="#metadataeditor.update_save">MetadataEditor.update_save</a></li>
+  <li><a href="#metadataeditor.make_widgets" id="toc-metadataeditor.make_widgets" class="nav-link" data-scroll-target="#metadataeditor.make_widgets">MetadataEditor.make_widgets</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/openhsi/openhsi/blob/master/api/metadata.ipynb" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/openhsi/openhsi/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../api/atmos.html">api</a></li><li class="breadcrumb-item"><a href="../api/metadata.html">metadata</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">metadata</h1>
+</div>
+
+<div>
+  <div class="description">
+    Edit your NetCDF file’s metadata
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<section id="metadata-editor" class="level1">
+<h1>Metadata Editor</h1>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This module can be imported using <code>from openhsi.metadata import *</code></p>
+</div>
+</div>
+<p>“As metadata are shared between National and International repositories, it is becoming increasing important to be able to unambiguously identify and refer to specific records. This is facilitated by including an identifier in the metadata. Some mechanism must exist for ensuring that these identifiers are unique. This is accomplished by specifying the naming authority or namespace for the identifier. It is the responsibility of the manager of the namespace to ensure that the identifiers in that namespace are unique. Identifying the Metadata Convention being used in the file and providing a link to more complete metadata, possibly using a different convention, are also important.”</p>
+<p>https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3</p>
+<p>“As metadata are shared between National and International repositories, it is becoming increasing important to be able to unambiguously identify and refer to specific records. This is facilitated by including an identifier in the metadata. Some mechanism must exist for ensuring that these identifiers are unique. This is accomplished by specifying the naming authority or namespace for the identifier. It is the responsibility of the manager of the namespace to ensure that the identifiers in that namespace are unique. Identifying the Metadata Convention being used in the file and providing a link to more complete metadata, possibly using a different convention, are also important.”</p>
+<p>https://wiki.esipfed.org/Attribute_Convention_for_Data_Discovery_1-3</p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L98" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="build_section_widgets" class="level3">
+<h3 class="anchored" data-anchor-id="build_section_widgets">build_section_widgets</h3>
+<blockquote class="blockquote">
+<pre><code> build_section_widgets (section_name:str='', fields:List[dict]=[{}],
+                        cols:int=3)</code></pre>
+</blockquote>
+<p><em>Construct text input widgets and place them into <code>cols</code> columns</em></p>
+<p>Standard name table https://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html</p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L119" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="build_variables_widgets" class="level3">
+<h3 class="anchored" data-anchor-id="build_variables_widgets">build_variables_widgets</h3>
+<blockquote class="blockquote">
+<pre><code> build_variables_widgets (ds:xarray.core.dataset.Dataset, cols:int=3)</code></pre>
+</blockquote>
+<p><em>search inside NetCDF coordinates for metadata. Layout widgets with specified <code>cols</code>.</em></p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L142" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="metadataeditor" class="level3">
+<h3 class="anchored" data-anchor-id="metadataeditor">MetadataEditor</h3>
+<blockquote class="blockquote">
+<pre><code> MetadataEditor ()</code></pre>
+</blockquote>
+<p><em>Interactive ISO 19115-2 Metadata Editor</em></p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L160" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="metadataeditor.__call__" class="level3">
+<h3 class="anchored" data-anchor-id="metadataeditor.__call__">MetadataEditor.__call__</h3>
+<blockquote class="blockquote">
+<pre><code> MetadataEditor.__call__ ()</code></pre>
+</blockquote>
+<p><em>provide the dashboard</em></p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L166" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="metadataeditor.update_export" class="level3">
+<h3 class="anchored" data-anchor-id="metadataeditor.update_export">MetadataEditor.update_export</h3>
+<blockquote class="blockquote">
+<pre><code> MetadataEditor.update_export ()</code></pre>
+</blockquote>
+<p><em>setup the json export button callback</em></p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L188" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="metadataeditor.update_extract" class="level3">
+<h3 class="anchored" data-anchor-id="metadataeditor.update_extract">MetadataEditor.update_extract</h3>
+<blockquote class="blockquote">
+<pre><code> MetadataEditor.update_extract ()</code></pre>
+</blockquote>
+<p><em>setup the load file button callback</em></p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L215" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="metadataeditor.update_save" class="level3">
+<h3 class="anchored" data-anchor-id="metadataeditor.update_save">MetadataEditor.update_save</h3>
+<blockquote class="blockquote">
+<pre><code> MetadataEditor.update_save ()</code></pre>
+</blockquote>
+<p><em>setup the in-place file update button callback</em></p>
+<hr>
+<p><a href="https://github.com/openhsi/openhsi/blob/master/openhsi/metadata.py#L256" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="metadataeditor.make_widgets" class="level3">
+<h3 class="anchored" data-anchor-id="metadataeditor.make_widgets">MetadataEditor.make_widgets</h3>
+<blockquote class="blockquote">
+<pre><code> MetadataEditor.make_widgets ()</code></pre>
+</blockquote>
+<p><em>init widgets!</em></p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This web page was generated from a Jupyter notebook and not all interactivity will work on this website. Download the notebook and run locally.</p>
+</div>
+</div>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>me <span class="op">=</span> MetadataEditor()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>me()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+</div>
+<div class="cell-output cell-output-display">
+<div id="1002">
+  <div class="bk-root" id="90894e2d-da58-4e38-990d-88023201ed15" data-root-id="1002"></div>
+</div>
+<script type="application/javascript">(function(root) {
+  function embed_document(root) {
+    var docs_json = {"c8eb655a-43b8-4c19-b63d-4ec124a8e2e9":{"defs":[{"extends":null,"module":null,"name":"ReactiveHTML1","overrides":[],"properties":[]},{"extends":null,"module":null,"name":"FlexBox1","overrides":[],"properties":[{"default":"flex-start","kind":null,"name":"align_content"},{"default":"flex-start","kind":null,"name":"align_items"},{"default":"row","kind":null,"name":"flex_direction"},{"default":"wrap","kind":null,"name":"flex_wrap"},{"default":"flex-start","kind":null,"name":"justify_content"}]},{"extends":null,"module":null,"name":"GridStack1","overrides":[],"properties":[{"default":"warn","kind":null,"name":"mode"},{"default":null,"kind":null,"name":"ncols"},{"default":null,"kind":null,"name":"nrows"},{"default":true,"kind":null,"name":"allow_resize"},{"default":true,"kind":null,"name":"allow_drag"},{"default":[],"kind":null,"name":"state"}]},{"extends":null,"module":null,"name":"click1","overrides":[],"properties":[{"default":"","kind":null,"name":"terminal_output"},{"default":"","kind":null,"name":"debug_name"},{"default":0,"kind":null,"name":"clears"}]},{"extends":null,"module":null,"name":"NotificationAreaBase1","overrides":[],"properties":[{"default":"bottom-right","kind":null,"name":"position"},{"default":0,"kind":null,"name":"_clear"}]},{"extends":null,"module":null,"name":"NotificationArea1","overrides":[],"properties":[{"default":[],"kind":null,"name":"notifications"},{"default":"bottom-right","kind":null,"name":"position"},{"default":0,"kind":null,"name":"_clear"},{"default":[{"background":"#ffc107","icon":{"className":"fas fa-exclamation-triangle","color":"white","tagName":"i"},"type":"warning"},{"background":"#007bff","icon":{"className":"fas fa-info-circle","color":"white","tagName":"i"},"type":"info"}],"kind":null,"name":"types"}]},{"extends":null,"module":null,"name":"Notification","overrides":[],"properties":[{"default":null,"kind":null,"name":"background"},{"default":3000,"kind":null,"name":"duration"},{"default":null,"kind":null,"name":"icon"},{"default":"","kind":null,"name":"message"},{"default":null,"kind":null,"name":"notification_type"},{"default":false,"kind":null,"name":"_destroyed"}]},{"extends":null,"module":null,"name":"TemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]},{"extends":null,"module":null,"name":"MaterialTemplateActions1","overrides":[],"properties":[{"default":0,"kind":null,"name":"open_modal"},{"default":0,"kind":null,"name":"close_modal"}]}],"roots":{"references":[{"attributes":{"children":[{"id":"1003"},{"id":"1004"},{"id":"1011"}],"margin":[0,0,0,0],"name":"Column00253"},"id":"1002","type":"Column"},{"attributes":{"client_comm_id":"53712b02e6874198af3f49d3c4606429","comm_id":"a9295fc917854d4b812cf4402d06fb35","plot_id":"1002"},"id":"1146","type":"panel.models.comm_manager.CommManager"},{"attributes":{"children":[{"id":"1030"},{"id":"1031"}],"margin":[0,0,0,0],"name":"Column00131"},"id":"1029","type":"Column"},{"attributes":{"children":[{"id":"1060"},{"id":"1068"}],"margin":[0,0,0,0],"name":"Column00178"},"id":"1059","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Which rows are extracted from each camera frame","title":"camera_row_slice"},"id":"1143","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Exposure time for each camera frame in ms","title":"camera_exposure_time"},"id":"1141","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Full Width Half Maximum for spectral bands","title":"camera_fwhm"},"id":"1144","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00163","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1061","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1127"},{"id":"1128"}],"margin":[0,0,0,0],"name":"Column00238"},"id":"1126","type":"Column"},{"attributes":{"children":[[{"id":"1071"},0,0,1,1],[{"id":"1072"},0,1,1,1],[{"id":"1073"},0,2,1,1],[{"id":"1074"},1,0,1,1],[{"id":"1075"},1,1,1,1],[{"id":"1076"},1,2,1,1],[{"id":"1077"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00176"},"id":"1070","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Gain used for the camera","title":"camera_gain"},"id":"1142","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A paragraph describing the dataset","title":"summary"},"id":"1033","type":"TextAreaInput"},{"attributes":{"reload":false},"id":"1147","type":"panel.models.location.Location"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A short description of the dataset","title":"title"},"id":"1032","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A comma separated list of key words and phrases","title":"keywords"},"id":"1034","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1036"},{"id":"1037"}],"margin":[0,0,0,0],"name":"Column00138"},"id":"1035","type":"Column"},{"attributes":{"children":[[{"id":"1093"},0,0,1,1],[{"id":"1094"},0,1,1,1],[{"id":"1095"},0,2,1,1],[{"id":"1096"},1,0,1,1],[{"id":"1097"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00197"},"id":"1092","type":"GridBox"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Extract Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1007","type":"Button"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in latitude with units specified","title":"geospatial_lat_resolution"},"id":"1074","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_role"},"id":"1104","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1080"},{"id":"1090"}],"margin":[0,0,0,0],"name":"Column00199"},"id":"1079","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"A textual description of the processing (or quality control) level of the data","title":"processing_level"},"id":"1123","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00224","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1121","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_institution"},"id":"1093","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The method of production of the original data. E.g. model-generated","title":"source"},"id":"1125","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this metadata was last modified","title":"date_metadata_modified"},"id":"1096","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"creator_type"},"id":"1094","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00202","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1101","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Unique name or identifier of vocabulary from which keywords are taken. E.g. CF:NetCDF COARDS Climate and Forecast Standard Names","title":"keywords_vocabulary"},"id":"1044","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was last modified","title":"date_modified"},"id":"1095","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00195","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1091","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00102","text":"&lt;p&gt;&lt;strong&gt;Interactive Metadata Editor&lt;/strong&gt;: ISO 19115-2&lt;/p&gt;"},"id":"1003","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which this data was formally issued","title":"date_issued"},"id":"1097","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1044"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00142"},"id":"1043","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Describe the restrictions to data access and distribution","title":"license"},"id":"1124","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1005"},{"id":"1006"},{"id":"1010"}],"margin":[0,0,0,0],"name":"Row00252"},"id":"1004","type":"Row"},{"attributes":{"children":[{"id":"1007"},{"id":"1008"},{"id":"1009"}],"margin":[0,0,0,0],"name":"Column00251"},"id":"1006","type":"Column"},{"attributes":{"children":[{"id":"1042"},{"id":"1043"}],"margin":[0,0,0,0],"name":"Column00143"},"id":"1041","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter path string here...","title":"File path:"},"id":"1005","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00216","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1114","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Link to a complete metadata record (or collection)","title":"metadata_link"},"id":"1026","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1012"}],"margin":[0,0,0,0],"name":"Column00250"},"id":"1011","type":"Column"},{"attributes":{"children":[[{"id":"1026"},0,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00122"},"id":"1025","type":"GridBox"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00174","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1069","type":"panel.models.markup.HTML"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Update Metadata","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1008","type":"Button"},{"attributes":{"children":[[{"id":"1123"},0,0,1,1],[{"id":"1124"},0,1,1,1],[{"id":"1125"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00226"},"id":"1122","type":"GridBox"},{"attributes":{"button_type":"primary","height":25,"icon":null,"label":"Export to JSON","margin":[5,10,5,10],"sizing_mode":"fixed","subscribed_events":["button_click"],"width":150},"id":"1009","type":"Button"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00186","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1081","type":"panel.models.markup.HTML"},{"attributes":{"margin":[0,0,0,0],"tabs":[{"id":"1027"},{"id":"1045"},{"id":"1058"},{"id":"1078"},{"id":"1098"},{"id":"1105"},{"id":"1118"},{"id":"1136"},{"id":"1145"}]},"id":"1012","type":"panel.models.tabs.Tabs"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00210","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1108","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"name":""},"id":"1010","type":"Div"},{"attributes":{"children":[{"id":"1014"},{"id":"1018"},{"id":"1023"}],"margin":[0,0,0,0],"name":"Column00124"},"id":"1013","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_east","title":"geospatial_lon_units"},"id":"1071","type":"TextAreaInput"},{"attributes":{"child":{"id":"1013"},"name":"Column00124","title":"Identification Reference"},"id":"1027","type":"Panel"},{"attributes":{"children":[{"id":"1048"},{"id":"1049"}],"margin":[0,0,0,0],"name":"Column00156"},"id":"1047","type":"Column"},{"attributes":{"children":[{"id":"1015"},{"id":"1016"}],"margin":[0,0,0,0],"name":"Column00112"},"id":"1014","type":"Column"},{"attributes":{"children":[{"id":"1019"},{"id":"1020"}],"margin":[0,0,0,0],"name":"Column00118"},"id":"1018","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the longitude axis usually presumed to be degree_north","title":"geospatial_lat_units"},"id":"1073","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1103"},0,0,1,1],[{"id":"1104"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00204"},"id":"1102","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Units for the vertical axis E.g. EPSG:4979","title":"geospatial_vertical_units"},"id":"1075","type":"TextAreaInput"},{"attributes":{"child":{"id":"1028"},"name":"Column00144","title":"Text"},"id":"1045","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Certical spacing of points with units specified","title":"geospatial_vertical_resolution"},"id":"1076","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"contributor_name"},"id":"1103","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Spacing of points in longitude with units specified","title":"geospatial_lon_resolution"},"id":"1072","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'up' or 'down'","title":"geospatial_vertical_positive"},"id":"1077","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1032"},{"id":"1033"},{"id":"1034"}],"margin":[0,0,0,0],"name":"Row00130"},"id":"1031","type":"Row"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"acknowledge various type of support for the project that produced this data","title":"acknowledgment"},"id":"1083","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The name of the controlled vocabulary from which variable standard names are taken","title":"standard_name_vocabulary"},"id":"1038","type":"TextAreaInput"},{"attributes":{"child":{"id":"1059"},"name":"Column00178","title":"Other Extent"},"id":"1078","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00128","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1030","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Provides an audit trail for modifications to the original data","title":"history"},"id":"1039","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The date on which the data was created","title":"date_created"},"id":"1088","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1038"},0,0,1,1],[{"id":"1039"},0,1,1,1],[{"id":"1040"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00137"},"id":"1037","type":"GridBox"},{"attributes":{"children":[{"id":"1081"},{"id":"1082"}],"margin":[0,0,0,0],"name":"Column00189"},"id":"1080","type":"Column"},{"attributes":{"child":{"id":"1137"},"name":"Column00248","title":"Instrument"},"id":"1145","type":"Panel"},{"attributes":{"children":[{"id":"1114"},{"id":"1115"}],"margin":[0,0,0,0],"name":"Column00219"},"id":"1113","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's name. Can be an individual or an institution","title":"publisher_name"},"id":"1110","type":"TextAreaInput"},{"attributes":{"child":{"id":"1079"},"name":"Column00199","title":"Creator"},"id":"1098","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00244","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1139","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"institution"},"id":"1087","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00135","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1036","type":"panel.models.markup.HTML"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00235","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1127","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_email"},"id":"1086","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00120","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1024","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Controlled vocabulary for the names used in the `instrument` attribute","title":"instrument_vocabulary"},"id":"1131","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The scientific project that produced the data","title":"project"},"id":"1089","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1100"}],"margin":[0,0,0,0],"name":"Column00206"},"id":"1099","type":"Column"},{"attributes":{"children":[[{"id":"1116"},0,0,1,1],[{"id":"1117"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00218"},"id":"1115","type":"GridBox"},{"attributes":{"children":[{"id":"1101"},{"id":"1102"}],"margin":[0,0,0,0],"name":"Column00205"},"id":"1100","type":"Column"},{"attributes":{"children":[{"id":"1138"}],"margin":[0,0,0,0],"name":"Column00248"},"id":"1137","type":"Column"},{"attributes":{"children":[{"id":"1061"},{"id":"1062"}],"margin":[0,0,0,0],"name":"Column00166"},"id":"1060","type":"Column"},{"attributes":{"children":[[{"id":"1050"},0,0,1,1],[{"id":"1051"},0,1,1,1],[{"id":"1052"},0,2,1,1],[{"id":"1053"},1,0,1,1],[{"id":"1054"},1,1,1,1],[{"id":"1055"},1,2,1,1],[{"id":"1056"},2,0,1,1],[{"id":"1057"},2,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00155"},"id":"1049","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Choose 'person', 'group', 'institution', or 'position'","title":"publisher_type"},"id":"1116","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1120"},{"id":"1126"}],"margin":[0,0,0,0],"name":"Column00239"},"id":"1119","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum latitude","title":"geospatial_lat_min"},"id":"1050","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1108"},{"id":"1109"}],"margin":[0,0,0,0],"name":"Column00213"},"id":"1107","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum longitude","title":"geospatial_lon_max"},"id":"1053","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1139"},{"id":"1140"}],"margin":[0,0,0,0],"name":"Column00247"},"id":"1138","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Miscellaneous information about the data.","title":"comment"},"id":"1040","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum latitude","title":"geospatial_lat_max"},"id":"1051","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1107"},{"id":"1113"}],"margin":[0,0,0,0],"name":"Column00220"},"id":"1106","type":"Column"},{"attributes":{"child":{"id":"1106"},"name":"Column00220","title":"Publisher"},"id":"1118","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset datatype","title":"cdm_data_type"},"id":"1129","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum longitude","title":"geospatial_lon_min"},"id":"1052","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_url"},"id":"1085","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1121"},{"id":"1122"}],"margin":[0,0,0,0],"name":"Column00227"},"id":"1120","type":"Column"},{"attributes":{"children":[[{"id":"1129"},0,0,1,1],[{"id":"1130"},0,1,1,1],[{"id":"1131"},0,2,1,1],[{"id":"1132"},1,0,1,1],[{"id":"1133"},1,1,1,1],[{"id":"1134"},1,2,1,1],[{"id":"1135"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00237"},"id":"1128","type":"GridBox"},{"attributes":{"children":[[{"id":"1083"},0,0,1,1],[{"id":"1084"},0,1,1,1],[{"id":"1085"},0,2,1,1],[{"id":"1086"},1,0,1,1],[{"id":"1087"},1,1,1,1],[{"id":"1088"},1,2,1,1],[{"id":"1089"},2,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00188"},"id":"1082","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of first data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_start"},"id":"1054","type":"TextAreaInput"},{"attributes":{"child":{"id":"1046"},"name":"Column00157","title":"Extent"},"id":"1058","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time of last data point using the ISO 8601:2004 date format YYYY-MM-DDThh:mm:ss<zone>","title":"time_coverage_end"},"id":"1055","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's email. Can be an individual or an institution","title":"publisher_email"},"id":"1112","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1017"}],"margin":[0,0,0,0],"name":"Row00111"},"id":"1016","type":"Row"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Minimum altitude","title":"geospatial_vertical_min"},"id":"1056","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Maximum altitude","title":"geospatial_vertical_max"},"id":"1057","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the platform(s) E.g. satellite, ship, station, aircraft","title":"platform"},"id":"1132","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1021"},0,0,1,1],[{"id":"1022"},0,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00117"},"id":"1020","type":"GridBox"},{"attributes":{"children":[[{"id":"1110"},0,0,1,1],[{"id":"1111"},0,1,1,1],[{"id":"1112"},0,2,1,1]],"margin":[0,0,0,0],"name":"GridBox00212"},"id":"1109","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Dataset conventions. E.g. CF-1.6, ISO 19115-2, COARDS","title":"Conventions"},"id":"1017","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Version identifier of the data file or product as assigned by the data creator","title":"product_version"},"id":"1133","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Globally unique identifier for the dataset","title":"id"},"id":"1021","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1029"},{"id":"1035"},{"id":"1041"}],"margin":[0,0,0,0],"name":"Column00144"},"id":"1028","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Enter a string here...","title":"creator_name"},"id":"1084","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00109","text":"&lt;p&gt;&lt;em&gt;Highly Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1015","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Email address of those responsible for publishing the data, with its current metadata and format","title":"publisher_institution"},"id":"1117","type":"TextAreaInput"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00115","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1019","type":"panel.models.markup.HTML"},{"attributes":{"children":[[{"id":"1063"},0,0,1,1],[{"id":"1064"},0,1,1,1],[{"id":"1065"},0,2,1,1],[{"id":"1066"},1,0,1,1],[{"id":"1067"},1,1,1,1]],"margin":[0,0,0,0],"name":"GridBox00165"},"id":"1062","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The organization that provides the initial id","title":"naming_authority"},"id":"1022","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The overarching program(s) of which the dataset is a part","title":"program"},"id":"1134","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1069"},{"id":"1070"}],"margin":[0,0,0,0],"name":"Column00177"},"id":"1068","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The data publisher's URL. Can be an individual or an institution","title":"publisher_url"},"id":"1111","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Name of the contributing instrument(s) or sensor(s) used to create this data set or product","title":"instrument"},"id":"1130","type":"TextAreaInput"},{"attributes":{"child":{"id":"1119"},"name":"Column00239","title":"Other Attributes"},"id":"1136","type":"Panel"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The north, south, east, west bouding box","title":"geospatial_bounds"},"id":"1063","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The vertical coordinate reference system (CRS) for the Z axis","title":"geospatial_bounds_vertical_crs"},"id":"1065","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1047"}],"margin":[0,0,0,0],"name":"Column00157"},"id":"1046","type":"Column"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"The coordinate reference system (CRS) of the point coordinates geospatial_bounds","title":"geospatial_bounds_crs"},"id":"1064","type":"TextAreaInput"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Duration of the dataset in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_duration"},"id":"1066","type":"TextAreaInput"},{"attributes":{"children":[{"id":"1024"},{"id":"1025"}],"margin":[0,0,0,0],"name":"Column00123"},"id":"1023","type":"Column"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00153","text":"&lt;p&gt;&lt;em&gt;Recommended:&lt;/em&gt;&lt;/p&gt;"},"id":"1048","type":"panel.models.markup.HTML"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Time period between each datapoint in ISO 8601:2004 duration format P[YYYY]-[MM]-[DD]T[hh]:[mm]:[ss]","title":"time_coverage_resolution"},"id":"1067","type":"TextAreaInput"},{"attributes":{"children":[[{"id":"1141"},0,0,1,1],[{"id":"1142"},0,1,1,1],[{"id":"1143"},0,2,1,1],[{"id":"1144"},1,0,1,1]],"margin":[0,0,0,0],"name":"GridBox00246"},"id":"1140","type":"GridBox"},{"attributes":{"margin":[5,10,5,10],"max_length":5000,"placeholder":"Published or web-based references that describe the data or methods used to produce it","title":"references"},"id":"1135","type":"TextAreaInput"},{"attributes":{"child":{"id":"1099"},"name":"Column00206","title":"Contributor"},"id":"1105","type":"Panel"},{"attributes":{"css_classes":["markdown"],"margin":[5,5,5,5],"name":"Markdown00140","text":"&lt;p&gt;&lt;em&gt;Suggested:&lt;/em&gt;&lt;/p&gt;"},"id":"1042","type":"panel.models.markup.HTML"},{"attributes":{"children":[{"id":"1091"},{"id":"1092"}],"margin":[0,0,0,0],"name":"Column00198"},"id":"1090","type":"Column"}],"root_ids":["1002","1146","1147"]},"title":"Bokeh Application","version":"2.4.3"}};
+    var render_items = [{"docid":"c8eb655a-43b8-4c19-b63d-4ec124a8e2e9","root_ids":["1002"],"roots":{"1002":"90894e2d-da58-4e38-990d-88023201ed15"}}];
+    root.Bokeh.embed.embed_items_notebook(docs_json, render_items);
+  }
+  if (root.Bokeh !== undefined && root.Bokeh.Panel !== undefined) {
+    embed_document(root);
+  } else {
+    var attempts = 0;
+    var timer = setInterval(function(root) {
+      if (root.Bokeh !== undefined && root.Bokeh.Panel !== undefined) {
+        clearInterval(timer);
+        embed_document(root);
+      } else if (document.readyState == "complete") {
+        attempts++;
+        if (attempts > 200) {
+          clearInterval(timer);
+          console.log("Bokeh: ERROR: Unable to run BokehJS code because BokehJS library is missing");
+        }
+      }
+    }, 25, root)
+  }
+})(window);</script>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/openhsi\.github\.io\/openhsi");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/openhsi/openhsi/blob/master/api/metadata.ipynb" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/openhsi/openhsi/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
