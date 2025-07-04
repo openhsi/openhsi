@@ -4,6 +4,7 @@ website:
       - index.ipynb
       - quick_start.ipynb
       - contributing.ipynb
+      - architecture_overview.ipynb
       - section: api
         contents:
           - api/atmos.ipynb
@@ -18,6 +19,7 @@ website:
       - section: cameras
         contents:
           - api/cameras/cameras.ipynb
+          - api/cameras/simulated.ipynb
           - api/cameras/lucidvision.ipynb
           - api/cameras/flir.ipynb
           - api/cameras/ximea.ipynb

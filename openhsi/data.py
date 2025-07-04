@@ -603,15 +603,14 @@ def to_xarray(self:DataCube,
                      y=(["y"], np.arange(self.dc.data.shape[1])),
                      time=(["time"], self.timestamps.data))
 
-    # Create Dataset with appropriate axis order
-    if old_style:  # cross-track, along-track, wavelength
-        ds = xr.Dataset(data_vars=dict(datacube=(["x", "y", "wavelength"], self.dc.data)),
-                       coords=coords, 
-                       attrs=attrs)
-    else:  # wavelength, cross-track, along-track (default)
-        ds = xr.Dataset(data_vars=dict(datacube=(["wavelength", "x", "y"], np.moveaxis(self.dc.data, -1, 0))),
-                       coords=coords, 
-                       attrs=attrs)
+    # Create Dataset 
+    ds = xr.Dataset(data_vars=dict(datacube=(["x", "y", "wavelength"], self.dc.data)),
+                coords=coords, 
+                attrs=attrs)
+
+    # Transpose to wavelength-first order unless old_style requested
+    if not old_style:
+        ds = ds.transpose("wavelength", "x", "y", ...)  # Lazy transpose operation
 
     # Add coordinate metadata
     ds.x.attrs["long_name"] = "cross-track"
@@ -672,6 +671,7 @@ def save(self:DataCube,
 
     png_save_path=f"{self.directory}/{prefix}{self.timestamps[0].strftime('%Y_%m_%d-%H_%M_%S')}{suffix}.png"
     fig.savefig(png_save_path, bbox_inches='tight', pad_inches=0)
+    plt.close(fig)
     
     return (nc_save_path, png_save_path)
 
@@ -741,8 +741,8 @@ def show(self:DataCube,
 
     if plot_lib == "bokeh":
         # Improved aspect ratio handling for bokeh plots
-        return rgb_hv.opts(width=500,height=round(250*rgb.shape[0]/rgb.shape[1]),frame_height=round(250*rgb.shape[0]/rgb.shape[1])).opts(
-            xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
+        return rgb_hv.opts(width=500,height=round(500*rgb.shape[0]/rgb.shape[1])).opts(
+            xlabel="along-track",ylabel="cross-track",invert_yaxis=True) #frame_height=round(250*rgb.shape[0]/rgb.shape[1])
     else: # plot_lib == "matplotlib"
         return rgb_hv.opts(fig_inches=22).opts(
             xlabel="along-track",ylabel="cross-track",invert_yaxis=True)
@@ -778,7 +778,7 @@ def load_nc(self:DataCube,
         # seconds_since_epoch = (self.ds_timestamps - unix_epoch) / one_second
         # self.ds_timestamps = np.array([datetime.utcfromtimestamp(s) for s in seconds_since_epoch])
         # self.timestamps.data = self.ds_timestamps
-        self.timestamps.data=ds.time.to_numpy()
+        self.timestamps.data = ds.time.to_numpy()
         self.ds_metadata = ds.attrs
 
         if hasattr(ds,"temperature"):
