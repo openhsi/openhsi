@@ -23,6 +23,7 @@ website:
           - api/cameras/lucidvision.ipynb
           - api/cameras/flir.ipynb
           - api/cameras/ximea.ipynb
+          - api/cameras/hikrobot.ipynb
       - section: tutorials
         contents:
           - tutorials/convert_calibrations.ipynb

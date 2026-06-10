@@ -1,0 +1,27 @@
+{
+    "camera_id": "0",
+    "row_slice": [
+        0,
+        -1
+    ],
+    "resolution": [
+        1024,
+        1280
+    ],
+    "fwhm_nm": 4,
+    "exposure_ms": 10,
+    "luminance": 30000,
+    "binxy": [
+        1,
+        1
+    ],
+    "win_offset": [
+        0,
+        0
+    ],
+    "win_resolution": [
+        0,
+        0
+    ],
+    "pixel_format": "Mono10"
+}

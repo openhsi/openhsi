@@ -133,6 +133,7 @@ We have the following implementations in `openhsi.cameras`:
 - `XimeaCamera`
 - `LucidCamera`
 - `FlirCamera`
+- `HikrobotCamera`
 
 These all have the same interface so in principle, these OpenHSI cameras
 can be used interchangeably as long as you have the right calibration
