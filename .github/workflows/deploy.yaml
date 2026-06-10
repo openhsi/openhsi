@@ -26,7 +26,8 @@ jobs:
       - name: Install library and pinned nbdev toolchain
         run: |
           python -m pip install --upgrade pip
-          pip install "nbdev>=2.3,<2.4" "execnb<0.2"
+          # setuptools<81 still provides pkg_resources, which nbdev 2.3.x imports
+          pip install "setuptools<81" "nbdev>=2.3,<2.4" "execnb<0.2"
           pip install -e .
       - name: Build docs
         run: nbdev_docs
