@@ -1,6 +1,8 @@
 repos:
 - repo: https://github.com/fastai/nbdev
-  rev: 2.2.10
+  rev: 2.3.37
   hooks:
   - id: nbdev_clean
+    additional_dependencies: ["execnb<0.2"]
   - id: nbdev_export
+    additional_dependencies: ["execnb<0.2"]

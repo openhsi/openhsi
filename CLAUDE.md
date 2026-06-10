@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OpenHSI is a Python library to calibrate, trigger, and capture datacubes for the open-source OpenHSI hyperspectral pushbroom camera. It supports multiple camera backends (Ximea, FLIR, Lucid Vision, webcam, simulated) behind a single interface.
+OpenHSI is a Python library to calibrate, trigger, and capture datacubes for the open-source OpenHSI hyperspectral pushbroom camera. It supports multiple camera backends (Ximea, FLIR, Lucid Vision, Hikrobot, webcam, simulated) behind a single interface.
 
 ## Critical: This is an nbdev project
 
@@ -45,6 +45,8 @@ nbdev_clean
 # Preview the docs site locally (Quarto)
 nbdev_preview
 ```
+
+**nbdev version matters**: use `nbdev>=2.3,<2.4` together with `execnb<0.2` (e.g. `pip install "nbdev<2.4" "execnb<0.2"`). The committed `.py` files were generated with nbdev 2.3.x; nbdev 2.2.x silently drops the `#| export cameras` cells from the vendor notebooks, nbdev 2.4.x rewrites every cell marker (huge diffs), and nbdev 3.x refuses to run until `settings.ini` is migrated to `pyproject.toml`. After running `nbdev_export`, check `git diff` — if modules you didn't touch changed, you have the wrong nbdev version.
 
 Pre-commit runs `nbdev_clean` and `nbdev_export` (`.pre-commit-config.yaml`). CI (`.github/workflows/test.yaml`) uses the standard `fastai/workflows/nbdev-ci` action, which checks that notebooks are clean, exports match, and tests pass. Docs deploy to GitHub Pages on push to `master`.
 
