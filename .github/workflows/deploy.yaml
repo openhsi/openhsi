@@ -12,6 +12,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: fastai/workflows/quarto-ghp@master
-
-    
+      # Replicates fastai/workflows/quarto-ghp@master, but with the nbdev
+      # toolchain pinned (see test.yaml for why).
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: settings.ini
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: "1.4.557"
+      - name: Install library and pinned nbdev toolchain
+        run: |
+          python -m pip install --upgrade pip
+          pip install "nbdev>=2.3,<2.4" "execnb<0.2"
+          pip install -e .
+      - name: Build docs
+        run: nbdev_docs
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ github.token }}
+          publish_dir: ./_docs
