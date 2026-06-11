@@ -6,7 +6,7 @@
 
 ### New Features
 
-- Hikrobot camera support (tested with MV-CA013-21UM): `HikrobotCamera` and `SharedHikrobotCamera` in `openhsi.cameras`, built on the Hikrobot MVS SDK.
+- Hikrobot camera support (developed for the MV-CA013-21UM; not yet hardware-tested): `HikrobotCamera` and `SharedHikrobotCamera` in `openhsi.cameras`, built on the Hikrobot MVS SDK.
 
 ### Bugs Squashed
 

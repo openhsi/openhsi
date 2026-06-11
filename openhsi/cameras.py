@@ -283,7 +283,7 @@ class SharedFlirCamera(FlirCameraBase, SharedOpenHSI):
 # %% ../nbs/api/cameras/hikrobot.ipynb 5
 @delegates()
 class HikrobotCameraBase():
-    """Core functionality for Hikrobot machine vision cameras (tested with MV-CA013-21UM).
+    """Core functionality for Hikrobot machine vision cameras (developed for the MV-CA013-21UM; not yet hardware-tested).
 
         Any keyword-value pair arguments must match those avaliable in the settings file. HikrobotCamera expects the ones listed below:
 
