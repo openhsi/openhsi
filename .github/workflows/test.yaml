@@ -45,3 +45,7 @@ jobs:
           fi
       - name: Run tests
         run: nbdev_test
+      - name: Run pytest suite (mock-SDK camera tests)
+        run: |
+          pip install pytest
+          python -m pytest tests/ -q
