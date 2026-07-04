@@ -7,4 +7,41 @@ jobs:
       fail-fast: true
     runs-on: ubuntu-latest
     steps:
-      - uses: fastai/workflows/nbdev-ci@master
+      # Replicates fastai/workflows/nbdev-ci@master, but with the nbdev
+      # toolchain pinned: that action installs an unpinned "nbdev<3", and
+      # nbdev 2.4.x is incompatible with execnb>=0.2 (and rewrites all cell
+      # markers). This repo's modules are generated with nbdev 2.3.x.
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: settings.ini
+      - name: Install library and pinned nbdev toolchain
+        run: |
+          python -m pip install --upgrade pip
+          # setuptools<81 still provides pkg_resources, which nbdev 2.3.x imports
+          pip install "setuptools<81" "nbdev>=2.3,<2.4" "execnb<0.2"
+          pip install -e .
+      - name: Check notebooks are clean and library is in sync
+        run: |
+          echo "Check we are starting with clean git checkout"
+          if [[ -n $(git status --porcelain -uno) ]]; then echo "git status is not clean"; exit 1; fi
+          echo "Trying to strip out notebooks"
+          nbdev_clean
+          echo "Check that strip out was unnecessary"
+          git status -s
+          if [[ -n $(git status --porcelain -uno) ]]; then
+            echo -e "!!! Detected unstripped notebooks\n!!! Remember to run nbdev_install_hooks"
+            git diff
+            exit 1
+          fi
+          nbdev_export
+          if [[ -n $(git status --porcelain -uno) ]]; then
+            echo "::error::Notebooks and library are not in sync. Please run nbdev_export."
+            git status -uno
+            git diff
+            exit 1
+          fi
+      - name: Run tests
+        run: nbdev_test
